@@ -17,6 +17,8 @@ export default function SignupPage() {
     resolver: yupResolver(signupSchema),
   });
 
+  const navigate = useNavigate();
+
   const onSubmit = async (data) => {
     const formData = new FormData();
     formData.append("username", data.username);
@@ -30,7 +32,7 @@ export default function SignupPage() {
     console.log("Signup Data:", Object.fromEntries(formData));
 
     const response = await RegisterUser(formData);
-    const navigate = useNavigate();
+    
 
     if (response.success) {
       console.log("User signed up successfully:", response.data);
