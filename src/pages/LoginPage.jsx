@@ -12,7 +12,8 @@ const LoginPage = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, reset },
+    reset,
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(loginSchema),
   });
@@ -21,15 +22,15 @@ const LoginPage = () => {
 
   const onSubmit = async (data) => {
     const response = await LoginUser({
-        identifier: data.identifier,
-        password: data.password
-    })
+      identifier: data.identifier,
+      password: data.password,
+    });
 
     if (response.success) {
       console.log("User logged in successfully:", response.data);
       toast.success("Login successful! 🎉");
       reset();
-     
+      navigate("/");
     } else {
       console.log("Login failed:", response.message);
       toast.error("Login failed! ❌");
@@ -37,9 +38,9 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-start bg-black text-white px-4 md:px-0 mb-20">
+    <div className="min-h-screen w-full fixed inset-0 flex flex-col items-center justify-start bg-black text-white px-4 md:px-0 mb-20">
       {/* Heading */}
-      <h1 className="text-2xl sm:text-3xl font-bold mt-10 mb-3 text-center">
+      <h1 className="text-2xl sm:text-3xl font-bold mt-28 mb-3 text-center">
         Login your Account
       </h1>
 
@@ -55,7 +56,6 @@ const LoginPage = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="w-full sm:max-w-md flex flex-col gap-4 sm:gap-6"
       >
-       
         {/* Username or Email */}
         <Input
           label="Username or Email"

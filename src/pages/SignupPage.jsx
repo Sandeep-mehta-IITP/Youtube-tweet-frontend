@@ -12,7 +12,8 @@ export default function SignupPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, reset },
+    reset,
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(signupSchema),
   });

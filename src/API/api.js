@@ -26,8 +26,13 @@ export const LoginUser = async (data) => {
       },
     });
 
+    console.log(" Login data", data);
+    
+
     return { success: true, data: response.data };
   } catch (error) {
+    console.log("Login API error", error);
+    
     const message =
       error.response?.data?.message || "Something went wrong during login";
     return { success: false, message };
