@@ -21,19 +21,19 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    const response = await LoginUser({
-      identifier: data.identifier,
-      password: data.password,
-    });
+    try {
+      const response = await LoginUser({
+        identifier: data.identifier,
+        password: data.password,
+      });
 
-    if (response.success) {
       console.log("User logged in successfully:", response.data);
       toast.success("Login successful! 🎉");
       reset();
       navigate("/");
-    } else {
-      console.log("Login failed:", response.message);
-      toast.error("Login failed! ❌");
+    } catch (error) {
+      console.log("Login failed:", error.userMessage);
+      toast.error(error.userMessage || "Login failed! ❌");
     }
   };
 

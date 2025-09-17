@@ -21,28 +21,28 @@ export default function SignupPage() {
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
-    const formData = new FormData();
-    formData.append("username", data.username);
-    formData.append("email", data.email);
-    formData.append("fullName", data.fullName);
-    formData.append("password", data.password);
+    try {
+      const formData = new FormData();
+      formData.append("username", data.username);
+      formData.append("email", data.email);
+      formData.append("fullName", data.fullName);
+      formData.append("password", data.password);
 
-    if (data.avatar?.[0]) formData.append("avatar", data.avatar[0]);
-    if (data.coverImage?.[0]) formData.append("coverImage", data.coverImage[0]);
+      if (data.avatar?.[0]) formData.append("avatar", data.avatar[0]);
+      if (data.coverImage?.[0])
+        formData.append("coverImage", data.coverImage[0]);
 
-    console.log("Signup Data:", Object.fromEntries(formData));
+      console.log("Signup Data:", Object.fromEntries(formData));
 
-    const response = await RegisterUser(formData);
-    
+      const response = await RegisterUser(formData);
 
-    if (response.success) {
       console.log("User signed up successfully:", response.data);
       toast.success("Signup successful! 🎉");
       reset();
       navigate("/");
-    } else {
-      console.error("Signup failed:", response.message);
-      toast.error("Signup failed! ❌");
+    } catch (error) {
+      console.error("Signup failed:", error.userMessage);
+      toast.error(error.userMessage || "Signup failed! ❌");
     }
   };
 
