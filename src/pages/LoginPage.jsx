@@ -1,14 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "@/utils/Validation/loginSchema";
-import { LoginUser } from "@/API/api";
+
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "@/app/Slices/authSlice";
 
 const LoginPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, isAuthenticated } = useSelector(({ auth }) => auth);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
+
   const {
     register,
     handleSubmit,
@@ -18,22 +30,17 @@ const LoginPage = () => {
     resolver: yupResolver(loginSchema),
   });
 
-  const navigate = useNavigate();
-
   const onSubmit = async (data) => {
-    try {
-      const response = await LoginUser({
+    const response = await dispatch(
+      loginUser({
         identifier: data.identifier,
         password: data.password,
-      });
+      })
+    );
 
-      console.log("User logged in successfully:", response.data);
-      toast.success("Login successful! 🎉");
+    if (loginUser.fulfilled.match(response)) {
       reset();
       navigate("/");
-    } catch (error) {
-      console.log("Login failed:", error.userMessage);
-      toast.error(error.userMessage || "Login failed! ❌");
     }
   };
 
@@ -78,7 +85,7 @@ const LoginPage = () => {
         />
 
         {/* Sign up btuuon */}
-        <Button type="submit" isLoading={isSubmitting}>
+        <Button type="submit" isLoading={loading}>
           Log in
         </Button>
       </form>

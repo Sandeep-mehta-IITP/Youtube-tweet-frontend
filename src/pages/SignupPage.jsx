@@ -1,49 +1,51 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { signupSchema } from "@/utils/Validation/signupSchema";
-import { RegisterUser } from "@/API/api";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "@/app/Slices/userSlice";
 
 export default function SignupPage() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, isAuthenticated } = useSelector((state) => state.user);
+
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(signupSchema),
   });
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const onSubmit = async (data) => {
-    try {
-      const formData = new FormData();
-      formData.append("username", data.username);
-      formData.append("email", data.email);
-      formData.append("fullName", data.fullName);
-      formData.append("password", data.password);
+    const formData = new FormData();
+    formData.append("username", data.username);
+    formData.append("email", data.email);
+    formData.append("fullName", data.fullName);
+    formData.append("password", data.password);
 
-      if (data.avatar?.[0]) formData.append("avatar", data.avatar[0]);
-      if (data.coverImage?.[0])
-        formData.append("coverImage", data.coverImage[0]);
+    if (data.avatar?.[0]) formData.append("avatar", data.avatar[0]);
+    if (data.coverImage?.[0]) formData.append("coverImage", data.coverImage[0]);
 
-      console.log("Signup Data:", Object.fromEntries(formData));
+    console.log("Signup Data:", Object.fromEntries(formData));
 
-      const response = await RegisterUser(formData);
-
-      console.log("User signed up successfully:", response.data);
-      toast.success("Signup successful! 🎉");
-      reset();
-      navigate("/");
-    } catch (error) {
-      console.error("Signup failed:", error.userMessage);
-      toast.error(error.userMessage || "Signup failed! ❌");
-    }
+    dispatch(registerUser(formData)).then((res) => {
+      if (registerUser.fulfilled.match(res)) {
+        reset();
+        navigate("/");
+      }
+    });
   };
 
   return (
@@ -128,7 +130,7 @@ export default function SignupPage() {
         />
 
         {/* Sign up btuuon */}
-        <Button type="submit" isLoading={isSubmitting}>
+        <Button type="submit" isLoading={loading} disabled={loading}>
           Sign Up
         </Button>
       </form>
