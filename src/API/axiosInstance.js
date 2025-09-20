@@ -1,6 +1,5 @@
 import axios from "axios";
 
-
 export const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BACKEND_URL,
   withCredentials: true,
@@ -18,9 +17,10 @@ axiosInstance.interceptors.response.use(
       message = error.message;
     }
 
-    return Promise.reject({ 
-        ...error, 
-        userMessage: message 
+    return Promise.reject({
+      status: error.response?.status,
+      data: error.response?.data,
+      userMessage: message,
     });
   }
 );

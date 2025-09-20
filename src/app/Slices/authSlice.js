@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 
 const initialState = {
-  userData: {},
+  userData: null,
   loading: false,
   isAuthenticated: false,
 };
@@ -18,6 +18,8 @@ export const loginUser = createAsyncThunk(
         },
       });
       toast.success("Login successful! 🎉");
+      //console.log("login data", response.data);
+      
       return response.data;
     } catch (error) {
       console.log("Login failed:", error.userMessage);
@@ -37,12 +39,13 @@ const authSlice = createSlice({
     });
 
     builder.addCase(loginUser.fulfilled, (state, action) => {
+      //console.log("Payload in slice:", action.payload);
       state.loading = false;
-      state.userData = action.payload;
+      state.userData = action.payload?.data;
       state.isAuthenticated = true;
     });
 
-    builder.addCase(loginUser.rejected, (state) => {
+    builder.addCase(loginUser.rejected, (state, action) => {
       state.loading = false;
       state.isAuthenticated = false;
       state.userData = null;
@@ -50,5 +53,7 @@ const authSlice = createSlice({
     });
   },
 });
+
+
 
 export default authSlice.reducer;
