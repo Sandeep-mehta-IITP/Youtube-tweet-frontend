@@ -30,14 +30,14 @@ const Navbar = () => {
   const searchInputRef = useRef();
   const smallsearchInputRef = useRef();
 
-  const asideOpen = useSelector((state) => state.ui.asideOpen)
+  const asideOpen = useSelector((state) => state.ui.asideOpen);
 
   const [createDropdownOpen, setCreateDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+
   const createDropdownRef = useRef();
   const userDropdownRef = useRef();
-  
 
   const createDropdownHandler = () => {
     setCreateDropdownOpen(!createDropdownOpen);
@@ -46,7 +46,6 @@ const Navbar = () => {
   const userDropdownHandler = () => {
     setIsUserDropdownOpen(!isUserDropdownOpen);
   };
-
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -70,25 +69,41 @@ const Navbar = () => {
     };
   }, []);
 
-  
+  const handleSearchQuery = (input) => {
+    let searchQuery = input.trim();
 
-  const handleSearchQuery = (e) => {};
+    if (!searchQuery) {
+      searchInputRef.current.focus();
+      return;
+    }
+
+    navigate(`/results?search-query=${searchQuery}`);
+  };
 
   return (
-    <header className="sticky inset-x-0 top-0 z-50 w-full border-b border-gray-800 bg-[#121212] px-4">
+    <header className="sticky inset-x-0 top-0 z-50 w-full border-b border-gray-800 bg-[#121212] px-4 ">
       <nav className="mx-auto flex items-center py-2 w-full">
-        <Menu  className="w-6 h-6 text-[#f6f5f6] ml-8 cursor-pointer" onClick={() => dipatch(toggleAside())} />
-        <Logo className="ml-4" />
+        <Menu
+          className="w-6 h-6 text-[#f6f5f6] ml-8 cursor-pointer hidden sm:block"
+          onClick={() => dipatch(toggleAside())}
+        />
+        <Logo className="-ml-2 sm:ml-4" />
 
         {/* Search bar */}
-        <form className="hidden w-full max-w-lg mx-auto sm:flex">
+        <form
+          className="hidden w-full max-w-lg mx-auto sm:flex"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSearchQuery(searchInputRef.current.value);
+          }}
+        >
           <div className="flex w-full">
             {/* Input */}
             <div className="relative flex-1">
               <Input
                 ref={searchInputRef}
                 placeholder="Search"
-                className="w-full bg-[#121212] border border-gray-600 rounded-l-full py-2 pl-12 pr-3 text-gray-100 font-medium text-lg outline-none sm:py-3 focus:border-blue-500"
+                className="w-full bg-[#121212] border border-gray-600 rounded-l-full py-2 pl-12 pr-3 text-gray-100 font-medium text-lg outline-none sm:py-3 focus:border-blue-500 focus:ring-1"
               />
 
               {/* Left Icon */}
@@ -107,9 +122,46 @@ const Navbar = () => {
           </div>
         </form>
 
+     
+        {/* Mobile Search */}
+        <div className="flex items-center sm:hidden ml-auto">
+          {!mobileSearchOpen ? (
+            <button onClick={() => setMobileSearchOpen(true)}>
+              <Search className="w-6 h-6 text-gray-300" />
+            </button>
+          ) : (
+            <div className="absolute inset-x-0 top-0 z-20 bg-[#121212] px-3 py-2">
+              <form
+                className="flex items-center w-full bg-[#1f1f1f] rounded-full px-3 py-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  handleSearchQuery(smallsearchInputRef.current.value);
+                  setMobileSearchOpen(false);
+                }}
+              >
+                <Input
+                  ref={smallsearchInputRef}
+                  placeholder="Search..."
+                  className="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-400 focus:ring-0 focus:outline-none"
+                />
+                <button type="submit">
+                  <Search className="w-5 h-5 text-gray-300  fixed top-7 right-20" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileSearchOpen(false)}
+                  className="text-gray-400 hover:text-white fixed right-9"
+                >
+                  ✕
+                </button>
+              </form>
+            </div>
+          )}
+        </div>
+
         {/*  Create Button */}
         <div className="mr-16 hidden sm:block">
-          {isAuthenticated &&
+          {isAuthenticated && (
             <div className="relative" ref={createDropdownRef}>
               <button
                 onClick={createDropdownHandler}
@@ -138,11 +190,11 @@ const Navbar = () => {
                 </Link>
               </div>
             </div>
-          }
+          )}
         </div>
 
         {/* User Profile */}
-        <div className="relative mr-5" ref={userDropdownRef}>
+        <div className="relative ml-2 sm:mr-5" ref={userDropdownRef}>
           {userData ? (
             // LOGGED IN USER - Show Avatar
             <>
