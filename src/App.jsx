@@ -1,22 +1,37 @@
 import { Routes, Route } from "react-router-dom";
 import SignupPage from "./pages/SignupPage";
-import { ToastContainer, toast } from "react-toastify";
+import { Bounce, ToastContainer, toast } from "react-toastify";
 import LoginPage from "./pages/LoginPage";
-import Navbar from "./components/layout/Navbar";
-import Aside from "./components/layout/Aside";
-import { useState } from "react";
+
+import Feed from "./components/Feed";
 
 function App() {
-  const [asideOpen, setAsideOpen] = useState(true);
+ 
 
   return (
     <div className="">
-      <ToastContainer />
-      <Navbar />
-      <Aside isOpen={asideOpen} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition:Bounce
+      />
+
       <Routes>
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+
+        <Route path="/" element={<Feed />}>
+          {/* <Route index element={<HomePage />} /> "/" route */}
+          {/* More child routes can be added */}
+        </Route>
       </Routes>
     </div>
   );
