@@ -21,6 +21,7 @@ import {
 import Button from "../ui/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleAside } from "@/app/Slices/uiSlice";
+import { logoutUser } from "@/app/Slices/authSlice";
 
 const Navbar = () => {
   let { userData, isAuthenticated } = useSelector((state) => state.auth);
@@ -47,6 +48,7 @@ const Navbar = () => {
     setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
+  // Dropdown Closer 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -69,6 +71,7 @@ const Navbar = () => {
     };
   }, []);
 
+  // Search Query 
   const handleSearchQuery = (input) => {
     let searchQuery = input.trim();
 
@@ -79,6 +82,13 @@ const Navbar = () => {
 
     navigate(`/results?search-query=${searchQuery}`);
   };
+
+
+  // Logout Handler
+  const logoutHandler = () => {
+    dipatch(logoutUser())
+    navigate("/")
+  }
 
   return (
     <header className="sticky inset-x-0 top-0 z-50 w-full border-b border-gray-800 bg-[#121212] px-4 ">
@@ -203,9 +213,9 @@ const Navbar = () => {
                 className="flex items-center space-x-2 p-1 rounded-full hover:bg-gray-700 "
               >
                 {/* User Avatar */}
-                {userData?.user?.avatar ? (
+                {userData?.avatar ? (
                   <img
-                    src={userData.user.avatar}
+                    src={userData.avatar}
                     alt="User avatar"
                     className="w-10 h-10 rounded-full object-cover"
                   />
@@ -244,7 +254,7 @@ const Navbar = () => {
                   <Settings className="w-5 h-5" />
                   <span>Settings</span>
                 </a>
-                <button className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500 hover:bg-opacity-10">
+                <button className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500 hover:bg-opacity-10" onClick={logoutHandler}>
                   <LogOutIcon className="w-5 h-5 text-red-500 inline mr-2" />
                   Sign out
                 </button>

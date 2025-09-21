@@ -4,9 +4,17 @@ import { Bounce, ToastContainer, toast } from "react-toastify";
 import LoginPage from "./pages/LoginPage";
 
 import Feed from "./components/Feed";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { getCurrentUser } from "./app/Slices/authSlice";
 
 function App() {
  
+  const dispatch = useDispatch()
+
+  useEffect(()=> {
+    dispatch(getCurrentUser())
+  }, [dispatch])
 
   return (
     <div className="">
