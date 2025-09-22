@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { getCurrentUser } from "./app/Slices/authSlice";
 import { healthCheck } from "./app/Slices/healthCheckSlice";
 import { Loader } from "lucide-react";
+import SupportPage from "./pages/SupportPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -69,6 +70,7 @@ function App() {
         <Route path="/" element={<Feed />}>
           {/* <Route index element={<HomePage />} /> "/" route */}
           {/* More child routes can be added */}
+          <Route path="support" element={<SupportPage />} />
         </Route>
       </Routes>
     </div>
