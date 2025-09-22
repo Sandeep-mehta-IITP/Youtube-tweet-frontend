@@ -66,7 +66,7 @@ const Aside = () => {
     <>
       {/* Desktop Sidebar */}
       <aside
-        className={`fixed h-screen bg-[#121212] pt-4 transition-all duration-300 
+        className={`fixed h-screen bg-[#121212] pt-4 
           ${asideOpen ? "w-60" : "w-16"} hidden sm:block`}
       >
         <ul className="flex flex-col gap-3.5 ml-2">
