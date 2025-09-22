@@ -24,9 +24,10 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
     );
   }
 
-  if (videos.length === 0) {
-    return <p className="text-center text-sky-400 p-4">No videos found...</p>;
-  }
+  // if (videos.length === 0) {
+  //   return <p className="text-center text-sky-400 p-4">No videos found...</p>;
+  // }
+  
   return (
     <div className="grid grid-cols-[repeat(auto-fit, minmax(250px,_1fr))] gap-4 p-4">
       {videos.map((video) => (
