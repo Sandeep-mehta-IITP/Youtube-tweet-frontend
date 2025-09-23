@@ -12,6 +12,7 @@ import { Loader } from "lucide-react";
 import SupportPage from "./pages/SupportPage";
 import FeedVideos from "./pages/FeedVideos";
 import GuestComponent from "./components/GuestPages/GuestComponent";
+import AuthLayout from "./components/auth/AuthLayout";
 
 function App() {
   const dispatch = useDispatch();
@@ -35,15 +36,17 @@ function App() {
     return () => clearInterval(Interval);
   }, [dispatch]);
 
-
-
   if (initialLoading) {
     return (
       <div className="h-screen w-full bg-[#121212] text-[#f6f5f6] overflow-y-auto flex items-center justify-center">
         <div className="flex flex-col items-center">
           <Loader className="w-12 h-12 animate-spin font-semibold text-sky-400" />
-          <h1 className="text-3xl font-bold mt-8 text-pink-500">Please wait....</h1>
-          <h1 className="text-xl mt-4">Refresh the page if it takes too long...</h1>
+          <h1 className="text-3xl font-bold mt-8 text-pink-500">
+            Please wait....
+          </h1>
+          <h1 className="text-xl mt-4">
+            Refresh the page if it takes too long...
+          </h1>
         </div>
       </div>
     );
@@ -66,8 +69,22 @@ function App() {
       />
 
       <Routes>
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/signup"
+          element={
+            <AuthLayout authentication={false}>
+              <SignupPage />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <AuthLayout authentication={false}>
+              <LoginPage />
+            </AuthLayout>
+          }
+        />
 
         <Route path="/" element={<Feed />}>
           {/* <Route index element={<HomePage />} /> "/" route */}
