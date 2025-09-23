@@ -68,7 +68,7 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
   return createPortal(
     <dialog
       ref={dialogRef}
-      className="mx-auto w-[90%] sm:w-[60%] lg:w-[40%] xl:w-[30%] bg-gray-900 rounded-2xl p-6 text-white overflow-y-auto backdrop:backdrop-blur-sm"
+      className="mx-auto mt-32 w-[90%] sm:w-[60%] lg:w-[40%] xl:w-[30%] bg-[#464444] rounded-2xl p-6 text-white overflow-y-auto backdrop:backdrop-blur-sm"
     >
       <div className="relative flex flex-col items-center gap-4">
         <button
@@ -78,9 +78,9 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
         >
           ✕
         </button>
-        <Logo width="w-12" className="mb-4" />
+        <Logo width="w-16 h-16" className="mb-1" />
         <h2 className="text-2xl font-bold text-center">{message}</h2>
-        <p className="text-gray-400 text-sm text-center mb-4">
+        <p className="text-gray-400 text-sm text-center mb-2">
           Don't have an account?{" "}
           <Link to="/signup" className="text-blue-500 hover:underline">
             Signup
@@ -110,16 +110,18 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
             className="text-black text-base sm:text-lg font-medium"
           />
 
-          <Button type="submit" isLoading={loading}>
-            Log in
-          </Button>
-          <Button
-            type="button"
-            onClick={handleClose}
-            className="bg-black/20 hover:bg-black/30 text-white"
-          >
-            Cancel
-          </Button>
+          <div className="flex  items-center justify-center gap-x-5">
+            <Button
+              type="button"
+              onClick={handleClose}
+              className="bg-black/20 hover:bg-black/30 text-white w-1/2"
+            >
+              Cancel
+            </Button>
+            <Button type="submit" isLoading={loading} className="w-1/2">
+              Log in
+            </Button>
+          </div>
         </form>
       </div>
     </dialog>,

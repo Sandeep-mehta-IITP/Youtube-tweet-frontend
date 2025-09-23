@@ -11,6 +11,7 @@ import { healthCheck } from "./app/Slices/healthCheckSlice";
 import { Loader } from "lucide-react";
 import SupportPage from "./pages/SupportPage";
 import FeedVideos from "./pages/FeedVideos";
+import GuestComponent from "./components/GuestPages/GuestComponent";
 
 function App() {
   const dispatch = useDispatch();
@@ -73,6 +74,7 @@ function App() {
           {/* More child routes can be added */}
           <Route path="" element={<FeedVideos />} />
           <Route path="support" element={<SupportPage />} />
+          <Route path="guest" element={<GuestComponent />} />
         </Route>
       </Routes>
     </div>
