@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import Navbar from "./layout/Navbar";
-import Aside from "./layout/Aside";
+import React from "react";
+import Navbar from "../core/Navbar";
+import Aside from "../core/Aside";
 import { Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
+
 
 const Feed = () => {
   const asideOpen = useSelector((state) => state.ui.asideOpen);

@@ -3,7 +3,7 @@ import SignupPage from "./pages/SignupPage";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import LoginPage from "./pages/LoginPage";
 
-import Feed from "./components/Feed";
+import Feed from "./components/Layout/Feed";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "./app/Slices/authSlice";
