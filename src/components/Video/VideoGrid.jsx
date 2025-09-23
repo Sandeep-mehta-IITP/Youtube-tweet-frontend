@@ -5,6 +5,7 @@ import {
 import { Loader, MoreHorizontal } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
+import NoVIdeoFound from "./NoVIdeoFound";
 
 const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
   //console.log("videos received in VideoGrid:", videos);
@@ -131,36 +132,7 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
 
       {/* No Videos Message */}
       {!loading && !fetching && videos.length === 0 && (
-        <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mb-6">
-            <svg
-              className="w-12 h-12 text-white/30"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.665z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-xl font-semibold text-white/80 mb-2">
-            No videos found
-          </h3>
-          <p className="text-sm text-white/50 max-w-md">
-            Try searching for something else or check back later for new
-            content.
-          </p>
-        </div>
+        <NoVIdeoFound />
       )}
     </div>
   );

@@ -13,7 +13,7 @@ const Feed = () => {
         <Aside />
         <main
           className={`flex-1 overflow-y-auto
-            ${asideOpen ? "ml-60 sm:ml-60" : "ml-16 sm:ml-16"} sm:ml-0`}
+            ${asideOpen ? "ml-0 sm:ml-60" : "ml-0 sm:ml-16"} `}
           id="scrollable_results_screen"
         >
           <Outlet />
