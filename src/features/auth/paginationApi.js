@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { toast } from "react-toastify";
 
-export const videosApi = createApi({
+export const paginationApi = createApi({
   reducerPath: "videosApi",
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BACKEND_URL,
@@ -41,4 +41,4 @@ export const videosApi = createApi({
   }),
 });
 
-export const { useGetVideosByOptionQuery } = videosApi;
+export const { useGetVideosByOptionQuery } = paginationApi;

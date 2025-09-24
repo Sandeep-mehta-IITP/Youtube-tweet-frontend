@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import VideoGrid from "@/components/Video/VideoGrid";
-import { useGetVideosByOptionQuery } from "@/features/auth/videosApi";
+import { useGetVideosByOptionQuery } from "@/features/auth/paginationApi";
 
 function FeedVideos() {
   const [page, setPage] = useState(1);

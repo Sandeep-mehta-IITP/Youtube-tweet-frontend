@@ -3,7 +3,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authSlice from "./Slices/authSlice"
 import userSlice from "./Slices/userSlice"
 import uiSlice from "./Slices/uiSlice"
-import { videosApi } from '@/features/auth/videosApi';
+import { paginationApi } from '@/features/auth/paginationApi';
 
 export const store = configureStore({
     reducer: {
@@ -12,9 +12,9 @@ export const store = configureStore({
         user: userSlice,
         ui: uiSlice,
 
-        [videosApi.reducerPath]: videosApi.reducer,
+        [paginationApi.reducerPath]: paginationApi.reducer,
     },
     middleware: (getDefaultMiddleware) => (
-        getDefaultMiddleware().concat(videosApi.middleware)
+        getDefaultMiddleware().concat(paginationApi.middleware)
     )
 })
