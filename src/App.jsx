@@ -13,6 +13,7 @@ import SupportPage from "./pages/SupportPage";
 import FeedVideos from "./pages/FeedVideos";
 import GuestComponent from "./components/GuestPages/GuestComponent";
 import AuthLayout from "./components/auth/AuthLayout";
+import VideoDetails from "./pages/VideoDetails";
 
 function App() {
   const dispatch = useDispatch();
@@ -93,6 +94,8 @@ function App() {
           <Route path="support" element={<SupportPage />} />
           <Route path="guest" element={<GuestComponent />} />
         </Route>
+
+        <Route path="/watch/:videoId" element={<VideoDetails />} />
       </Routes>
     </div>
   );

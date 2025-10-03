@@ -2,45 +2,44 @@ import React, { useEffect, useRef } from "react";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 
-const VideoPlayer = (props) => {
+const VideoPlayer = ({ options, onReady }) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
 
-  const { options, onReady } = props;
-
   useEffect(() => {
-    // Video.js player initilaized once
-    if (!videoRef.current) {
-      const videoElement = document.createElement("video-js");
-      videoElement.classList.add("vjs-big-play-centered");
-      videoRef.current.appendChild(videoElement);
+    // Initialize Video.js player
+    if (!playerRef.current) {
+      const videoElement = videoRef.current;
+      if (!videoElement) return; // Ensure the video element exists
 
       const player = (playerRef.current = videojs(videoElement, options, () => {
         videojs.log("Player ready!!!");
         onReady && onReady(player);
       }));
-
-      // You could update an existing player in the `else` block here
     } else {
+      // Update existing player
       const player = playerRef.current;
       player.autoplay(options.autoplay);
       player.src(options.sources);
+      player.poster(options.poster)
     }
-  }, [videoRef, options]);
 
-  // Dispose the Video.js player when the functional component unmounts
-  useEffect(() => {
-    const player = playerRef.current;
-
-    if (player && player.isDisposed()) {
-      player.dispose();
-      playerRef.current = null;
-    }
-  }, [playerRef]);
+    // Cleanup on unmount
+    return () => {
+      const player = playerRef.current;
+      if (player && !player.isDisposed()) {
+        player.dispose();
+        playerRef.current = null;
+      }
+    };
+  }, [options]); // Ensure options is stable (e.g., memoized in parent)
 
   return (
     <div data-vjs-player className="size-full">
-      <div ref={videoRef} />
+      <video
+        ref={videoRef}
+        className="video-js vjs-big-play-centered"
+      />
     </div>
   );
 };

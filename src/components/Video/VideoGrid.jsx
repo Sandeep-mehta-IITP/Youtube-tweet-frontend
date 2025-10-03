@@ -58,8 +58,8 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
             </span>
 
             {/* Hover overlay for better UX */}
-
-            <div className="absolute inset-0 bg-black bg-opacity-65 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg"></div>
+            {/* pointer-events-none for working link tag properly without effecting z and opacity-0 */}
+            <div className="absolute inset-0 bg-black bg-opacity-65 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg pointer-events-none"></div>
           </div>
 
           {/* Video Info Card */}

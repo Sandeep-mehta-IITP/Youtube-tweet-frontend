@@ -15,7 +15,7 @@ function FeedVideos() {
   const { data, isFetching, isLoading } = useGetVideosByOptionQuery({ page });
 
   console.log("data from API:", data);
-console.log("allVideos state:", allVideos);
+  console.log("allVideos state:", allVideos);
 
   // Merge pages into local state
   useEffect(() => {

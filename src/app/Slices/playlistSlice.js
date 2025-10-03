@@ -290,7 +290,7 @@ export const deletePlaylist = createAsyncThunk(
 // });
 
 const playlistSlice = createSlice({
-  reducerPath: "playlist",
+  name: "playlist",
   initialState,
   reducers: {
     clearPlaylistState: (state) => {
