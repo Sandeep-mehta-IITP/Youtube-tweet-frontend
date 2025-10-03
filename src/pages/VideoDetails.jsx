@@ -5,6 +5,7 @@ import {
   removeVideoFromPlaylist,
 } from "@/app/Slices/playlistSlice";
 import { emptyVideoState } from "@/app/Slices/videoSlice";
+import LikeComponent from "@/components/core/LikeComponent";
 import VideoPlayer from "@/components/core/VideoPlayer";
 import { useGetVideoQuery } from "@/features/auth/videoApi";
 import { formatTimestamp } from "@/utils/helpers/formatFigure";
@@ -260,7 +261,10 @@ const VideoDetails = () => {
               <div className="w-full md:w-1/2 lg:w-full xl:w-1/2">
                 <div className="flex items-center justify-between gap-x-4 md:justify-end lg:justify-between xl:justify-end">
                   {/* Likes */}
-                  
+                  <LikeComponent 
+                  videoId={video?.data?._id}
+                  isLiked={video?.data?.isLiked}
+                  />
                 </div>
               </div>
             </div>
