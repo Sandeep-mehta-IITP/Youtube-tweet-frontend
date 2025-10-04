@@ -80,7 +80,7 @@ export const toggleVideoLike = createAsyncThunk(
 );
 
 const likeSlice = createSlice({
-  name: "Like",
+  name: "like",
   initialState,
   extraReducers: (builder) => {
     // get liked video

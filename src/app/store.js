@@ -9,6 +9,8 @@ import playlistSlice from "./Slices/playlistSlice";
 import videoSlice from "./Slices/videoSlice";
 import { videoApi } from "@/features/auth/videoApi";
 import likeSlice from "./Slices/likeSlice";
+import commentSlice from "./Slices/commentSlice";
+import tweetSlice from "./Slices/tweetSlice"
 
 
 export const store = configureStore({
@@ -21,6 +23,9 @@ export const store = configureStore({
     playlist: playlistSlice,
     video: videoSlice,
     like: likeSlice,
+    comment: commentSlice,
+    tweet: tweetSlice,
+    
 
     [paginationApi.reducerPath]: paginationApi.reducer,
     [videoApi.reducerPath]: videoApi.reducer,

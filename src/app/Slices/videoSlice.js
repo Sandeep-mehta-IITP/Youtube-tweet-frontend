@@ -10,7 +10,7 @@ const initialState = {
 
 
 const videoSlice = createSlice({
-  name: "Video",
+  name: "video",
   initialState,
   reducers: {
     emptyVideoState: (state, action) => {
