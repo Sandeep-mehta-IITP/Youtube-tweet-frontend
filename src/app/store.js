@@ -10,8 +10,9 @@ import videoSlice from "./Slices/videoSlice";
 import { videoApi } from "@/features/auth/videoApi";
 import likeSlice from "./Slices/likeSlice";
 import commentSlice from "./Slices/commentSlice";
-import tweetSlice from "./Slices/tweetSlice"
-
+import tweetSlice from "./Slices/tweetSlice";
+import subscriptionSlice from "./Slices/subscriptionSlice";
+import dashboardSlice from "./Slices/dashboardSlice";
 
 export const store = configureStore({
   reducer: {
@@ -25,7 +26,8 @@ export const store = configureStore({
     like: likeSlice,
     comment: commentSlice,
     tweet: tweetSlice,
-    
+    subscription: subscriptionSlice,
+    dashboard: dashboardSlice,
 
     [paginationApi.reducerPath]: paginationApi.reducer,
     [videoApi.reducerPath]: videoApi.reducer,
