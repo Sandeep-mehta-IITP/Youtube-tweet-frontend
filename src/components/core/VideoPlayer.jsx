@@ -6,40 +6,39 @@ const VideoPlayer = ({ options, onReady }) => {
   const videoRef = useRef(null);
   const playerRef = useRef(null);
 
+  // 1️⃣ Init once on mount / dispose on unmount
   useEffect(() => {
-    // Initialize Video.js player
-    if (!playerRef.current) {
-      const videoElement = videoRef.current;
-      if (!videoElement) return; // Ensure the video element exists
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
 
-      const player = (playerRef.current = videojs(videoElement, options, () => {
+    if (!playerRef.current) {
+      playerRef.current = videojs(videoElement, options, () => {
         videojs.log("Player ready!!!");
-        onReady && onReady(player);
-      }));
-    } else {
-      // Update existing player
-      const player = playerRef.current;
-      player.autoplay(options.autoplay);
-      player.src(options.sources);
-      player.poster(options.poster)
+        onReady?.(playerRef.current);
+      });
     }
 
-    // Cleanup on unmount
     return () => {
-      const player = playerRef.current;
-      if (player && !player.isDisposed()) {
-        player.dispose();
+      if (playerRef.current) {
+        videojs.log("Player will dispose");
+        playerRef.current.dispose();
         playerRef.current = null;
       }
     };
-  }, [options]); // Ensure options is stable (e.g., memoized in parent)
+  }, []); // only run once
+
+  // 2️⃣ Update existing player on options change
+  useEffect(() => {
+    if (playerRef.current) {
+      playerRef.current.src(options.sources);
+      playerRef.current.poster(options.poster);
+      playerRef.current.autoplay(options.autoplay);
+    }
+  }, [options]);
 
   return (
     <div data-vjs-player className="size-full">
-      <video
-        ref={videoRef}
-        className="video-js vjs-big-play-centered"
-      />
+      <video ref={videoRef} className="video-js vjs-big-play-centered" />
     </div>
   );
 };

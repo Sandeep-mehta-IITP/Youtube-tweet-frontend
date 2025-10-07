@@ -41,13 +41,13 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
   }, [showPopup]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && showPopup) {
       handleClose();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, showPopup]);
 
-  const handleLogin = async (data) => {
-    const response = await dispatch(
+  const handleLogin = (data) => {
+    const response = dispatch(
       loginUser({ identifier: data.identifier, password: data.password })
     );
 
@@ -59,7 +59,10 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
   };
 
   const handleClose = () => {
-    dialogRef.current.close();
+    if (dialogRef.current) {
+      dialogRef.current.close();
+    }
+    reset();
     setShowPopup(false);
   };
 

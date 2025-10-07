@@ -7,7 +7,7 @@ const initialState = {
     status: false
 }
 
-export const healthCheck = createAsyncThunk("/health/healthCheck", async (_, {rejectWithValue}) => {
+export const healthCheck = createAsyncThunk("health/healthCheck", async (_, {rejectWithValue}) => {
     try {
         const response = await axiosInstance.get("/healthcheck")
         console.log("Health check :", response.data)

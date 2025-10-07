@@ -21,21 +21,21 @@ export const getLikedVideos = createAsyncThunk(
   }
 );
 
-export const toggleLike = createAsyncThunk(
-  "like/toggleLike",
-  async ({ qs, toggleLike }, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.patch(
-        `likes?toggleLike=${toggleLike}&${qs}`
-      );
-      return response.data;
-    } catch (error) {
-      console.log("FAILED TO TOGGLE LIKE", error.userMessage);
-      toast.error(error.userMessage || "Failed to toggle like.");
-      return rejectWithValue(error.userMessage);
-    }
-  }
-);
+// export const toggleLike = createAsyncThunk(
+//   "like/toggleLike",
+//   async ({ qs, toggleLike }, { rejectWithValue }) => {
+//     try {
+//       const response = await axiosInstance.patch(
+//         `likes?toggleLike=${toggleLike}&${qs}`
+//       );
+//       return response.data;
+//     } catch (error) {
+//       console.log("FAILED TO TOGGLE LIKE", error.userMessage);
+//       toast.error(error.userMessage || "Failed to toggle like.");
+//       return rejectWithValue(error.userMessage);
+//     }
+//   }
+// );
 
 export const toggleCommentLike = createAsyncThunk(
   "like/toggleCommentLike",
@@ -99,21 +99,21 @@ const likeSlice = createSlice({
       state.status = false;
     });
 
-    // toggle like or dislike
-    builder.addCase(toggleLike.pending, (state) => {
-      state.loading = true;
-    });
+    // // toggle like or dislike
+    // builder.addCase(toggleLike.pending, (state) => {
+    //   state.loading = true;
+    // });
 
-    builder.addCase(toggleLike.fulfilled, (state, action) => {
-      state.loading = false;
-      state.status = true;
-      state.data = action.payload;
-    });
+    // builder.addCase(toggleLike.fulfilled, (state, action) => {
+    //   state.loading = false;
+    //   state.status = true;
+    //   state.data = action.payload;
+    // });
 
-    builder.addCase(toggleLike.rejected, (state) => {
-      state.loading = false;
-      state.status = false;
-    });
+    // builder.addCase(toggleLike.rejected, (state) => {
+    //   state.loading = false;
+    //   state.status = false;
+    // });
 
     // toggle comment like
     builder.addCase(toggleCommentLike.pending, (state) => {

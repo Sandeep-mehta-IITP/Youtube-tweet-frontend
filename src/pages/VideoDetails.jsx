@@ -5,10 +5,20 @@ import {
   removeVideoFromPlaylist,
 } from "@/app/Slices/playlistSlice";
 import { emptyVideoState } from "@/app/Slices/videoSlice";
+import LoginPopup from "@/components/auth/LoginPopup";
+import Comments from "@/components/Comment/Comments";
 import LikeComponent from "@/components/core/LikeComponent";
+import UserProfile from "@/components/core/UserProfile";
 import VideoPlayer from "@/components/core/VideoPlayer";
-import { useGetVideoQuery } from "@/features/auth/videoApi";
-import { formatTimestamp } from "@/utils/helpers/formatFigure";
+import {
+  useGetAllVideosQuery,
+  useGetVideoQuery,
+} from "@/features/auth/videoApi";
+import {
+  formatTimestamp,
+  formatVideoDuration,
+} from "@/utils/helpers/formatFigure";
+import { Check, FolderPlus } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
@@ -23,7 +33,6 @@ const VideoDetails = () => {
   const playerRef = useRef(null);
 
   const { isAuthenticated } = useSelector(({ auth }) => auth);
-
   const {
     loading: playlistLoading,
     status: playlistStatus,
@@ -31,18 +40,19 @@ const VideoDetails = () => {
   } = useSelector((state) => state.playlist);
 
   const { data: video, isLoading, error } = useGetVideoQuery(videoId);
+  const { data: allVideos, isLoading: allVideosLoading } =
+    useGetAllVideosQuery();
 
-  console.log("video", video);
+  const currentVideoID = video?.data?._id;
+  const suggestedVideos = allVideos?.data?.docs?.filter((v) => v._id !== currentVideoID);
 
   useEffect(() => {
     if (!videoId) return;
     return () => dispatch(emptyVideoState());
-  }, [videoId, navigate]);
+  }, [videoId, dispatch]);
 
-  // add and remove video from playlist
-  const handlePlaylistVideo = (playlistId, videoId) => {
+  const handlePlaylistVideo = (playlistId, videoId, status) => {
     if (!playlistId) return;
-
     if (status) {
       dispatch(addVideoToPlaylist({ videoId, playlistId }));
     } else {
@@ -50,17 +60,12 @@ const VideoDetails = () => {
     }
   };
 
-  // new playlist creation
   const createNewPlaylist = (eventObj) => {
     eventObj.preventDefault();
-
     const name = eventObj.target.name.value;
-
-    // empty string check
     if (!name.trim()) {
       return toast.error("Please enter the playlist name.");
     }
-
     dispatch(createPlaylist({ data: { name } })).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(addVideoToPlaylist({ playlistId: res.payload?._id, videoId }));
@@ -68,132 +73,14 @@ const VideoDetails = () => {
     });
   };
 
-  // if user logged in fetch all playlists otherwise show loginpopup
   const handleSavePlaylist = () => {
     if (isAuthenticated) {
-      dispatch(getUserPlaylists(user._id));
+      dispatch(getUserPlaylists());
     } else {
       loginPopupRef.current.open();
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
-        {/* Main video skeleton */}
-        <div className="lg:col-span-2 animate-pulse space-y-4">
-          {/* Video thumbnail */}
-          <div className="w-full pt-[56%] bg-slate-200/20 rounded-lg relative"></div>
-
-          {/* Video title */}
-          <div className="space-y-2">
-            <div className="h-6 w-full bg-slate-300/60 rounded"></div>
-            <div className="h-4 w-5/6 bg-slate-300/60 rounded"></div>
-            <div className="h-4 w-3/4 bg-slate-300/60 rounded"></div>
-          </div>
-
-          {/* Owner / channel info */}
-          <div className="flex items-center gap-2 mt-2">
-            <div className="w-10 h-10 rounded-full bg-slate-300/60"></div>
-            <div className="flex flex-col gap-1">
-              <div className="h-4 w-20 bg-slate-300/60 rounded"></div>
-              <div className="h-3 w-12 bg-slate-300/60 rounded"></div>
-            </div>
-          </div>
-
-          {/* Views and upload date */}
-          <div className="h-3 w-32 bg-slate-300/60 rounded mt-2"></div>
-
-          {/* Comments skeleton */}
-          <div className="space-y-2 mt-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-full bg-slate-300/60"></div>
-                <div className="flex-1 space-y-1">
-                  <div className="h-3 w-3/4 bg-slate-300/60 rounded"></div>
-                  <div className="h-3 w-1/2 bg-slate-300/60 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Side video suggestions */}
-        <div className="lg:col-span-1 space-y-4">
-          {[...Array(9)].map((_, i) => (
-            <div key={i} className="flex gap-2 animate-pulse">
-              <div className="w-32 h-20 bg-slate-200/20 rounded-lg flex-shrink-0"></div>
-              <div className="flex-1 space-y-2 py-1">
-                <div className="h-4 w-3/4 bg-slate-300/60 rounded"></div>
-                <div className="h-3 w-1/2 bg-slate-300/60 rounded"></div>
-                <div className="h-3 w-1/3 bg-slate-300/60 rounded"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // if not video found / invalid
-  if (!video)
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
-        {/* Main video skeleton */}
-        <div className="lg:col-span-2 animate-pulse space-y-4">
-          {/* Video thumbnail */}
-          <div className="w-full pt-[56%] bg-slate-200/20 rounded-lg relative"></div>
-
-          {/* Video title */}
-          <div className="space-y-2">
-            <div className="h-6 w-full bg-slate-300/60 rounded"></div>
-            <div className="h-4 w-5/6 bg-slate-300/60 rounded"></div>
-            <div className="h-4 w-3/4 bg-slate-300/60 rounded"></div>
-          </div>
-
-          {/* Owner / channel info */}
-          <div className="flex items-center gap-2 mt-2">
-            <div className="w-10 h-10 rounded-full bg-slate-300/60"></div>
-            <div className="flex flex-col gap-1">
-              <div className="h-4 w-20 bg-slate-300/60 rounded"></div>
-              <div className="h-3 w-12 bg-slate-300/60 rounded"></div>
-            </div>
-          </div>
-
-          {/* Views and upload date */}
-          <div className="h-3 w-32 bg-slate-300/60 rounded mt-2"></div>
-
-          {/* Comments skeleton */}
-          <div className="space-y-2 mt-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <div className="w-8 h-8 rounded-full bg-slate-300/60"></div>
-                <div className="flex-1 space-y-1">
-                  <div className="h-3 w-3/4 bg-slate-300/60 rounded"></div>
-                  <div className="h-3 w-1/2 bg-slate-300/60 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Side video suggestions */}
-        <div className="lg:col-span-1 space-y-4">
-          {[...Array(9)].map((_, i) => (
-            <div key={i} className="flex gap-2 animate-pulse">
-              <div className="w-32 h-20 bg-slate-200/20 rounded-lg flex-shrink-0"></div>
-              <div className="flex-1 space-y-2 py-1">
-                <div className="h-4 w-3/4 bg-slate-300/60 rounded"></div>
-                <div className="h-3 w-1/2 bg-slate-300/60 rounded"></div>
-                <div className="h-3 w-1/3 bg-slate-300/60 rounded"></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-
-  // video player controls options
   const videoPlayerControlsOptions = {
     controls: true,
     responsive: true,
@@ -208,72 +95,255 @@ const VideoDetails = () => {
     poster: video?.data?.thumbnail?.url || "",
   };
 
-  const hadlePlayerReady = (player) => {
+  const handlePlayerReady = (player) => {
     playerRef.current = player;
-
     player.on("waiting", () => {
       videojs.log("Player is waiting");
     });
-
     player.on("dispose", () => {
       videojs.log("Player will dispose");
     });
-
     player.on("error", () => {
       console.error("Video.js Error:", player.error());
-      // Retry loading the source after a delay
       setTimeout(() => {
         player.src(videoPlayerControlsOptions.sources);
       }, 2000);
     });
   };
 
-  return video && !isLoading ? (
-    <section className="w-full pb-[4.4rem] sm:pb-0">
-      <div className="w-full flex flex-wrap gap-4 lg:flex-nowrap">
-        <div className="w-full col-span-12">
-          {/*  VIDEO  */}
-          <div className="relative w-full mb-4 pt-[56%] overflow-hidden">
-            <div className="absolute inset-0">
-              <VideoPlayer
-                options={videoPlayerControlsOptions}
-                onReady={hadlePlayerReady}
-              />
+  if (isLoading) {
+    return (
+      <div className="max-w-[1280px] mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6 animate-pulse">
+            <div className="w-full aspect-video bg-gray-800 rounded-lg"></div>
+            <div className="space-y-3">
+              <div className="h-8 w-3/4 bg-gray-700 rounded"></div>
+              <div className="h-4 w-1/2 bg-gray-700 rounded"></div>
+              <div className="h-4 w-1/3 bg-gray-700 rounded"></div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gray-700"></div>
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-gray-700 rounded"></div>
+                <div className="h-3 w-16 bg-gray-700 rounded"></div>
+              </div>
+            </div>
+            <div className="space-y-4 mt-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-700"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-3/4 bg-gray-700 rounded"></div>
+                    <div className="h-3 w-1/2 bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-
-          {/* Video, Playlist, Like and Owner Data */}
-          <div
-            className="group mb-4 w-full rounded-lg border p-4 hover:bg-white/5 focus:bg-white/5 duration-300"
-            role="button"
-            tabIndex="0"
-          >
-            <div className="flex flex-wrap gap-y-3">
-              {/* Video Metadata */}
-              <div className="w-full md:w-1/2 lg:w-full xl:w-1/2">
-                <h1 className="text-xl font-bold">{video?.data?.title}</h1>
-                <p className="flex text-sm text-gray-200">
-                  {video?.data?.views} Veiws || {formatTimestamp(video?.data?.createdAt)}
-                </p>
-              </div>
-
-              {/* Like and playlist components */}
-              <div className="w-full md:w-1/2 lg:w-full xl:w-1/2">
-                <div className="flex items-center justify-between gap-x-4 md:justify-end lg:justify-between xl:justify-end">
-                  {/* Likes */}
-                  <LikeComponent 
-                  videoId={video?.data?._id}
-                  isLiked={video?.data?.isLiked}
-                  />
+          <div className="lg:col-span-1 space-y-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex gap-3 animate-pulse">
+                <div className="w-40 h-24 bg-gray-800 rounded-lg"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+                  <div className="h-3 w-1/2 bg-gray-700 rounded"></div>
+                  <div className="h-3 w-1/3 bg-gray-700 rounded"></div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (!video) {
+    return (
+      <div className="max-w-[1280px] mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+          <div className="lg:col-span-2 space-y-6">
+            <div className="w-full aspect-video bg-gray-800 rounded-lg"></div>
+            <div className="space-y-3">
+              <div className="h-8 w-3/4 bg-gray-700 rounded"></div>
+              <div className="h-4 w-1/2 bg-gray-700 rounded"></div>
+              <div className="h-4 w-1/3 bg-gray-700 rounded"></div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gray-700"></div>
+              <div className="space-y-2">
+                <div className="h-4 w-24 bg-gray-700 rounded"></div>
+                <div className="h-3 w-16 bg-gray-700 rounded"></div>
+              </div>
+            </div>
+            <div className="space-y-4 mt-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-700"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-3 w-3/4 bg-gray-700 rounded"></div>
+                    <div className="h-3 w-1/2 bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="lg:col-span-1 space-y-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex gap-3 animate-pulse">
+                <div className="w-40 h-24 bg-gray-800 rounded-lg"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
+                  <div className="h-3 w-1/2 bg-gray-700 rounded"></div>
+                  <div className="h-3 w-1/3 bg-gray-700 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <section className="w-full mx-auto px-4 py-6 bg-[#0f0f0f] text-white">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Video Player */}
+          <div className="w-full aspect-video">
+            <VideoPlayer
+              options={videoPlayerControlsOptions}
+              onReady={handlePlayerReady}
+            />
+          </div>
+
+          {/* Video Metadata */}
+          <div className="space-y-4">
+            <h1 className="text-2xl font-bold">{video?.data?.title}</h1>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <UserProfile userId={video?.data?.owner?.username} />
+                <p className="text-sm text-gray-400">
+                  {video?.data?.views} views • {formatTimestamp(video?.data?.createdAt)}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <LikeComponent
+                  videoId={video?.data?._id}
+                  isLiked={video?.data?.isLiked}
+                  totalLikes={video?.data?.totalLikes}
+                  isDisLiked={video?.data?.isDisLiked}
+                  totalDisLikes={video?.data?.totalDisLikes}
+                />
+                <div className="relative">
+                  <LoginPopup
+                    ref={loginPopupRef}
+                    message="Sign in to save video in playlist..."
+                  />
+                  <button
+                    onClick={handleSavePlaylist}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-full text-sm font-medium"
+                  >
+                    <FolderPlus className="w-5 h-5" />
+                    Save
+                  </button>
+                  {isAuthenticated && (
+                    <div className="absolute top-full right-0 mt-2 w-64 bg-gray-900 rounded-lg shadow-lg p-4 z-10 hidden group-hover:block focus-within:block">
+                      <h2 className="text-lg font-semibold mb-4 text-center">
+                        Save to playlist
+                      </h2>
+                      <ul className="mb-4 max-h-48 overflow-y-auto">
+                        {playlistLoading ? (
+                          <li className="text-sm text-gray-400">Loading...</li>
+                        ) : playlists?.length > 0 ? (
+                          playlists.map((item) => (
+                            <li key={item._id} className="mb-2">
+                              <label className="flex items-center gap-3 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="hidden peer"
+                                  id={`playlist-${item._id}`}
+                                  defaultChecked={item.isVideoPresent}
+                                  onChange={(e) =>
+                                    handlePlaylistVideo(item._id, videoId, e.target.checked)
+                                  }
+                                />
+                                <span className="w-5 h-5 rounded border border-gray-600 peer-checked:bg-red-600 peer-checked:border-red-600 flex items-center justify-center">
+                                  <Check className="w-4 h-4 text-white" />
+                                </span>
+                                <span className="text-sm">{item.name}</span>
+                              </label>
+                            </li>
+                          ))
+                        ) : (
+                          <li className="text-sm text-gray-400">No playlists found</li>
+                        )}
+                      </ul>
+                      <form onSubmit={createNewPlaylist} className="space-y-2">
+                        <input
+                          type="text"
+                          name="name"
+                          id="playlist-name"
+                          placeholder="Enter playlist name..."
+                          required
+                          className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="submit"
+                          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium"
+                        >
+                          Create Playlist
+                        </button>
+                      </form>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-gray-800 rounded-lg p-4">
+              <p className="text-sm text-gray-300">{video?.data?.description}</p>
+            </div>
+
+            {/* Comments */}
+            <Comments
+              videoId={video?.data?._id}
+              ownerAvatar={video?.data?.owner?.avatar?.url}
+            />
+          </div>
+        </div>
+
+        {/* Suggested Videos */}
+        <div className="lg:col-span-1 space-y-4">
+          {suggestedVideos?.map((video) => (
+            <div
+              key={video._id}
+              className="flex gap-3 cursor-pointer hover:bg-gray-800 rounded-lg p-2"
+              onClick={() => navigate(`/watch/${video._id}`)}
+            >
+              <div className="w-40 h-24 relative flex-shrink-0">
+                <img
+                  src={video.thumbnail?.url}
+                  alt={video.title}
+                  className="w-full h-full object-cover rounded-lg"
+                />
+                <span className="absolute bottom-1 right-1 bg-black bg-opacity-75 px-1.5 py-0.5 text-xs text-white rounded">
+                  {formatVideoDuration(video.duration) || "00:00"}
+                </span>
+              </div>
+              <div className="flex-1">
+                <h6 className="text-sm font-semibold line-clamp-2">{video.title}</h6>
+                <p className="text-xs text-gray-400 mt-1">{video?.ownerDetails?.username}</p>
+                <p className="text-xs text-gray-400">
+                  {video.views} views • {formatTimestamp(video.createdAt)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </section>
-  ) : (
-    <section></section>
   );
 };
 

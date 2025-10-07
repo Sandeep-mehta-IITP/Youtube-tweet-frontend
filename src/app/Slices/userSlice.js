@@ -9,7 +9,7 @@ const initialState = {
 };
 
 export const registerUser = createAsyncThunk(
-  "/user/register",
+  "user/registerUser",
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post("/users/register", formData, {

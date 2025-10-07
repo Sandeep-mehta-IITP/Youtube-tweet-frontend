@@ -26,12 +26,12 @@ export const videoApi = createApi({
             )
             .join("&");
 
-        return `/vidoes${queryString}`;
+        return `/videos${queryString}`;
       },
       providesTags: (result) =>
-        result?.videos
+        result?.data?.docs
           ? [
-              ...result.videos.map(({ id }) => ({ type: "Video", id })),
+              ...result.data.docs.map(({ id }) => ({ type: "Video", id })),
               { type: "Video", id: "LIST" },
             ]
           : [{ type: "Video", id: "LIST" }],

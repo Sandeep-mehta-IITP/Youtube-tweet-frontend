@@ -2,7 +2,12 @@ import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import LoginPopup from "../auth/LoginPopup";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { ThumbsDown, ThumbsUp, Loader2 } from "lucide-react";
+import {
+  toggleCommentLike,
+  toggleTweetLike,
+  toggleVideoLike,
+} from "@/app/Slices/likeSlice";
 
 const LikeComponent = ({
   videoId,
@@ -10,114 +15,138 @@ const LikeComponent = ({
   tweetId,
   isLiked = false,
   totalLikes = 0,
-  isDisLiked = false,
-  totalDisLikes = 0,
+  isDisliked = false,
+  totalDislikes = 0,
 }) => {
-  const [like, setLike] = useState({ isLiked, totalLikes });
-  const [disLike, setDisLike] = useState({ isDisLiked, totalDisLikes });
   const dispatch = useDispatch();
   const loginPopupRef = useRef();
-
   const { isAuthenticated } = useSelector(({ auth }) => auth);
+  const [isLoading, setIsLoading] = useState(false);
+  const [localLikes, setLocalLikes] = useState(totalLikes);
+  const [localDislikes, setLocalDislikes] = useState(totalDislikes);
+  const [localIsLiked, setLocalIsLiked] = useState(isLiked);
+  const [localIsDisliked, setLocalIsDisliked] = useState(isDisliked);
 
-  const handleToggleLike = (status) => {
-    if (!isAuthenticated) return loginPopupRef.current.open();
+  const handleToggleLike = async (likeStatus) => {
+    if (!isAuthenticated) {
+      loginPopupRef.current.open();
+      return;
+    }
 
-    let localLike = like.isLiked,
-      localDislike = disLike.isDisLiked,
-      localTotalLike = like.totalLikes,
-      localTotalDisLike = disLike.totalDisLikes;
+    if (!videoId && !commentId && !tweetId) {
+      toast.error("Invalid action: No resource ID provided.");
+      return;
+    }
 
-    if (status) {
-      if (disLike.isDisLiked) {
-        localLike = true;
-          localTotalLike = like.totalLikes + 1;
-          localDislike = false;
-          localTotalDisLike = disLike.totalDisLikes - 1;
-      } else if (like.isLiked) {
-        localLike = false;
-         localTotalLike = like.totalLikes - 1;
+    setIsLoading(true);
+    // Optimistically update local state for immediate feedback
+    if (likeStatus) {
+      if (localIsDisliked) {
+        setLocalIsDisliked(false);
+        setLocalDislikes((prev) => prev - 1);
+        setLocalIsLiked(true);
+        setLocalLikes((prev) => prev + 1);
+      } else if (localIsLiked) {
+        setLocalIsLiked(false);
+        setLocalLikes((prev) => prev - 1);
       } else {
-        localLike = true;
-        localTotalLike = like.totalLikes + 1;
+        setLocalIsLiked(true);
+        setLocalLikes((prev) => prev + 1);
       }
     } else {
-      if (like.isLiked) {
-        localLike = false;
-        localTotalLike = like.totalLikes - 1;
-        localDislike = true;
-        localTotalDisLike = disLike.totalDisLikes + 1;
-      } else if (disLike.isDisLiked) {
-        localDislike = false;
-        localTotalDisLike = disLike.totalDisLikes - 1;
+      if (localIsLiked) {
+        setLocalIsLiked(false);
+        setLocalLikes((prev) => prev - 1);
+        setLocalIsDisliked(true);
+        setLocalDislikes((prev) => prev + 1);
+      } else if (localIsDisliked) {
+        setLocalIsDisliked(false);
+        setLocalDislikes((prev) => prev - 1);
       } else {
-        localDislike = true;
-        localTotalDisLike = disLike.totalDisLikes + 1;
+        setLocalIsDisliked(true);
+        setLocalDislikes((prev) => prev + 1);
       }
     }
 
-    setLike((prev) => ({
-      ...prev,
-      isLiked: localLike,
-      totalLikes: localTotalLike,
-    }));
-    setDisLike((prev) => ({
-      ...prev,
-      isDisLiked: localDislike,
-      totalDisLikes: localTotalDisLike,
-    }));
+    try {
+      let action;
+      if (videoId) {
+        action = toggleVideoLike({ videoId, toggleLike: likeStatus });
+      } else if (commentId) {
+        action = toggleCommentLike({ commentId, toggleLike: likeStatus });
+      } else if (tweetId) {
+        action = toggleTweetLike({ tweetId, toggleLike: likeStatus });
+      }
+
+      await dispatch(action).unwrap();
+      // If the API returns updated counts, you can update local state here
+      // For now, rely on parent component to pass updated props
+    } catch (error) {
+      // Revert optimistic updates on error
+      setLocalIsLiked(isLiked);
+      setLocalLikes(totalLikes);
+      setLocalIsDisliked(isDisliked);
+      setLocalDislikes(totalDislikes);
+      toast.error(
+        error.message || "Failed to update like status. Please try again."
+      );
+      console.error("Like toggle error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  let qs = ""; // queryString
-  if (videoId) qs = `videoId=${videoId}`;
-  else if (commentId) qs = `commentId=${commentId}`;
-  else if (tweetId) qs = `tweetId=${tweetId}`;
-  else return toast.error("No ID found.");
-
-  dispatch({ qs, toggleLike: status });
   return (
-    <section
-      className={`flex overflow-hidden bg-slate-800 rounded-lg border ${
-        videoId ? "" : "max-w-fit h-fit text-sm"
+    <div
+      className={`flex items-center gap-1 bg-gray-800 rounded-full p-1 ${
+        videoId ? "px-2 py-1" : "px-1.5 py-0.5"
       }`}
     >
-      <LoginPopup ref={loginPopupRef} message="Sign in to Like Video..." />
-      {/* Like button */}
+      <LoginPopup
+        ref={loginPopupRef}
+        message={`Sign in to ${
+          videoId
+            ? "like this video"
+            : commentId
+              ? "like this comment"
+              : "like this tweet"
+        }...`}
+      />
+      {/* Like Button */}
       <button
-        className={`flex items-center border-r border-gray-700 gap-x-3 ${
-          videoId ? "px-4 py-1.5" : "px-2 py-1"
-        } after:content-[attr(data-like)] hover:bg-white/10`}
-        data-like={like?.totalLikes}
-        data-like-alt={like?.totalLikes + 1}
         onClick={() => handleToggleLike(true)}
+        disabled={isLoading}
+        className={`flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-gray-700 transition-colors ${
+          localIsLiked ? "text-blue-400" : "text-gray-300"
+        } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
       >
-        <span
-          className={`inline-block ${videoId ? "w-5" : "w-4"} ${like.isLiked ? "btn:text-[#AEBDEA]" : "btn:text-white"}`}
-        >
+        {isLoading && !localIsDisliked ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
           <ThumbsUp
-            className={`w-5 h-5 ${like.isLiked ? "text-[#AEBDEA]" : "none"}`}
+            className={`w-4 h-4 ${localIsLiked ? "fill-blue-400" : ""}`}
           />
-        </span>
+        )}
+        <span className="text-xs">{localLikes}</span>
       </button>
-
-      {/* Dislike button */}
+      {/* Dislike Button */}
       <button
-        className={`flex items-center border-r border-gray-700 gap-x-3 ${
-          videoId ? "px-4 py-1.5" : "px-2 py-1"
-        } after:content-[attr(data-like)] hover:bg-white/10`}
-        data-like={disLike?.totalDisLikes}
-        data-like-alt={disLike?.totalDisLikes + 1}
         onClick={() => handleToggleLike(false)}
+        disabled={isLoading}
+        className={`flex items-center gap-1.5 px-2 py-1 rounded-full hover:bg-gray-700 transition-colors ${
+          localIsDisliked ? "text-blue-400" : "text-gray-300"
+        } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
       >
-        <span
-          className={`inline-block ${videoId ? "w-5" : "w-4"} ${like.isLiked ? "btn:text-[#AEBDEA]" : "btn:text-white"}`}
-        >
+        {isLoading && !localIsLiked ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
           <ThumbsDown
-            className={`w-5 h-5 ${like.isLiked ? "text-[#AEBDEA]" : "none"}`}
+            className={`w-4 h-4 ${localIsDisliked ? "fill-blue-400" : ""}`}
           />
-        </span>
+        )}
+        <span className="text-xs">{localDislikes}</span>
       </button>
-    </section>
+    </div>
   );
 };
 

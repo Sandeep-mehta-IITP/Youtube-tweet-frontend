@@ -116,7 +116,7 @@ const tweetSlice = createSlice({
       );
     });
 
-    builder.addCase(getUserTweets.rejected, (state) => {
+    builder.addCase(updateTweet.rejected, (state) => {
       state.loading = false;
       state.status = false;
     });

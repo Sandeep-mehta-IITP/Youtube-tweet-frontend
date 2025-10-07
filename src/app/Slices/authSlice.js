@@ -9,7 +9,7 @@ const initialState = {
 };
 
 export const loginUser = createAsyncThunk(
-  "/auth/loginUser",
+  "auth/loginUser",
   async (data, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post("/users/login", data, {
@@ -32,7 +32,7 @@ export const loginUser = createAsyncThunk(
 );
 
 export const logoutUser = createAsyncThunk(
-  "/auth/logout",
+  "auth/logoutUser",
   async (_, { rejectWithValue }) => {
     try {
       await axiosInstance.post("/users/logout", {});
@@ -46,7 +46,7 @@ export const logoutUser = createAsyncThunk(
 );
 
 export const getCurrentUser = createAsyncThunk(
-  "/auth/currentUser",
+  "auth/getCurrentUser",
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/users/me", {});
