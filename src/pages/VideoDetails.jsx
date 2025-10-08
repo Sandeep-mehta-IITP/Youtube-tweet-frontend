@@ -44,7 +44,9 @@ const VideoDetails = () => {
     useGetAllVideosQuery();
 
   const currentVideoID = video?.data?._id;
-  const suggestedVideos = allVideos?.data?.docs?.filter((v) => v._id !== currentVideoID);
+  const suggestedVideos = allVideos?.data?.docs?.filter(
+    (v) => v._id !== currentVideoID
+  );
 
   useEffect(() => {
     if (!videoId) return;
@@ -220,13 +222,12 @@ const VideoDetails = () => {
           {/* Video Metadata */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold">{video?.data?.title}</h1>
+
             <div className="flex items-center justify-between flex-wrap gap-4">
-              <div className="flex items-center gap-4">
-                <UserProfile userId={video?.data?.owner?.username} />
-                <p className="text-sm text-gray-400">
-                  {video?.data?.views} views • {formatTimestamp(video?.data?.createdAt)}
-                </p>
-              </div>
+              <p className="items-start text-sm text-gray-400">
+                {video?.data?.views} views •{" "}
+                {formatTimestamp(video?.data?.createdAt)}
+              </p>
               <div className="flex items-center gap-4">
                 <LikeComponent
                   videoId={video?.data?._id}
@@ -265,7 +266,11 @@ const VideoDetails = () => {
                                   id={`playlist-${item._id}`}
                                   defaultChecked={item.isVideoPresent}
                                   onChange={(e) =>
-                                    handlePlaylistVideo(item._id, videoId, e.target.checked)
+                                    handlePlaylistVideo(
+                                      item._id,
+                                      videoId,
+                                      e.target.checked
+                                    )
                                   }
                                 />
                                 <span className="w-5 h-5 rounded border border-gray-600 peer-checked:bg-red-600 peer-checked:border-red-600 flex items-center justify-center">
@@ -276,7 +281,9 @@ const VideoDetails = () => {
                             </li>
                           ))
                         ) : (
-                          <li className="text-sm text-gray-400">No playlists found</li>
+                          <li className="text-sm text-gray-400">
+                            No playlists found
+                          </li>
                         )}
                       </ul>
                       <form onSubmit={createNewPlaylist} className="space-y-2">
@@ -300,10 +307,17 @@ const VideoDetails = () => {
                 </div>
               </div>
             </div>
+            
+            {/* User profile */}
+            <div className="w-full flex items-center">
+              <UserProfile userId={video?.data?.owner?.username} />
+            </div>
 
             {/* Description */}
             <div className="bg-gray-800 rounded-lg p-4">
-              <p className="text-sm text-gray-300">{video?.data?.description}</p>
+              <p className="text-sm text-gray-300">
+                {video?.data?.description}
+              </p>
             </div>
 
             {/* Comments */}
@@ -333,8 +347,12 @@ const VideoDetails = () => {
                 </span>
               </div>
               <div className="flex-1">
-                <h6 className="text-sm font-semibold line-clamp-2">{video.title}</h6>
-                <p className="text-xs text-gray-400 mt-1">{video?.ownerDetails?.username}</p>
+                <h6 className="text-sm font-semibold line-clamp-2">
+                  {video.title}
+                </h6>
+                <p className="text-xs text-gray-400 mt-1">
+                  {video?.ownerDetails?.username}
+                </p>
                 <p className="text-xs text-gray-400">
                   {video.views} views • {formatTimestamp(video.createdAt)}
                 </p>
