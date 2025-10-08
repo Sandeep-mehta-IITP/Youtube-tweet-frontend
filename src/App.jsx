@@ -95,6 +95,7 @@ function App() {
           <Route path="guest" element={<GuestComponent />} />
         </Route>
 
+        
         <Route path="/watch/:videoId" element={<VideoDetails />} />
       </Routes>
     </div>

@@ -16,6 +16,7 @@ const Comments = ({ videoId, ownerAvatar }) => {
 
   const { status, data } = useSelector((state) => state.comment);
   const [localCommentData, setLocalCommentData] = useState(null);
+  const [content, setContent] = useState("");
 
   useEffect(() => {
     if (!videoId) return;
@@ -75,7 +76,7 @@ const Comments = ({ videoId, ownerAvatar }) => {
                     </div>
                     <div className="bg-slate-100/10 rounded animate-pulse w-32 mt-1 h-4"></div>
                     <p className="my-1 text-[14px]">
-                      <div className="text-transparent h-5 bg-slate-100/10 rounded animate-pulse w-[70%] outline-none border-b-[1px] border-transparent"></div>
+                      <span className="text-transparent h-5 bg-slate-100/10 rounded animate-pulse w-[70%] outline-none border-b-[1px] border-transparent"></span>
                     </p>
                   </div>
                 </span>
@@ -88,6 +89,8 @@ const Comments = ({ videoId, ownerAvatar }) => {
   }
 
   const comments = data || localCommentData;
+
+  console.log("comments in comments", comments);
 
   // Something went wrong Comments...
   if (!status && !comments)
@@ -110,48 +113,66 @@ const Comments = ({ videoId, ownerAvatar }) => {
 
         <form
           onSubmit={addCommentHandler}
-          className="w-full rounded-lg border px-1 py-1 flex items-center"
+          className="w-full flex flex-col gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 transition"
         >
-          <input
-            type="text"
-            name="content"
-            ref={inputRef}
-            placeholder="Add a comment"
-            className="w-4/5 bg-transparent focus:outline-none px-2 py-1 placeholder-white"
-          />
+          <div className="flex items-start gap-3">
+            {/* Auto-resizing textarea */}
+            <textarea
+              ref={inputRef}
+              name="content"
+              value={content}
+              onChange={(e) => {
+                setContent(e.target.value);
+                const el = inputRef.current;
+                el.style.height = "auto";
+                el.style.height = `${el.scrollHeight}px`;
+              }}
+              rows={1}
+              placeholder="Add a comment..."
+              className="flex-1 resize-none overflow-hidden bg-transparent placeholder-gray-700 text-gray-950 px-3 py-2 rounded-lg focus:outline-none focus:ring-0 text-sm font-semibold"
+            />
+          </div>
 
-          <span className="w-1/5 flex justify-end mr-1">
-            {/* Cancel button */}
-            <button
-              type="button"
-              onClick={() => (inputRef.current.value = "")}
-              className="rounded-3xl hover:border hover:border-b-white disabled:cursor-not-allowed hover:bg-gray-700 text-white text-sm font-semibold px-2 pb-1 mr-2"
-            >
-              Cancel
-            </button>
-            {/* Comment button */}
-            <button
-              type="submit"
-              className="rounded-3xl bg-blue-500 disabled:bg-gray-800 hover:bg-blue-600 text-lg text-[#f6f5f6] font-semibold border border-b-white px-2 pb-1"
-            >
-              Comment
-            </button>
-          </span>
+          {/* Buttons appear only if text exists */}
+          {content.trim().length > 0 && (
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setContent("");
+                  inputRef.current.style.height = "44px";
+                }}
+                className="rounded-full px-4 py-1 text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="rounded-full bg-blue-600 px-4 py-1 text-sm font-medium text-white shadow-sm hover:bg-blue-700 active:scale-95 transition"
+              >
+                Comment
+              </button>
+            </div>
+          )}
         </form>
       </div>
       <hr className="my-4 border-white" />
 
       {/* comments */}
-      {comments.map((comment) => (
-        <div key={comment._id}>
-          <CommentLayout
-            comment={comment}
-            ownerAvatar={ownerAvatar}
-            videoId={videoId}
-          />
-          <hr className="my-2 border-white" />
-        </div>
-      ))}
+      {Array.isArray(comments?.data?.docs) && comments.data.docs.length > 0 ? (
+        comments.data.docs.map((comment) => (
+          <div key={comment._id}>
+            <CommentLayout
+              comment={comment}
+              ownerAvatar={ownerAvatar}
+              videoId={videoId}
+            />
+            <hr className="my-2 border-white" />
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-400">No comments yet</p>
+      )}
     </div>
   );
 };

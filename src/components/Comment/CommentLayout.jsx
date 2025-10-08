@@ -17,6 +17,8 @@ const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
   const inputRef = useRef();
   const dispatch = useDispatch();
 
+  console.log("comment in comment layout", comment);
+  
   useEffect(() => {
     if (isEditing) {
       inputRef.current.focus();
@@ -56,8 +58,8 @@ const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
         <div className="mt-2 w-11 h-11 shrink-0 border-white">
           <Link to={`/user/${comment?.owner?.username}`}>
             <img
-              src={comment.owner.avatar}
-              alt={comment.owner.username}
+              src={comment?.owner?.avatar}
+              alt={comment?.owner?.username}
               className="w-full h-full object-cover rounded-full"
             />
           </Link>
@@ -67,7 +69,7 @@ const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
           <p className="flex items-center text-gray-200 text-sm">
             {comment.owner?.fullName}{" "}
             <span className="text-xs">
-              {formatTimestamp(comment.createdAt)}
+              {formatTimestamp(comment?.createdAt)}
             </span>
           </p>
           <p className="text-xs text-gray-200">

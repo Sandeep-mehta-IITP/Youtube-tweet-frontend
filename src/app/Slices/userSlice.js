@@ -1,18 +1,20 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/API/axiosInstance";
 import { toast } from "react-toastify";
+import { error } from "console";
 
 const initialState = {
   userData: {},
   loading: false,
   isAuthenticated: false,
+  error: null,
 };
 
 export const registerUser = createAsyncThunk(
   "user/registerUser",
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post("/users/register", formData, {
+      const response = await axiosInstance.post("users/register", formData, {
         headers: {
           "Content-Type": "multipart/form-data", // Override default JSON header
         },
@@ -27,6 +29,21 @@ export const registerUser = createAsyncThunk(
     }
   }
 );
+
+export const channelProfile = createAsyncThunk(
+  "users/channelProfile",
+  async (username, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/users/c/${username}`);
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO FETCHED CHANNEL PROFILE", error.userMessage);
+      toast.error(error.userMessage || "Failed to fetched channel profile.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
 
 const userSlice = createSlice({
   name: "user",
@@ -49,6 +66,24 @@ const userSlice = createSlice({
       state.userData = null;
       state.error = action.payload;
     });
+
+    // channel profile
+    builder.addCase(channelProfile.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(channelProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(channelProfile.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+    });
+
+    //
   },
 });
 
