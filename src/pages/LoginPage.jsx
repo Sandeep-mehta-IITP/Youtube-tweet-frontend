@@ -6,7 +6,6 @@ import { loginSchema } from "@/utils/Validation/loginSchema";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "@/app/Slices/authSlice";
 
