@@ -95,7 +95,7 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
                   <Link
                     to={`/user/${video?.ownerDetails?.username}`}
                     className="hover:text-sky-500 transition-colors duration-200"
-                    title={video?.ownerDetails?.username}
+                    
                   >
                     {video?.ownerDetails?.username}
                   </Link>
