@@ -19,7 +19,7 @@ import {
   formatVideoDuration,
 } from "@/utils/helpers/formatFigure";
 import { Check, FolderPlus } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -48,39 +48,69 @@ const VideoDetails = () => {
     (v) => v._id !== currentVideoID
   );
 
+  const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
+
   useEffect(() => {
     if (!videoId) return;
     return () => dispatch(emptyVideoState());
   }, [videoId, dispatch]);
 
-  const handlePlaylistVideo = (playlistId, videoId, status) => {
+  const handlePlaylistVideo = (playlistId, currentVideoID, status) => {
     if (!playlistId) return;
     if (status) {
-      dispatch(addVideoToPlaylist({ videoId, playlistId }));
+      dispatch(addVideoToPlaylist({ currentVideoID, playlistId }));
     } else {
-      dispatch(removeVideoFromPlaylist({ videoId, playlistId }));
+      dispatch(removeVideoFromPlaylist({ currentVideoID, playlistId }));
     }
   };
+
+  
+  
 
   const createNewPlaylist = (eventObj) => {
     eventObj.preventDefault();
-    const name = eventObj.target.name.value;
+    const name = eventObj.target.playlistName.value;
+    const description = eventObj.target.playlistDescription.value;
+
     if (!name.trim()) {
       return toast.error("Please enter the playlist name.");
     }
-    dispatch(createPlaylist({ data: { name } })).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        dispatch(addVideoToPlaylist({ playlistId: res.payload?._id, videoId }));
-      }
-    });
+
+    if (!description.trim()) {
+      return toast.error("Please enter the playlist description.");
+    }
+    dispatch(createPlaylist({ data: { name, description } }))
+      .then((res) => {
+        if (res.meta.requestStatus === "fulfilled") {
+          if (!videoId) {
+            console.error("Video ID is missing");
+            return toast.error("No video selected to add to playlist.");
+          }
+          console.log("playlist id in videodetails", res.payload?.data?._id);
+          console.log("video id in videodetails", currentVideoID);
+          
+          
+          dispatch(
+            addVideoToPlaylist({
+              playlistId: res.payload?.data?._id,
+              videoId: currentVideoID,
+            })
+          );
+
+          eventObj.target.reset();
+          setShowPlaylistDropdown(false);
+        }
+      })
+      .catch(() => toast.error("Failed to create playlist"));
   };
 
   const handleSavePlaylist = () => {
-    if (isAuthenticated) {
-      dispatch(getUserPlaylists());
-    } else {
+    if (!isAuthenticated) {
       loginPopupRef.current.open();
+      return;
     }
+    dispatch(getUserPlaylists(videoId));
+    setShowPlaylistDropdown((prev) => !prev);
   };
 
   const videoPlayerControlsOptions = {
@@ -249,7 +279,11 @@ const VideoDetails = () => {
                     Save
                   </button>
                   {isAuthenticated && (
-                    <div className="absolute top-full right-0 mt-2 w-64 bg-gray-900 rounded-lg shadow-lg p-4 z-10 hidden group-hover:block focus-within:block">
+                    <div
+                      className={`absolute top-full right-0 mt-2 w-64 bg-gray-900 rounded-lg shadow-lg p-4 z-10 transition-transform duration-200 ${
+                        showPlaylistDropdown ? "block" : "hidden"
+                      }`}
+                    >
                       <h2 className="text-lg font-semibold mb-4 text-center">
                         Save to playlist
                       </h2>
@@ -268,7 +302,7 @@ const VideoDetails = () => {
                                   onChange={(e) =>
                                     handlePlaylistVideo(
                                       item._id,
-                                      videoId,
+                                      currentVideoID,
                                       e.target.checked
                                     )
                                   }
@@ -289,9 +323,18 @@ const VideoDetails = () => {
                       <form onSubmit={createNewPlaylist} className="space-y-2">
                         <input
                           type="text"
-                          name="name"
+                          name="playlistName"
                           id="playlist-name"
                           placeholder="Enter playlist name..."
+                          required
+                          className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+
+                        <input
+                          type="text"
+                          name="playlistDescription"
+                          id="playlist-description"
+                          placeholder="Enter playlist description..."
                           required
                           className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
@@ -307,7 +350,7 @@ const VideoDetails = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* User profile */}
             <div className="w-full flex items-center">
               <UserProfile userId={video?.data?.owner?.username} />
