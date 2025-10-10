@@ -178,4 +178,4 @@ const PlaylistForm = ({ playlist }, ref) => {
   );
 };
 
-export default PlaylistForm;
+export default React.forwardRef(PlaylistForm);

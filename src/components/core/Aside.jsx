@@ -37,7 +37,7 @@ const Aside = () => {
     {
       name: "Playlists",
       icon: <ListVideo className="w-6 h-6" />,
-      route: "/playlists",
+      route: "/user/playlists",
     },
     {
       name: "Your Videos",

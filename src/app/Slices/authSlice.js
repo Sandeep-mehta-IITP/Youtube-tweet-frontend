@@ -17,11 +17,11 @@ export const loginUser = createAsyncThunk(
           "Content-Type": "application/json",
         },
       });
-       toast.success("Login successful! 🎉");
+      toast.success("Login successful! 🎉");
       // console.log("login data", response.data);
       // console.log("login", response.data.data);
       // console.log("login user", response.data.data.user);
-      
+
       return response.data?.data?.user;
     } catch (error) {
       console.log("Login failed:", error.userMessage);
@@ -50,13 +50,100 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/users/me", {});
-    //  console.log("curent user", response.data);
-    //  console.log("current user", response.data.data);
-     
-      
+      //  console.log("curent user", response.data);
+      //  console.log("current user", response.data.data);
+
       return response.data?.data;
     } catch (error) {
       console.log("CURRENT USER FETCHED FAILED:", error.userMessage);
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const changePaswword = createAsyncThunk(
+  "auth/changePassword",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        "/users/change-password",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success(
+        response.data.message || "Update password successfully !!!"
+      );
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO CHANGE PASSWORD", error.userMessage);
+      toast.error(error.userMessage || "Failed to change password.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        "/users/update-details",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      toast.success(response.data.message || "Profile updated successfully!!!");
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO UPDATE PROFILE", error.userMessage);
+      toast.error(error.userMessage || "Failed to update profile.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const updateAvatar = createAsyncThunk(
+  "user/updateAvatar",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/users/update-avatar`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success(response.data.message || "Avatar updated successfully!!!");
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO UPDATE AVATAR", error.userMessage);
+      toast.error(error.userMessage || "Failed to update avatar.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const updateCoverImage = createAsyncThunk(
+  "user/updateCoverImage",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(`/users/update-coverImage`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      toast.success(response.data.message || "CoverImage updated successfully!!!");
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO UPDATE COVERIMAGE", error.userMessage);
+      toast.error(error.userMessage || "Failed to update coverImage.");
       return rejectWithValue(error.userMessage);
     }
   }
@@ -104,19 +191,19 @@ const authSlice = createSlice({
     // Fetch current user
     builder.addCase(getCurrentUser.pending, (state) => {
       state.loading = true;
-    })
+    });
 
     builder.addCase(getCurrentUser.fulfilled, (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
       state.userData = action.payload;
-    })
+    });
 
     builder.addCase(getCurrentUser.rejected, (state) => {
       state.loading = false;
       state.isAuthenticated = false;
       state.userData = null;
-    })
+    });
   },
 });
 

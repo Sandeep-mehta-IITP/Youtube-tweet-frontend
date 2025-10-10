@@ -14,6 +14,8 @@ import FeedVideos from "./pages/FeedVideos";
 import GuestComponent from "./components/GuestPages/GuestComponent";
 import AuthLayout from "./components/auth/AuthLayout";
 import VideoDetails from "./pages/VideoDetails";
+import PlaylistVideos from "./components/Playlist/PlaylistVideos";
+import ChannelPlaylists from "./components/Playlist/ChannelPlaylists";
 
 function App() {
   const dispatch = useDispatch();
@@ -93,8 +95,12 @@ function App() {
           <Route path="" element={<FeedVideos />} />
           <Route path="support" element={<SupportPage />} />
           <Route path="guest" element={<GuestComponent />} />
+
+          {/* Playlists */}
+          <Route path="playlist/:playlistId" element={< PlaylistVideos />} />
         </Route>
 
+         <Route path="/user/playlists" element={<ChannelPlaylists owner={false} />} />
         
         <Route path="/watch/:videoId" element={<VideoDetails />} />
       </Routes>
