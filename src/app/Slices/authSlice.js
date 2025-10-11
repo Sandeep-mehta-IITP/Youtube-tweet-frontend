@@ -134,16 +134,105 @@ export const updateCoverImage = createAsyncThunk(
   "user/updateCoverImage",
   async ({ data }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.patch(`/users/update-coverImage`, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      toast.success(response.data.message || "CoverImage updated successfully!!!");
+      const response = await axiosInstance.patch(
+        `/users/update-coverImage`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      toast.success(
+        response.data.message || "CoverImage updated successfully!!!"
+      );
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO UPDATE COVERIMAGE", error.userMessage);
       toast.error(error.userMessage || "Failed to update coverImage.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const watchHistory = createAsyncThunk(
+  "user/watchHistory",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get("/users/history");
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO FETCHED WATCHHISTORY", error.userMessage);
+      toast.error(error.userMessage || "Failed to fetch watchHistory.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const clearWatchHistory = createAsyncThunk(
+  "user/clearWatchHistory",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete("/users/history");
+      toast.success(
+        response.data.data.message || "Watch history cleared successfully."
+      );
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO FETCHED WATCHHISTORY", error.userMessage);
+      toast.error(error.userMessage || "Failed to fetch watchHistory.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const addLink = createAsyncThunk(
+  "user/addLink",
+  async ({ formData }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        `/about/user/add/link`,
+        formData
+      );
+      toast.success(response.data.data.message || "Link added successfully.");
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO ADDED LINK", error.userMessage);
+      toast.error(error.userMessage || "Failed to added link.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const updateLink = createAsyncThunk(
+  "user/updateLink",
+  async ({ linkId, formData }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/about/user/u/link/${linkId}`,
+        formData
+      );
+      toast.success(response.data.data.message || "Link updated successfully.");
+    } catch (error) {
+      console.log("FAILED TO UPDATE LINK", error.userMessage);
+      toast.error(error.userMessage || "Failed to update link.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const removeLink = createAsyncThunk(
+  "user/removeLink",
+  async ({ linkId }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.delete(
+        `/about/user/remove/link/${linkId}`
+      );
+      toast.success(response.data.data.message || "Link removed successfully.");
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO REMOVE LINK", error.userMessage);
+      toast.error(error.userMessage || "Failed to remove link.");
       return rejectWithValue(error.userMessage);
     }
   }
@@ -200,6 +289,159 @@ const authSlice = createSlice({
     });
 
     builder.addCase(getCurrentUser.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // chnage password
+    builder.addCase(changePaswword.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(changePaswword.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(changePaswword.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // update profile
+    builder.addCase(updateProfile.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(updateProfile.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(updateProfile.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // update avatar
+    builder.addCase(updateAvatar.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(updateAvatar.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(updateAvatar.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // update cover image
+    builder.addCase(updateCoverImage.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(updateCoverImage.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(updateCoverImage.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // watch history
+    builder.addCase(watchHistory.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(watchHistory.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(watchHistory.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // clear watch history
+    builder.addCase(clearWatchHistory.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(clearWatchHistory.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(clearWatchHistory.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // add link
+    builder.addCase(addLink.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(addLink.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(addLink.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // update link
+    builder.addCase(updateLink.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(updateLink.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(updateLink.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // remove link
+    builder.addCase(removeLink.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(removeLink.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(removeLink.rejected, (state) => {
       state.loading = false;
       state.isAuthenticated = false;
       state.userData = null;
