@@ -12,7 +12,7 @@ export const getVideoComments = createAsyncThunk(
   "comment/getVideoComments",
   async (videoId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/comments/${videoId}`);
+      const response = await axiosInstance.get(`/comments/get/${videoId}`);
       return response.data;
     } catch (error) {
       console.log("FAILED TO FETCHED VIDEO COMMENTS", error.userMessage);
@@ -26,9 +26,10 @@ export const addComment = createAsyncThunk(
   "comment/addComment",
   async ({ videoId, content }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/comments/${videoId}`, {
+      const response = await axiosInstance.post(`/comments/add/${videoId}`, {
         content,
       });
+      toast.success(response.data.message || "Comment added successfully.")
       return response.data;
     } catch (error) {
       console.log("FAILED TO ADD COMMENT ON VIDEO", error.userMessage);

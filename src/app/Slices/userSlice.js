@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/API/axiosInstance";
 import { toast } from "react-toastify";
 
-
 const initialState = {
   userData: {},
   loading: false,
@@ -44,6 +43,19 @@ export const channelProfile = createAsyncThunk(
   }
 );
 
+export const getAboutChannel = createAsyncThunk(
+  "users/getAboutChannel",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(`/about/user/${userId}`);
+      return response.data.data;
+    } catch (error) {
+      console.log("FAILED TO FETCHED ABOUT CHANNEL", error.userMessage);
+      toast.error(error.userMessage || "Failed to fetched about channel.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
 
 const userSlice = createSlice({
   name: "user",
@@ -57,8 +69,8 @@ const userSlice = createSlice({
     builder.addCase(registerUser.fulfilled, (state, action) => {
       state.loading = false;
       state.userData = action.payload;
-      console.log(" register user in user slice",state.userData);
-      
+      console.log(" register user in user slice", state.userData);
+
       state.isAuthenticated = true;
     });
 
@@ -78,7 +90,7 @@ const userSlice = createSlice({
       state.loading = false;
       state.isAuthenticated = true;
       state.userData = action.payload;
-      console.log(" channel data in user slice",state.userData);
+      console.log(" channel data in user slice", state.userData);
     });
 
     builder.addCase(channelProfile.rejected, (state) => {
@@ -86,7 +98,22 @@ const userSlice = createSlice({
       state.isAuthenticated = false;
     });
 
-    //
+    // get about channel
+    builder.addCase(getAboutChannel.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(getAboutChannel.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+      console.log(" channel data in user slice", state.userData);
+    });
+
+    builder.addCase(getAboutChannel.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+    });
   },
 });
 

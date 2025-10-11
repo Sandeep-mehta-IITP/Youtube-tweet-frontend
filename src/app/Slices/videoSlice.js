@@ -103,6 +103,34 @@ export const togglePublishStatus = createAsyncThunk(
   }
 );
 
+// export const getVideo = createAsyncThunk(
+//   "video/getVideo",
+//   async (videoId, { rejectWithValue }) => {
+//     try {
+//       const response = await axiosInstance.get(`/videos/${videoId}`);
+//       return response.data.data;
+//     } catch (error) {
+//       console.log("FAILED TO FETCHED VIDEO", error.userMessage);
+//       toast.error(error.userMessage || "Failed to fetched video.");
+//       return rejectWithValue(error.userMessage);
+//     }
+//   }
+// );
+
+// export const getAllVideos = createAsyncThunk(
+//   "video/getAllVideos",
+//   async (userId, { rejectWithValue }) => {
+//     try {
+//       const response = await axiosInstance.get(`/videos?userId=${userId}`);
+//       return response.data.data;
+//     } catch (error) {
+//       console.log("FAILED TO FETCHED ALL VIDEOS", error.userMessage);
+//       toast.error(error.userMessage || "Failed to fetched all videos.");
+//       return rejectWithValue(error.userMessage);
+//     }
+//   }
+// );
+
 const videoSlice = createSlice({
   name: "video",
   initialState,

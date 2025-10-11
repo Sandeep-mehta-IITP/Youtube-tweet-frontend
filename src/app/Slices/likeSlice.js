@@ -41,7 +41,7 @@ export const toggleCommentLike = createAsyncThunk(
   "like/toggleCommentLike",
   async ({ commentId, toggleLike }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/likes/toggle/c/${commentId}`);
+      const response = await axiosInstance.post(`/likes/toggle/c/${commentId}?toggle=${toggleLike}`);
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO TOGGLE COMMENT LIKE", error.userMessage);
@@ -55,7 +55,7 @@ export const toggleTweetLike = createAsyncThunk(
   "like/toggleTweetLike",
   async ({ tweetId, toggleLike }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/likes/toggle/t/${tweetId}`);
+      const response = await axiosInstance.post(`/likes/toggle/t/${tweetId}?toggleLike=${toggleLike}`);
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO TOGGLE COMMENT LIKE", error.userMessage);
@@ -69,7 +69,7 @@ export const toggleVideoLike = createAsyncThunk(
   "like/toggleVideoLike",
   async ({ videoId, toggleLike }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/likes/toggle/v/${videoId}`);
+      const response = await axiosInstance.post(`/likes/toggle/v/${videoId}?toggleLike=${toggleLike}`);
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO TOGGLE COMMENT LIKE", error.userMessage);

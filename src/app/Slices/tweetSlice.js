@@ -22,11 +22,22 @@ export const getUserTweets = createAsyncThunk(
   }
 );
 
+export const getAllTweets = createAsyncThunk("tweet/getAllTweets", async(_, {rejectWithValue}) => {
+  try {
+    const response = await axiosInstance.get(`/tweets`);
+    return response.data.data
+  } catch (error) {
+     console.log("FAILED TO FETCHED ALL TWEETS", error.userMessage);
+      toast.error(error.userMessage || "Failed to fetched all tweets.");
+      return rejectWithValue(error.userMessage);
+  }
+})
+
 export const createTweet = createAsyncThunk(
   "tweet/createTweet",
   async ({ content }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post(`/tweets/`, content);
+      const response = await axiosInstance.post(`/tweets`, content);
       toast.success(response.data.message || "Tweet created successfully !!!");
       return response.data;
     } catch (error) {
@@ -83,6 +94,22 @@ const tweetSlice = createSlice({
     });
 
     builder.addCase(getUserTweets.rejected, (state) => {
+      state.loading = false;
+      state.status = false;
+    });
+
+    // get all tweets
+    builder.addCase(getAllTweets.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(getAllTweets.fulfilled, (state, action) => {
+      state.loading = false;
+      state.status = true;
+      state.data = action.payload;
+    });
+
+    builder.addCase(getAllTweets.rejected, (state) => {
       state.loading = false;
       state.status = false;
     });
