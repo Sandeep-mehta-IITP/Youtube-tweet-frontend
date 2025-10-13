@@ -7,31 +7,37 @@ import { Link } from "react-router-dom";
 import { formatCount } from "@/utils/helpers/formatFigure";
 import { CheckCircle, UserPlus } from "lucide-react";
 
-const UserProfile = ({ userId }) => {
+const UserProfile = ({ username }) => {
+  //console.log("UserId in UserProfile:", username);
+
   const loginPopupRef = useRef();
   const dispatch = useDispatch();
 
   const { userData, loading } = useSelector((state) => state.user);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
+  //console.log("UserData in UserProfile:", userData);
+
   const [localData, setLocalData] = useState("");
 
   useEffect(() => {
-    if (!userId) return;
+    if (!username) return;
 
-    dispatch(channelProfile(userId)).then((res) => setLocalData(res.payload));
-  }, [dispatch, userId]);
+    dispatch(channelProfile(username)).then((res) => setLocalData(res.payload));
+  }, [dispatch, username]);
 
   const subscripationToggleHandler = async (channelId) => {
     if (!isAuthenticated) return loginPopupRef.current.open();
 
     setLocalData((pre) => ({ ...pre, isSubscribed: !pre.isSubscribed }));
     dispatch(toggleSubscription(channelId)).then(() =>
-      dispatch(channelProfile(userId))
+      dispatch(channelProfile(username))
     );
   };
 
-  if ((!localData && loading) || !userId) {
+  //console.log("LocalData in UserProfile:", localData);
+
+  if ((!localData && loading) || !username) {
     return (
       <div className="mt-4 flex items-center justify-between">
         {/* Owner Data */}
@@ -61,7 +67,7 @@ const UserProfile = ({ userId }) => {
 
   let profileData = userData || localData;
 
-  // console.log("profileData in userProfile", profileData);
+  //console.log("profileData in userProfile", profileData);
   // console.log("channelId in userProfile", profileData?._id);
 
   // Something went wrong Profile...
@@ -71,7 +77,7 @@ const UserProfile = ({ userId }) => {
     );
 
   return (
-    <div className="w-full mt-4 flex overflow-hidden items-center justify-between mx-2 sm:mx-3">
+    <div className="w-full mt-4 flex overflow-hidden items-center justify-between mx-2 sm:mx-4">
       <LoginPopup ref={loginPopupRef} message="Sign in to subscribe..." />
       {/* Owner Data */}
       <div key="owner-data" className="flex items-center gap-x-4">
@@ -103,7 +109,7 @@ const UserProfile = ({ userId }) => {
       <div
         key="subscribe-btn"
         onClick={() => subscripationToggleHandler(profileData._id)}
-        className="block"
+        className="block mr-1 sm:mr-3"
       >
         <button
           className={`flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-3 rounded-full font-semibold text-sm transition-all duration-200

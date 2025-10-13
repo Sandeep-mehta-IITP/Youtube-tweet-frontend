@@ -1,53 +1,66 @@
-import {
-  deleteComment,
-  getVideoComments,
-  updateComment,
-} from "@/app/Slices/commentSlice";
+import { updateComment, deleteComment } from "@/app/Slices/commentSlice";
 import { formatTimestamp } from "@/utils/helpers/formatFigure";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import LikeComponent from "../core/LikeComponent";
-import { Heart } from "lucide-react";
 
-const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
-  const [isEditing, setIsEditng] = useState(false);
+const CommentLayout = ({
+  comment,
+  videoId,
+  ownerAvatar = "",
+  updateCommentLocally,
+  deleteCommentLocally,
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
   const [content, setContent] = useState(comment?.content);
   const inputRef = useRef();
   const dispatch = useDispatch();
 
-  console.log("comment in comment layout", comment);
-  
   useEffect(() => {
-    if (isEditing) {
-      inputRef.current.focus();
-    }
+    if (isEditing) inputRef.current.focus();
   }, [isEditing]);
 
-  const handleChancel = () => {
-    setIsEditng(false);
+  const handleCancel = () => {
+    setIsEditing(false);
     setContent(comment?.content);
   };
 
-  const handleEditing = () => {
-    setIsEditng(true);
-  };
+  const handleEditing = () => setIsEditing(true);
 
-  const handleUpdate = () => {
-    if (!content.trim()) {
-      toast.warn("Please enter some content.");
-      return;
+  const handleUpdate = async () => {
+    if (!content.trim()) return toast.warn("Please enter some content.");
+
+    try {
+      // Optimistic UI: update parent state immediately
+      updateCommentLocally({ ...comment, content });
+      setIsEditing(false);
+
+      // Dispatch backend update
+      await dispatch(
+        updateComment({ commentId: comment._id, content })
+      ).unwrap();
+    } catch (err) {
+      setContent(comment?.content); // revert on failure
+      updateCommentLocally(comment);
     }
-
-    dispatch(updateComment({ commentId: comment._id, data: { content } }));
-    setIsEditng(false);
   };
 
-  const handleDelete = () => {
-    useDispatch(deleteComment({ commentId: comment._id })).then(() => {
-      dispatch(getVideoComments(videoId));
-    });
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this comment?"))
+      return;
+
+    try {
+      // Optimistic UI: remove immediately
+      deleteCommentLocally(comment._id);
+
+      // Dispatch backend delete
+      await dispatch(deleteComment({ commentId: comment._id })).unwrap();
+    } catch (err) {
+      // Optionally, re-add the comment if deletion fails
+      updateCommentLocally(comment);
+    }
   };
 
   return (
@@ -64,18 +77,16 @@ const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
             />
           </Link>
         </div>
+
         {/* Content */}
         <div className="block w-full">
-          <p className="flex items-center text-gray-200 text-sm">
-            {comment.owner?.fullName}{" "}
-            <span className="text-xs">
-              {formatTimestamp(comment?.createdAt)}
-            </span>
-          </p>
-          <p className="text-xs text-gray-200">
+          <p className="flex items-center text-gray-200 gap-x-3 text-sm font-semibold">
             <Link to={`/user/${comment?.owner?.username}`}>
               @{comment?.owner?.username}
             </Link>
+            <span className="text-sm font-normal opacity-60 hover:opacity-100">
+              {formatTimestamp(comment?.createdAt)}
+            </span>
           </p>
 
           <p className="my-2 text-sm">
@@ -85,15 +96,13 @@ const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
               name="content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              disabled={!comment.owner || !isEditing}
+              disabled={!comment.isOwner || !isEditing}
               className="w-[72%] bg-transparent outline-none border-b-[1px] border-transparent enabled:border-blue-500 focus:border-blue-500"
             />
           </p>
 
           {/* Likes Component */}
-          <span
-            className={`flex items-center overflow-hidden rounded-lg max-w-fit h-fit text-xs relative`}
-          >
+          <span className="flex items-center overflow-hidden rounded-lg max-w-fit h-fit text-xs relative">
             <LikeComponent
               commentId={comment._id}
               isLiked={comment.isLiked}
@@ -102,7 +111,6 @@ const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
               totalDisLikes={comment.disLikesCount}
             />
 
-            {/* Likedby user detials */}
             {comment.isLikedByVideoOwner && (
               <div className="w-fit flex items-center justify-center border border-transparent rounded-lg ml-1 hover:border-slate-300">
                 <Link to={`/watch/${videoId}`}>
@@ -123,35 +131,27 @@ const CommentLayout = ({ comment, videoId, ownerAvatar = "" }) => {
 
       {/* Comment controls - only for owner */}
       {comment.isOwner && (
-        <form className="flex items-end">
-          <span className="flex justify-end">
-            {/* Delete and Cancel button */}
-            <button
-              type="button"
-              onClick={() => {
-                isEditing ? handleChancel : handleDelete;
-              }}
-              className={`pt-0 rounded-3xl bg-transparent hover:border hover:border-b-white disabled:cursor-not-allowed px-2 pb-1 mr-2 text-white text-sm font-semibold ${
-                isEditing
-                  ? "hover:bg-gray-600"
-                  : "hover: bg-red-500 hover:text-black"
-              }`}
-            >
-              {isEditing ? "Cancel" : "Delete"}
-            </button>
+        <div className="flex items-end">
+          <button
+            type="button"
+            onClick={isEditing ? handleCancel : handleDelete}
+            className={`pt-0 rounded-3xl bg-transparent hover:border hover:border-b-white px-2 pb-1 mr-2 text-white text-sm font-semibold ${
+              isEditing
+                ? "hover:bg-gray-600 hover:text-white"
+                : "hover:bg-red-500 hover:text-white"
+            }`}
+          >
+            {isEditing ? "Cancel" : "Delete"}
+          </button>
 
-            {/* Edit and Update button */}
-            <button
-              type="button"
-              onClick={() => {
-                isEditing ? handleUpdate : handleEditing;
-              }}
-              className={`pt-0 rounded-3xl bg-blue-400 disabled:bg-gray-700 disabled:text-white disabled:cursor-not-allowed hover:bg-blue-500 px-2 pb-1 text-black text-sm font-semibold border border-b-white`}
-            >
-              {isEditing ? "Update" : "Edit"}
-            </button>
-          </span>
-        </form>
+          <button
+            type="button"
+            onClick={isEditing ? handleUpdate : handleEditing}
+            className="pt-0 rounded-3xl bg-blue-400 hover:bg-blue-500 px-2 pb-1 text-black text-sm font-semibold hover:border hover:border-b-white"
+          >
+            {isEditing ? "Update" : "Edit"}
+          </button>
+        </div>
       )}
     </section>
   );

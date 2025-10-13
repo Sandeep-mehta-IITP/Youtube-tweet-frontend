@@ -33,27 +33,40 @@ const VideoDetails = () => {
   const playerRef = useRef(null);
 
   const { isAuthenticated } = useSelector(({ auth }) => auth);
-  const {
-    loading: playlistLoading,
-    status: playlistStatus,
-    data: playlists,
-  } = useSelector((state) => state.playlist);
+  const { loading: playlistLoading, data: playlists } = useSelector(
+    (state) => state.playlist
+  );
 
-  const { data: video, isLoading, error } = useGetVideoQuery(videoId);
-  const { data: allVideos, isLoading: allVideosLoading } =
-    useGetAllVideosQuery();
+  const {
+    data: video,
+    isLoading,
+    error,
+    refetch: refetchVideo,
+  } = useGetVideoQuery(videoId);
+
+  const { data: allVideos } = useGetAllVideosQuery();
 
   const currentVideoID = video?.data?._id;
+
   const suggestedVideos = allVideos?.data?.docs?.filter(
     (v) => v._id !== currentVideoID
   );
 
   const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
 
+  // Reset states and refetch video whenever videoId changes
   useEffect(() => {
     if (!videoId) return;
-    return () => dispatch(emptyVideoState());
-  }, [videoId, dispatch]);
+    dispatch(emptyVideoState());
+    setShowPlaylistDropdown(false);
+
+    if (refetchVideo) {
+      refetchVideo();
+    }
+
+    // Scroll to top for better UX
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [videoId, dispatch, refetchVideo]);
 
   const handlePlaylistVideo = (playlistId, currentVideoID, status) => {
     if (!playlistId) return;
@@ -64,39 +77,26 @@ const VideoDetails = () => {
     }
   };
 
-  
-  
-
   const createNewPlaylist = (eventObj) => {
     eventObj.preventDefault();
     const name = eventObj.target.playlistName.value;
     const description = eventObj.target.playlistDescription.value;
 
-    if (!name.trim()) {
-      return toast.error("Please enter the playlist name.");
-    }
-
-    if (!description.trim()) {
+    if (!name.trim()) return toast.error("Please enter the playlist name.");
+    if (!description.trim())
       return toast.error("Please enter the playlist description.");
-    }
+
     dispatch(createPlaylist({ data: { name, description } }))
       .then((res) => {
         if (res.meta.requestStatus === "fulfilled") {
-          if (!videoId) {
-            console.error("Video ID is missing");
+          if (!currentVideoID)
             return toast.error("No video selected to add to playlist.");
-          }
-          console.log("playlist id in videodetails", res.payload?.data?._id);
-          console.log("video id in videodetails", currentVideoID);
-          
-          
           dispatch(
             addVideoToPlaylist({
               playlistId: res.payload?.data?._id,
-              videoId: currentVideoID,
+              currentVideoID,
             })
           );
-
           eventObj.target.reset();
           setShowPlaylistDropdown(false);
         }
@@ -109,7 +109,7 @@ const VideoDetails = () => {
       loginPopupRef.current.open();
       return;
     }
-    dispatch(getUserPlaylists(videoId));
+    dispatch(getUserPlaylists(currentVideoID));
     setShowPlaylistDropdown((prev) => !prev);
   };
 
@@ -143,7 +143,7 @@ const VideoDetails = () => {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || !video) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -190,55 +190,11 @@ const VideoDetails = () => {
     );
   }
 
-  if (!video) {
-    return (
-      <div className="max-w-[1280px] mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="w-full aspect-video bg-gray-800 rounded-lg"></div>
-            <div className="space-y-3">
-              <div className="h-8 w-3/4 bg-gray-700 rounded"></div>
-              <div className="h-4 w-1/2 bg-gray-700 rounded"></div>
-              <div className="h-4 w-1/3 bg-gray-700 rounded"></div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gray-700"></div>
-              <div className="space-y-2">
-                <div className="h-4 w-24 bg-gray-700 rounded"></div>
-                <div className="h-3 w-16 bg-gray-700 rounded"></div>
-              </div>
-            </div>
-            <div className="space-y-4 mt-6">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-700"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 w-3/4 bg-gray-700 rounded"></div>
-                    <div className="h-3 w-1/2 bg-gray-700 rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="lg:col-span-1 space-y-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex gap-3 animate-pulse">
-                <div className="w-40 h-24 bg-gray-800 rounded-lg"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 bg-gray-700 rounded"></div>
-                  <div className="h-3 w-1/2 bg-gray-700 rounded"></div>
-                  <div className="h-3 w-1/3 bg-gray-700 rounded"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <section className="w-full mx-auto px-4 py-6 bg-[#0f0f0f] text-white">
+    <section
+      key={videoId}
+      className="w-full mx-auto px-4 py-6 bg-[#0f0f0f] text-white"
+    >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Video Player */}
@@ -252,7 +208,6 @@ const VideoDetails = () => {
           {/* Video Metadata */}
           <div className="space-y-4">
             <h1 className="text-2xl font-bold">{video?.data?.title}</h1>
-
             <div className="flex items-center justify-between flex-wrap gap-4">
               <p className="items-start text-sm text-gray-400">
                 {video?.data?.views} views •{" "}
@@ -324,16 +279,13 @@ const VideoDetails = () => {
                         <input
                           type="text"
                           name="playlistName"
-                          id="playlist-name"
                           placeholder="Enter playlist name..."
                           required
                           className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-
                         <input
                           type="text"
                           name="playlistDescription"
-                          id="playlist-description"
                           placeholder="Enter playlist description..."
                           required
                           className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -353,7 +305,7 @@ const VideoDetails = () => {
 
             {/* User profile */}
             <div className="w-full flex items-center">
-              <UserProfile userId={video?.data?.owner?.username} />
+              <UserProfile username={video?.data?.owner?.username} />
             </div>
 
             {/* Description */}
@@ -365,6 +317,7 @@ const VideoDetails = () => {
 
             {/* Comments */}
             <Comments
+              key={videoId} // ensures comments refresh for new video
               videoId={video?.data?._id}
               ownerAvatar={video?.data?.owner?.avatar?.url}
             />
@@ -373,31 +326,31 @@ const VideoDetails = () => {
 
         {/* Suggested Videos */}
         <div className="lg:col-span-1 space-y-4">
-          {suggestedVideos?.map((video) => (
+          {suggestedVideos?.map((v) => (
             <div
-              key={video._id}
+              key={v._id}
               className="flex gap-3 cursor-pointer hover:bg-gray-800 rounded-lg p-2"
-              onClick={() => navigate(`/watch/${video._id}`)}
+              onClick={() => navigate(`/watch/${v._id}`)}
             >
               <div className="w-40 h-24 relative flex-shrink-0">
                 <img
-                  src={video.thumbnail?.url}
-                  alt={video.title}
+                  src={v.thumbnail?.url}
+                  alt={v.title}
                   className="w-full h-full object-cover rounded-lg"
                 />
                 <span className="absolute bottom-1 right-1 bg-black bg-opacity-75 px-1.5 py-0.5 text-xs text-white rounded">
-                  {formatVideoDuration(video.duration) || "00:00"}
+                  {formatVideoDuration(v.duration) || "00:00"}
                 </span>
               </div>
               <div className="flex-1">
                 <h6 className="text-sm font-semibold line-clamp-2">
-                  {video.title}
+                  {v.title}
                 </h6>
                 <p className="text-xs text-gray-400 mt-1">
-                  {video?.ownerDetails?.username}
+                  {v?.ownerDetails?.username}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {video.views} views • {formatTimestamp(video.createdAt)}
+                  {v.views} views • {formatTimestamp(v.createdAt)}
                 </p>
               </div>
             </div>

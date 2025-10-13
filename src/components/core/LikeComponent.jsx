@@ -15,23 +15,21 @@ const LikeComponent = ({
   tweetId,
   isLiked = false,
   totalLikes = 0,
-  isDisliked = false,
-  totalDislikes = 0,
+  isDisLiked = false,
+  totalDisLikes = 0,
 }) => {
   const dispatch = useDispatch();
   const loginPopupRef = useRef();
   const { isAuthenticated } = useSelector(({ auth }) => auth);
+
   const [isLoading, setIsLoading] = useState(false);
   const [localLikes, setLocalLikes] = useState(totalLikes);
-  const [localDislikes, setLocalDislikes] = useState(totalDislikes);
+  const [localDislikes, setLocalDislikes] = useState(totalDisLikes);
   const [localIsLiked, setLocalIsLiked] = useState(isLiked);
-  const [localIsDisliked, setLocalIsDisliked] = useState(isDisliked);
+  const [localIsDisliked, setLocalIsDisliked] = useState(isDisLiked);
 
   const handleToggleLike = async (likeStatus) => {
-    if (!isAuthenticated) {
-      loginPopupRef.current.open();
-      return;
-    }
+    if (!isAuthenticated) return loginPopupRef.current.open();
 
     if (!videoId && !commentId && !tweetId) {
       toast.error("Invalid action: No resource ID provided.");
@@ -39,58 +37,70 @@ const LikeComponent = ({
     }
 
     setIsLoading(true);
-    // Optimistically update local state for immediate feedback
+
+    // Optimistic UI update
+    let newIsLiked = localIsLiked;
+    let newIsDisliked = localIsDisliked;
+    let newLikes = localLikes;
+    let newDislikes = localDislikes;
+
     if (likeStatus) {
-      if (localIsDisliked) {
-        setLocalIsDisliked(false);
-        setLocalDislikes((prev) => prev - 1);
-        setLocalIsLiked(true);
-        setLocalLikes((prev) => prev + 1);
-      } else if (localIsLiked) {
-        setLocalIsLiked(false);
-        setLocalLikes((prev) => prev - 1);
+      // User clicked LIKE
+      if (localIsLiked) {
+        newIsLiked = false;
+        newLikes--;
       } else {
-        setLocalIsLiked(true);
-        setLocalLikes((prev) => prev + 1);
+        newIsLiked = true;
+        newLikes++;
+        if (localIsDisliked) {
+          newIsDisliked = false;
+          newDislikes--;
+        }
       }
     } else {
-      if (localIsLiked) {
-        setLocalIsLiked(false);
-        setLocalLikes((prev) => prev - 1);
-        setLocalIsDisliked(true);
-        setLocalDislikes((prev) => prev + 1);
-      } else if (localIsDisliked) {
-        setLocalIsDisliked(false);
-        setLocalDislikes((prev) => prev - 1);
+      // User clicked DISLIKE
+      if (localIsDisliked) {
+        newIsDisliked = false;
+        newDislikes--;
       } else {
-        setLocalIsDisliked(true);
-        setLocalDislikes((prev) => prev + 1);
+        newIsDisliked = true;
+        newDislikes++;
+        if (localIsLiked) {
+          newIsLiked = false;
+          newLikes--;
+        }
       }
     }
 
+    // Apply optimistic changes
+    setLocalIsLiked(newIsLiked);
+    setLocalIsDisliked(newIsDisliked);
+    setLocalLikes(newLikes);
+    setLocalDislikes(newDislikes);
+
     try {
       let action;
-      if (videoId) {
+      if (videoId)
         action = toggleVideoLike({ videoId, toggleLike: likeStatus });
-      } else if (commentId) {
+      else if (commentId)
         action = toggleCommentLike({ commentId, toggleLike: likeStatus });
-      } else if (tweetId) {
+      else if (tweetId)
         action = toggleTweetLike({ tweetId, toggleLike: likeStatus });
-      }
 
-      await dispatch(action).unwrap();
-      // If the API returns updated counts, you can update local state here
-      // For now, rely on parent component to pass updated props
-    } catch (error) {
-      // Revert optimistic updates on error
+      const response = await dispatch(action).unwrap();
+
+      // Sync UI with backend (authoritative counts)
+      setLocalLikes(response.totalLikes);
+      setLocalDislikes(response.totalDisLikes);
+      setLocalIsLiked(response.isLiked);
+      setLocalIsDisliked(response.isDisLiked);
+    } catch (err) {
+      // Revert optimistic UI if failed
       setLocalIsLiked(isLiked);
+      setLocalIsDisliked(isDisLiked);
       setLocalLikes(totalLikes);
-      setLocalIsDisliked(isDisliked);
-      setLocalDislikes(totalDislikes);
-      toast.error(
-        error.message || "Failed to update like status. Please try again."
-      );
-      console.error("Like toggle error:", error);
+      setLocalDislikes(totalDisLikes);
+      toast.error(err.message || "Failed to update like status.");
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +122,7 @@ const LikeComponent = ({
               : "like this tweet"
         }...`}
       />
+
       {/* Like Button */}
       <button
         onClick={() => handleToggleLike(true)}
@@ -129,6 +140,7 @@ const LikeComponent = ({
         )}
         <span className="text-xs">{localLikes}</span>
       </button>
+
       {/* Dislike Button */}
       <button
         onClick={() => handleToggleLike(false)}

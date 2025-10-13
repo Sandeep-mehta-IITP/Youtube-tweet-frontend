@@ -10,7 +10,7 @@ const initialState = {
 
 export const getVideoComments = createAsyncThunk(
   "comment/getVideoComments",
-  async (videoId, { rejectWithValue }) => {
+  async ( videoId , { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/comments/get/${videoId}`);
       return response.data;
@@ -29,7 +29,7 @@ export const addComment = createAsyncThunk(
       const response = await axiosInstance.post(`/comments/add/${videoId}`, {
         content,
       });
-      toast.success(response.data.message || "Comment added successfully.")
+      toast.success(response.data.message || "Comment added successfully.");
       return response.data;
     } catch (error) {
       console.log("FAILED TO ADD COMMENT ON VIDEO", error.userMessage);
@@ -42,9 +42,12 @@ export const addComment = createAsyncThunk(
 export const updateComment = createAsyncThunk(
   "comment/updateComment",
   async ({ commentId, content }, { rejectWithValue }) => {
+
+    console.log("content in update comment slice", content);
+    
     try {
       const response = await axiosInstance.patch(`/comments/c/${commentId}`, {
-        content,
+        content
       });
       toast.success(
         response?.data?.data?.message || "Update comment successfully !!!"
@@ -60,7 +63,7 @@ export const updateComment = createAsyncThunk(
 
 export const deleteComment = createAsyncThunk(
   "comment/deleteComment",
-  async (commentId, { rejectWithValue }) => {
+  async ({ commentId }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.delete(`/comments/c/${commentId}`);
       toast.success(
