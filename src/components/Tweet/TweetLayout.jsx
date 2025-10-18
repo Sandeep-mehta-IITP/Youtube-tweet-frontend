@@ -1,4 +1,4 @@
-import { updateComment, deleteComment } from "@/app/Slices/commentSlice";
+import { deleteTweet, updateTweet } from "@/app/Slices/tweetSlice";
 import { formatTimestamp } from "@/utils/helpers/formatFigure";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -6,17 +6,12 @@ import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import LikeComponent from "../core/LikeComponent";
 
-const CommentLayout = ({
-  comment,
-  videoId,
-  ownerAvatar = "",
-  updateCommentLocally,
-  deleteCommentLocally,
-}) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState(comment?.content || "");
-  const textareaRef = useRef();
+const TweetLayout = ({ tweet, owner, authStatus }) => {
   const dispatch = useDispatch();
+  const textareaRef = useRef();
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState(tweet?.content);
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -28,7 +23,7 @@ const CommentLayout = ({
 
   const handleCancel = () => {
     setIsEditing(false);
-    setContent(comment?.content || "");
+    setContent(tweet?.content || "");
   };
 
   const handleEditing = () => setIsEditing(true);
@@ -37,52 +32,44 @@ const CommentLayout = ({
     if (!content.trim()) {
       toast.warn("Please enter some content.");
       return;
+    } else if (content.trim()?.length < 20) {
+      toast.error("Minimum 20 characters are required");
+      return;
+    } else if (content.trim()?.length > 700) {
+      toast.error("Maximum 700 characters are allowed");
+      return;
     }
 
     try {
-      // Optimistic UI: update parent state immediately
-      updateCommentLocally({ ...comment, content });
+      await dispatch(updateTweet({ tweetId: tweet?._id, content })).unwrap();
       setIsEditing(false);
-
-      // Dispatch backend update
-      await dispatch(
-        updateComment({ commentId: comment._id, content })
-      ).unwrap();
-    } catch (err) {
-      console.log(err);
-
-      setContent(comment?.content || "");
-      updateCommentLocally(comment);
+    } catch (error) {
+      console.log(error);
+      setIsEditing(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this comment?"))
+    if (!window.confirm("Are you sure you want to delete this tweet?")) {
       return;
+    }
 
     try {
-      // Optimistic UI: remove immediately
-      deleteCommentLocally(comment._id);
-
-      // Dispatch backend delete
-      await dispatch(deleteComment({ commentId: comment._id })).unwrap();
-    } catch (err) {
-      console.log(err);
-
-      updateCommentLocally(comment);
+      await dispatch(deleteTweet({ tweetId: tweet?._id })).unwrap();
+    } catch (error) {
+      console.log(error);
     }
   };
-
   return (
     <section className="flex flex-col sm:flex-row justify-between gap-4">
-      {/* Comment content */}
+      {/* Tweet content */}
       <div className="flex w-full gap-3 sm:gap-4">
         {/* Avatar */}
         <div className="mt-2 w-10 h-10 sm:w-12 sm:h-12 shrink-0">
-          <Link to={`/user/${comment?.owner?.username}`}>
+          <Link to={`/user/${tweet?.owner?.username}`}>
             <img
-              src={comment?.owner?.avatar || "/default-avatar.png"}
-              alt={`${comment?.owner?.username}'s avatar`}
+              src={tweet?.owner?.avatar || "/default-avatar.png"}
+              alt={`${tweet?.owner?.username}'s avatar`}
               className="w-full h-full object-cover rounded-full border border-gray-200 dark:border-gray-700"
             />
           </Link>
@@ -92,13 +79,13 @@ const CommentLayout = ({
         <div className="flex-1">
           <div className="flex items-center gap-2 sm:gap-3 text-sm">
             <Link
-              to={`/user/${comment?.owner?.username}`}
+              to={`/user/${tweet?.owner?.username}`}
               className="text-gray-900 dark:text-white font-semibold hover:underline"
             >
-              @{comment?.owner?.username}
+              @{tweet?.owner?.username}
             </Link>
             <span className="text-gray-500 dark:text-gray-400 text-xs">
-              {formatTimestamp(comment?.createdAt)}
+              {formatTimestamp(tweet?.createdAt)}
             </span>
           </div>
 
@@ -114,43 +101,31 @@ const CommentLayout = ({
                   el.style.height = "auto";
                   el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
                 }}
-                disabled={!comment.isOwner}
-                placeholder="Edit your comment..."
+                disabled={!tweet.isOwner}
+                placeholder="Edit your tweet..."
                 className="w-full resize-none bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-blue-500 outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors py-1"
-                aria-label="Edit comment"
+                aria-label="Edit tweet"
               />
             ) : (
-              <p>{comment?.content}</p>
+              <p>{tweet?.content}</p>
             )}
           </div>
 
           {/* Likes Component */}
           <div className="flex items-center gap-2">
             <LikeComponent
-              commentId={comment._id}
-              isLiked={comment.isLiked}
-              totalLikes={comment.likesCount}
-              isDisLiked={comment.isDisLiked}
-              totalDisLikes={comment.disLikesCount}
+              commentId={tweet?._id}
+              isLiked={tweet?.isLiked}
+              totalLikes={tweet?.likesCount}
+              isDisLiked={tweet?.isDisLiked}
+              totalDisLikes={tweet?.disLikesCount}
             />
-            {comment.isLikedByVideoOwner && (
-              <div className="relative flex items-center justify-center">
-                <Link to={`/watch/${videoId}`}>
-                  <img
-                    src={ownerAvatar || "/default-avatar.png"}
-                    alt="Video owner's avatar"
-                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-gray-200 dark:border-gray-700"
-                  />
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-red-600 rounded-full border border-white dark:border-gray-800" />
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
       {/* Comment controls - only for owner */}
-      {comment.isOwner && (
+      {tweet?.isOwner && (
         <div className="flex items-center sm:items-end gap-2 sm:gap-3">
           <button
             type="button"
@@ -178,4 +153,4 @@ const CommentLayout = ({
   );
 };
 
-export default CommentLayout;
+export default TweetLayout;

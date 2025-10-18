@@ -1,4 +1,4 @@
-import { FileVideo, ShoppingCart } from "lucide-react";
+import { FileVideo } from "lucide-react";
 import React from "react";
 
 const EmptyPlaylist = ({ playlistVideos = false }) => {

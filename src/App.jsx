@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import SignupPage from "./pages/SignupPage";
-import { Bounce, ToastContainer, toast } from "react-toastify";
+import { Bounce, ToastContainer } from "react-toastify";
 import LoginPage from "./pages/LoginPage";
 
 import Feed from "./components/Layout/Feed";
@@ -16,6 +16,9 @@ import AuthLayout from "./components/auth/AuthLayout";
 import VideoDetails from "./pages/VideoDetails";
 import PlaylistVideos from "./components/Playlist/PlaylistVideos";
 import ChannelPlaylists from "./components/Playlist/ChannelPlaylists";
+import EmptyTweet from "./components/Tweet/EmptyTweet";
+import TweetLayout from "./components/Tweet/TweetLayout";
+import ChannelTweets from "./components/Tweet/ChannelTweets";
 
 function App() {
   const dispatch = useDispatch();
@@ -103,6 +106,8 @@ function App() {
          <Route path="/user/playlists" element={<ChannelPlaylists owner={false} />} />
         
         <Route path="/watch/:videoId" element={<VideoDetails />} />
+
+        <Route path="/empty/tweet" element={<ChannelTweets />} />
       </Routes>
     </div>
   );
