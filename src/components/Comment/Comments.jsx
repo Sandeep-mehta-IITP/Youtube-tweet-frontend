@@ -85,7 +85,10 @@ const Comments = ({ videoId, ownerAvatar }) => {
   }
 
   return (
-    <div className="relative max-w-full mx-auto bg-white dark:bg-[#121212] transition-colors duration-300">
+    <div
+      key={videoId}
+      className="relative max-w-full mx-auto bg-white dark:bg-[#121212] transition-colors duration-300"
+    >
       {/* Mobile Header */}
       <div className="sm:hidden flex items-center justify-between p-4 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
         <h6 className="text-lg font-semibold text-gray-900 dark:text-white">

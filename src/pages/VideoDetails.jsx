@@ -19,7 +19,7 @@ import {
   formatVideoDuration,
 } from "@/utils/helpers/formatFigure";
 import { Check, FolderPlus, MessageCircle } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -42,27 +42,34 @@ const VideoDetails = () => {
     isLoading,
     error,
     refetch: refetchVideo,
-  } = useGetVideoQuery(videoId);
+  } = useGetVideoQuery(videoId, {
+    refetchOnMountOrArgChange: true, // Force refetch when videoId changes
+  });
 
   const { data: allVideos } = useGetAllVideosQuery();
 
   const currentVideoID = video?.data?._id || "";
-  const suggestedVideos =
-    allVideos?.data?.docs?.filter((v) => v._id !== currentVideoID) || [];
+  const suggestedVideos = useMemo(
+    () => allVideos?.data?.docs?.filter((v) => v._id !== currentVideoID) || [],
+    [allVideos, currentVideoID]
+  );
 
   const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
-  // Reset states and refetch video whenever videoId changes
+  // Reset states and refetch data when videoId changes
   useEffect(() => {
     if (!videoId) return;
+
+    // Clear Redux video state
     dispatch(emptyVideoState());
+
+    // Reset local states
     setShowPlaylistDropdown(false);
     setShowComments(false);
 
-    if (refetchVideo) {
-      refetchVideo();
-    }
+    // Force refetch video data
+    refetchVideo();
 
     // Scroll to top for better UX
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -223,8 +230,11 @@ const VideoDetails = () => {
   }
 
   return (
-    <section className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 bg-white dark:bg-[#121212] transition-colors duration-300">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <section
+      key={videoId}
+      className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 bg-white dark:bg-[#121212] transition-colors duration-300"
+    >
+      <div key={videoId} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* Video Player */}
           <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg">
@@ -291,7 +301,7 @@ const VideoDetails = () => {
                                   type="checkbox"
                                   className="hidden peer"
                                   id={`playlist-${item._id}`}
-                                  defaultChecked={item.isVideoPresent}
+                                  checked={item.isVideoPresent} // Use checked instead of defaultChecked
                                   onChange={(e) =>
                                     handlePlaylistVideo(
                                       item._id,
