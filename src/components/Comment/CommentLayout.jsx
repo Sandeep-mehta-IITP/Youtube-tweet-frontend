@@ -14,23 +14,30 @@ const CommentLayout = ({
   deleteCommentLocally,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState(comment?.content);
-  const inputRef = useRef();
+  const [content, setContent] = useState(comment?.content || "");
+  const textareaRef = useRef();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isEditing) inputRef.current.focus();
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus();
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
   }, [isEditing]);
 
   const handleCancel = () => {
     setIsEditing(false);
-    setContent(comment?.content);
+    setContent(comment?.content || "");
   };
 
   const handleEditing = () => setIsEditing(true);
 
   const handleUpdate = async () => {
-    if (!content.trim()) return toast.warn("Please enter some content.");
+    if (!content.trim()) {
+      toast.warn("Please enter some content.");
+      return;
+    }
 
     try {
       // Optimistic UI: update parent state immediately
@@ -41,8 +48,12 @@ const CommentLayout = ({
       await dispatch(
         updateComment({ commentId: comment._id, content })
       ).unwrap();
+      toast.success("Comment updated successfully");
     } catch (err) {
-      setContent(comment?.content); // revert on failure
+      toast.error("Failed to update comment");
+      console.log(err);
+      
+      setContent(comment?.content || "");
       updateCommentLocally(comment);
     }
   };
@@ -57,52 +68,68 @@ const CommentLayout = ({
 
       // Dispatch backend delete
       await dispatch(deleteComment({ commentId: comment._id })).unwrap();
+      toast.success("Comment deleted successfully");
     } catch (err) {
-      // Optionally, re-add the comment if deletion fails
+      toast.error("Failed to delete comment");
+      console.log(err);
+      
       updateCommentLocally(comment);
     }
   };
 
   return (
-    <section className="flex justify-between">
+    <section className="flex flex-col sm:flex-row justify-between gap-4">
       {/* Comment content */}
-      <span className="flex w-full gap-x-5">
+      <div className="flex w-full gap-3 sm:gap-4">
         {/* Avatar */}
-        <div className="mt-2 w-11 h-11 shrink-0 border-white">
+        <div className="mt-2 w-10 h-10 sm:w-12 sm:h-12 shrink-0">
           <Link to={`/user/${comment?.owner?.username}`}>
             <img
-              src={comment?.owner?.avatar}
-              alt={comment?.owner?.username}
-              className="w-full h-full object-cover rounded-full"
+              src={comment?.owner?.avatar || "/default-avatar.png"}
+              alt={`${comment?.owner?.username}'s avatar`}
+              className="w-full h-full object-cover rounded-full border border-gray-200 dark:border-gray-700"
             />
           </Link>
         </div>
 
         {/* Content */}
-        <div className="block w-full">
-          <p className="flex items-center text-gray-200 gap-x-3 text-sm font-semibold">
-            <Link to={`/user/${comment?.owner?.username}`}>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 sm:gap-3 text-sm">
+            <Link
+              to={`/user/${comment?.owner?.username}`}
+              className="text-gray-900 dark:text-white font-semibold hover:underline"
+            >
               @{comment?.owner?.username}
             </Link>
-            <span className="text-sm font-normal opacity-60 hover:opacity-100">
+            <span className="text-gray-500 dark:text-gray-400 text-xs">
               {formatTimestamp(comment?.createdAt)}
             </span>
-          </p>
+          </div>
 
-          <p className="my-2 text-sm">
-            <input
-              type="text"
-              ref={inputRef}
-              name="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              disabled={!comment.isOwner || !isEditing}
-              className="w-[72%] bg-transparent outline-none border-b-[1px] border-transparent enabled:border-blue-500 focus:border-blue-500"
-            />
-          </p>
+          <div className="my-2 text-sm text-gray-900 dark:text-white">
+            {isEditing ? (
+              <textarea
+                ref={textareaRef}
+                name="content"
+                value={content}
+                onChange={(e) => {
+                  setContent(e.target.value);
+                  const el = textareaRef.current;
+                  el.style.height = "auto";
+                  el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+                }}
+                disabled={!comment.isOwner}
+                placeholder="Edit your comment..."
+                className="w-full resize-none bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-blue-500 outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors py-1"
+                aria-label="Edit comment"
+              />
+            ) : (
+              <p>{comment?.content}</p>
+            )}
+          </div>
 
           {/* Likes Component */}
-          <span className="flex items-center overflow-hidden rounded-lg max-w-fit h-fit text-xs relative">
+          <div className="flex items-center gap-2">
             <LikeComponent
               commentId={comment._id}
               isLiked={comment.isLiked}
@@ -110,44 +137,42 @@ const CommentLayout = ({
               isDisLiked={comment.isDisLiked}
               totalDisLikes={comment.disLikesCount}
             />
-
             {comment.isLikedByVideoOwner && (
-              <div className="w-fit flex items-center justify-center border border-transparent rounded-lg ml-1 hover:border-slate-300">
+              <div className="relative flex items-center justify-center">
                 <Link to={`/watch/${videoId}`}>
                   <img
-                    src={ownerAvatar}
-                    alt={ownerAvatar}
-                    className="w-8 h-8 rounded-full"
+                    src={ownerAvatar || "/default-avatar.png"}
+                    alt="Video owner's avatar"
+                    className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-gray-200 dark:border-gray-700"
                   />
-                  <span className="inline-block w-4 absolute bottom-0 right-0">
-                    <Heart className="w-3 h-3 fill-red-600" />
-                  </span>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-red-600 rounded-full border border-white dark:border-gray-800" />
                 </Link>
               </div>
             )}
-          </span>
+          </div>
         </div>
-      </span>
+      </div>
 
       {/* Comment controls - only for owner */}
       {comment.isOwner && (
-        <div className="flex items-end">
+        <div className="flex items-center sm:items-end gap-2 sm:gap-3">
           <button
             type="button"
             onClick={isEditing ? handleCancel : handleDelete}
-            className={`pt-0 rounded-3xl bg-transparent hover:border hover:border-b-white px-2 pb-1 mr-2 text-white text-sm font-semibold ${
+            className={`px-3 py-1.5 rounded-full text-sm font-medium transition transform active:scale-95 ${
               isEditing
-                ? "hover:bg-gray-600 hover:text-white"
-                : "hover:bg-red-500 hover:text-white"
+                ? "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                : "text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20"
             }`}
+            aria-label={isEditing ? "Cancel editing" : "Delete comment"}
           >
             {isEditing ? "Cancel" : "Delete"}
           </button>
-
           <button
             type="button"
             onClick={isEditing ? handleUpdate : handleEditing}
-            className="pt-0 rounded-3xl bg-blue-400 hover:bg-blue-500 px-2 pb-1 text-black text-sm font-semibold hover:border hover:border-b-white"
+            className="px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition transform active:scale-95"
+            aria-label={isEditing ? "Update comment" : "Edit comment"}
           >
             {isEditing ? "Update" : "Edit"}
           </button>

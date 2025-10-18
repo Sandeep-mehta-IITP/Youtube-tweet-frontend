@@ -47,6 +47,7 @@ const Comments = ({ videoId, ownerAvatar }) => {
       );
     } catch (err) {
       toast.error("Failed to add comment");
+      console.log("comments err", err);
       setComments((prev) => prev.filter((c) => c._id !== tempComment._id));
     }
   };
@@ -66,16 +67,16 @@ const Comments = ({ videoId, ownerAvatar }) => {
   // Show loading skeleton if comments not loaded yet
   if (!comments) {
     return (
-      <div className="p-4 animate-pulse">
-        <div className="h-6 w-32 bg-gray-400 mb-2 rounded"></div>
+      <div className="p-4 animate-pulse space-y-4">
+        <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
         {Array(3)
           .fill()
           .map((_, i) => (
-            <div key={i} className="flex gap-3 items-start mb-2">
-              <div className="h-12 w-12 bg-gray-400 rounded-full" />
+            <div key={i} className="flex gap-3">
+              <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 w-3/4 bg-gray-400 rounded"></div>
-                <div className="h-3 w-1/2 bg-gray-400 rounded"></div>
+                <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
             </div>
           ))}
@@ -84,22 +85,35 @@ const Comments = ({ videoId, ownerAvatar }) => {
   }
 
   return (
-    <div className="fixed inset-0 top-16 z-50 overflow-auto rounded-lg border bg-[#121212] p-4 sm:static sm:max-h-[500px] lg:max-h-none">
-
-      <LoginPopup
-        ref={loginPopupRef}
-        message="Sign in to comment on this video..."
-      />
-
-      {/* Add comment */}
-      <div className="mb-4">
-        <h6 className="mb-4 text-lg text-[#f6f5f6] font-semibold">
+    <div className="relative max-w-full mx-auto bg-white dark:bg-[#121212] transition-colors duration-300">
+      {/* Mobile Header */}
+      <div className="sm:hidden flex items-center justify-between p-4 bg-white dark:bg-[#121212] border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
+        <h6 className="text-lg font-semibold text-gray-900 dark:text-white">
           {comments.length} Comment{comments.length !== 1 && "s"}
         </h6>
+        <button
+          className="text-gray-900 dark:text-white text-lg hover:text-gray-600 dark:hover:text-gray-300 transition"
+          onClick={() => window.history.back()}
+          aria-label="Close comments"
+        >
+          ✕
+        </button>
+      </div>
 
+      {/* Comment Input Section */}
+      <div className="p-4 sm:p-6">
+        <LoginPopup
+          ref={loginPopupRef}
+          message="Sign in to comment on this video..."
+        />
+        <div className="sm:block hidden mb-6">
+          <h6 className="text-xl font-semibold text-gray-900 dark:text-white">
+            {comments.length} Comment{comments.length !== 1 && "s"}
+          </h6>
+        </div>
         <form
           onSubmit={addCommentHandler}
-          className="w-full flex flex-col gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 transition"
+          className="w-full flex flex-col gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1f1f1f] p-4 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 transition-all duration-200"
         >
           <textarea
             ref={inputRef}
@@ -110,27 +124,30 @@ const Comments = ({ videoId, ownerAvatar }) => {
               setContent(e.target.value);
               const el = inputRef.current;
               el.style.height = "auto";
-              el.style.height = `${el.scrollHeight}px`;
+              el.style.height = `${Math.min(el.scrollHeight, 120)}px`; // Limit max height
             }}
             rows={1}
             placeholder="Add a comment..."
-            className="flex-1 resize-none overflow-hidden bg-transparent placeholder-gray-700 text-gray-950 px-3 py-2 rounded-lg focus:outline-none focus:ring-0 text-sm font-semibold"
+            className="w-full resize-none overflow-hidden bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white px-3 py-2 rounded-lg focus:outline-none text-sm font-medium transition-colors"
+            aria-label="Comment input"
           />
           {content.trim().length > 0 && (
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => {
                   setContent("");
                   inputRef.current.style.height = "44px";
                 }}
-                className="rounded-full px-4 py-1 text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
+                className="rounded-full px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                aria-label="Cancel comment"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded-full bg-blue-600 px-4 py-1 text-sm font-medium text-white shadow-sm hover:bg-blue-700 active:scale-95 transition"
+                className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 active:scale-95 transition transform"
+                aria-label="Submit comment"
               >
                 Comment
               </button>
@@ -138,25 +155,28 @@ const Comments = ({ videoId, ownerAvatar }) => {
           )}
         </form>
       </div>
-      <hr className="my-4 border-white" />
 
-      {/* Comments list */}
-      {comments.length > 0 ? (
-        comments.map((comment) => (
-          <div key={comment._id}>
-            <CommentLayout
-              comment={comment}
-              ownerAvatar={ownerAvatar}
-              videoId={videoId}
-              updateCommentLocally={updateCommentLocally}
-              deleteCommentLocally={deleteCommentLocally}
-            />
-            <hr className="my-3 border-white" />
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-400">No comments yet</p>
-      )}
+      {/* Comments List */}
+      <div className="p-4 sm:p-6 space-y-4 max-h-[600px] overflow-y-auto scrollbar-hide">
+        {comments.length > 0 ? (
+          comments.map((comment) => (
+            <div key={comment._id} className="pb-4">
+              <CommentLayout
+                comment={comment}
+                ownerAvatar={ownerAvatar}
+                videoId={videoId}
+                updateCommentLocally={updateCommentLocally}
+                deleteCommentLocally={deleteCommentLocally}
+              />
+              <hr className="my-4 border-gray-200 dark:border-gray-700" />
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 dark:text-gray-400 text-center text-sm">
+            No comments yet. Be the first to comment!
+          </p>
+        )}
+      </div>
     </div>
   );
 };

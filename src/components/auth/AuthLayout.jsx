@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const AuthLayout = ({
   authentication = true,
-  guestComponent = false,
+  guestComponent = null,
   children,
 }) => {
   const [loading, setLoading] = useState(true);
@@ -14,16 +14,36 @@ const AuthLayout = ({
   useEffect(() => {
     if (authentication && isAuthenticated !== authentication) {
       if (guestComponent) return;
-      else navigate("/login");
+      navigate("/login");
     } else if (!authentication && isAuthenticated !== authentication) {
       navigate("/");
     }
 
     setLoading(false);
-  }, [authentication, isAuthenticated, navigate]);
+  }, [authentication, isAuthenticated, navigate, guestComponent]);
 
-  if (!isAuthenticated && guestComponent) return guestComponent;
-  return loading ? <h1> Loading...</h1> : <>{children}</>;
+  if (loading) {
+    return (
+      <div
+        className="flex items-center justify-center min-h-screen bg-white dark:bg-[#121212] transition-colors duration-300"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-900 dark:text-white text-lg font-medium">
+            Loading...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated && guestComponent) {
+    return <>{guestComponent}</>;
+  }
+
+  return <div className="animate-fade-in">{children}</div>;
 };
 
 export default AuthLayout;

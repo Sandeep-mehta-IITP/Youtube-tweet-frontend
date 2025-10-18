@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
-
 * {
   margin: 0;
   padding: 0;
@@ -15,11 +13,86 @@ body {
   color: white;
 }
 
+/* Scrollbar hide class with high specificity */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 .scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+/* Ensure no conflicting scrollbar styles */
+.scrollbar-hide::-webkit-scrollbar-track,
+.scrollbar-hide::-webkit-scrollbar-thumb {
   display: none;
 }
 
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE 10+ */
-  scrollbar-width: none;     /* Firefox */
+
+/* Fade-in animation for content */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Custom Video.js YouTube-like theme */
+.vjs-theme-youtube .vjs-control-bar {
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 0 0 12px 12px;
+}
+
+.vjs-theme-youtube .vjs-play-progress,
+.vjs-theme-youtube .vjs-volume-level {
+  background-color: #2563eb; /* blue-600 */
+}
+
+.vjs-theme-youtube .vjs-big-play-button {
+  background-color: #2563eb; /* blue-600 */
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  line-height: 3rem;
+  border: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.vjs-theme-youtube .vjs-big-play-button:hover {
+  background-color: #1d4ed8; /* blue-700 */
+  transform: scale(1.05);
+}
+
+.vjs-theme-youtube .vjs-control {
+  color: #fff;
+}
+
+.vjs-theme-youtube .vjs-button:hover {
+  color: #d1d5db; /* gray-300 */
+}
+
+.vjs-theme-youtube .vjs-poster {
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+@media (prefers-color-scheme: light) {
+  .vjs-theme-youtube .vjs-control-bar {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  .vjs-theme-youtube .vjs-control {
+    color: #1f2937; /* gray-900 */
+  }
+  .vjs-theme-youtube .vjs-button:hover {
+    color: #4b5563; /* gray-600 */
+  }
 }

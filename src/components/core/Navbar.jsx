@@ -31,7 +31,7 @@ const Navbar = () => {
   const searchInputRef = useRef();
   const smallsearchInputRef = useRef();
 
-  const asideOpen = useSelector((state) => state.ui.asideOpen);
+  // const asideOpen = useSelector((state) => state.ui.asideOpen);
 
   const [createDropdownOpen, setCreateDropdownOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
