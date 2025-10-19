@@ -1,38 +1,35 @@
-import { createTweet, getUserTweets } from "@/app/Slices/tweetSlice";
-import React, { useEffect, useState } from "react";
+import { createTweet, getAllTweets } from "@/app/Slices/tweetSlice";
+import LoginPopup from "@/components/auth/LoginPopup";
+import EmptyTweet from "@/components/Tweet/EmptyTweet";
+import TweetLayout from "@/components/Tweet/TweetLayout";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { MdSentimentDissatisfied } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
-const ChannelTweets = ({ owner = false }) => {
+const FeedTweets = ({ owner = false }) => {
   const dispatch = useDispatch();
-  let { username } = useParams();
+  const loginPopUpRef = useRef();
 
   const { data, status } = useSelector(({ tweet }) => tweet);
-  let userId = useSelector((state) => state.user.userData?._id);
-  const { isAuthenticated, userData: currentUser } = useSelector(
-    ({ auth }) => auth
-  );
+  const { isAuthenticated } = useSelector(({ auth }) => auth);
 
   const [localTweets, setLocalTweets] = useState(null);
   const { register, handleSubmit, reset, setFocus } = useForm();
 
   useEffect(() => {
-    if (owner) {
-      userId = currentUser?._id;
-    }
-
-    if (!userId) return;
-
-    dispatch(getUserTweets(userId)).then((res) => {
-      if (res.meta.requestStatus == "fulfilled") {
+    dispatch(getAllTweets()).then((res) => {
+      if (res.payload) {
         setLocalTweets(res.payload);
       }
     });
-  }, [userId, isAuthenticated, owner]);
+  }, [isAuthenticated]);
 
   const addTweet = (data) => {
+    if (!isAuthenticated) {
+      return loginPopUpRef.current.open();
+    }
+
     if (!data.tweet.trim()) {
       toast.error("Content is required");
       setFocus("tweet");
@@ -47,8 +44,8 @@ const ChannelTweets = ({ owner = false }) => {
       return;
     }
 
-    dispatch(createTweet({ content: data })).then(() => {
-      getUserTweets(currentUser?._id);
+    dispatch(createTweet({ content: data.tweet })).then(() => {
+      dispatch(getAllTweets());
       reset();
     });
   };
@@ -101,24 +98,20 @@ const ChannelTweets = ({ owner = false }) => {
       <div className="flex w-full h-screen flex-col gap-y-4 px-16 py-4 rounded bg-slate-100/10 animate-pulse"></div>
     );
   }
+
   return (
     <>
-      {owner && (
+      <LoginPopup ref={loginPopUpRef} message="Sign in to Tweet..." />
+
+      <section className="w-full py-1 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
         <form onSubmit={handleSubmit(addTweet)} className="mt-2 border pb-2">
           <textarea
             {...register("tweet")}
             className="w-full resize-none overflow-hidden bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white px-3 py-2 rounded-lg focus:outline-none text-sm font-medium transition-colors"
-            placeholder="Write a tweet"
+            placeholder="Whats in your mind today..."
           ></textarea>
 
           <div className="flex items-center justify-end gap-x-3 px-3">
-            {/* Emoji button */}
-            <button
-              type="button"
-              className="inline-block h-5 w-5 hover:text-blue-400"
-            >
-              <MdSentimentDissatisfied className="w-14 h-14 text-gray-200" />
-            </button>
             {/* Cancel button */}
             <button
               type="button"
@@ -136,9 +129,25 @@ const ChannelTweets = ({ owner = false }) => {
             </button>
           </div>
         </form>
-      )}
+
+        <hr className="my-4 border-gray-200 dark:border-gray-700" />
+
+        {tweets.length > 0 ? (
+          <ul>
+            {tweets.map((tweet) => (
+              <TweetLayout
+                key={tweet?._id}
+                tweet={tweet}
+                owner={tweet?.isOwner}
+              />
+            ))}
+          </ul>
+        ) : (
+          <EmptyTweet />
+        )}
+      </section>
     </>
   );
 };
 
-export default ChannelTweets;
+export default FeedTweets;

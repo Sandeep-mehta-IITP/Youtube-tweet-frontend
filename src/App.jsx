@@ -19,6 +19,7 @@ import ChannelPlaylists from "./components/Playlist/ChannelPlaylists";
 import EmptyTweet from "./components/Tweet/EmptyTweet";
 import TweetLayout from "./components/Tweet/TweetLayout";
 import ChannelTweets from "./components/Tweet/ChannelTweets";
+import FeedTweets from "./pages/FeedTweets";
 
 function App() {
   const dispatch = useDispatch();
@@ -108,6 +109,7 @@ function App() {
         <Route path="/watch/:videoId" element={<VideoDetails />} />
 
         <Route path="/empty/tweet" element={<ChannelTweets />} />
+        <Route path="/feed/tweets" element={<FeedTweets />} />
       </Routes>
     </div>
   );

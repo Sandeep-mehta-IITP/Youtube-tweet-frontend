@@ -36,6 +36,8 @@ export const getAllTweets = createAsyncThunk("tweet/getAllTweets", async(_, {rej
 export const createTweet = createAsyncThunk(
   "tweet/createTweet",
   async ({ content }, { rejectWithValue }) => {
+    console.log(content);
+    
     try {
       const response = await axiosInstance.post(`/tweets`, content);
       toast.success(response.data.message || "Tweet created successfully !!!");

@@ -44,7 +44,7 @@ const Aside = () => {
       icon: <VideoIcon className="w-6 h-6" />,
       route: "/your-videos",
     },
-    { name: "Tweets", icon: <Twitter className="w-6 h-6" />, route: "/tweets" },
+    { name: "Tweets", icon: <Twitter className="w-6 h-6" />, route: "/feed/tweets" },
     {
       name: "Dashboard",
       icon: <BarChart2 className="w-6 h-6" />,
