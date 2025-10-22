@@ -39,7 +39,7 @@ export const createTweet = createAsyncThunk(
     console.log(content);
     
     try {
-      const response = await axiosInstance.post(`/tweets`, content);
+      const response = await axiosInstance.post(`/tweets`, {content});
       toast.success(response.data.message || "Tweet created successfully !!!");
       return response.data;
     } catch (error) {
@@ -124,7 +124,7 @@ const tweetSlice = createSlice({
     builder.addCase(createTweet.fulfilled, (state, action) => {
       state.loading = false;
       state.status = true;
-      state.data.unshift(action.payload);
+      state.data = action.payload;
     });
 
     builder.addCase(createTweet.rejected, (state) => {

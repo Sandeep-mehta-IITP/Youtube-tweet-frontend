@@ -46,7 +46,7 @@ body {
   animation: fade-in 0.3s ease-out forwards;
 }
 
-/* Custom Video.js YouTube-like theme */
+Custom Video.js YouTube-like theme
 .vjs-theme-youtube .vjs-control-bar {
   background-color: rgba(0, 0, 0, 0.7);
   border-radius: 0 0 12px 12px;
@@ -95,4 +95,21 @@ body {
   .vjs-theme-youtube .vjs-button:hover {
     color: #4b5563; /* gray-600 */
   }
+}
+
+
+.vjs-theme-youtube .vjs-big-play-button {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: none;
+  font-size: 36px;
+}
+
+.vjs-theme-youtube .vjs-big-play-button .vjs-icon-placeholder:before {
+  line-height: 48px;
 }

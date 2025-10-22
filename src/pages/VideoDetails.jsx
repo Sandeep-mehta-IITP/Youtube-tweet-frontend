@@ -40,15 +40,18 @@ const VideoDetails = () => {
   const {
     data: video,
     isLoading,
+    isFetching,
     error,
     refetch: refetchVideo,
   } = useGetVideoQuery(videoId, {
-    refetchOnMountOrArgChange: true, // Force refetch when videoId changes
+    skip: !videoId,
+    refetchOnMountOrArgChange: true,
   });
 
   const { data: allVideos } = useGetAllVideosQuery();
 
-  const currentVideoID = video?.data?._id || "";
+  const currentVideoID = videoId; // Always use URL param
+
   const suggestedVideos = useMemo(
     () => allVideos?.data?.docs?.filter((v) => v._id !== currentVideoID) || [],
     [allVideos, currentVideoID]
@@ -57,36 +60,47 @@ const VideoDetails = () => {
   const [showPlaylistDropdown, setShowPlaylistDropdown] = useState(false);
   const [showComments, setShowComments] = useState(false);
 
-  // Reset states and refetch data when videoId changes
+  // Reset everything on videoId change
   useEffect(() => {
     if (!videoId) return;
 
-    // Clear Redux video state
     dispatch(emptyVideoState());
-
-    // Reset local states
     setShowPlaylistDropdown(false);
     setShowComments(false);
-
-    // Force refetch video data
     refetchVideo();
-
-    // Scroll to top for better UX
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Dispose old player
+    if (playerRef.current) {
+      playerRef.current.dispose();
+      playerRef.current = null;
+    }
   }, [videoId, dispatch, refetchVideo]);
 
-  const handlePlaylistVideo = (playlistId, currentVideoID, status) => {
-    if (!playlistId || !currentVideoID) return;
+  // Cleanup player on unmount
+  useEffect(() => {
+    return () => {
+      if (playerRef.current) {
+        playerRef.current.dispose();
+        playerRef.current = null;
+      }
+    };
+  }, []);
+
+  const handlePlaylistVideo = (playlistId, videoId, status) => {
+    if (!playlistId || !videoId) return;
     if (status) {
-      dispatch(addVideoToPlaylist({ currentVideoID, playlistId })).then(() => {
+      dispatch(
+        addVideoToPlaylist({ currentVideoID: videoId, playlistId })
+      ).then(() => {
         toast.success("Video added to playlist");
       });
     } else {
-      dispatch(removeVideoFromPlaylist({ currentVideoID, playlistId })).then(
-        () => {
-          toast.success("Video removed from playlist");
-        }
-      );
+      dispatch(
+        removeVideoFromPlaylist({ currentVideoID: videoId, playlistId })
+      ).then(() => {
+        toast.success("Video removed from playlist");
+      });
     }
   };
 
@@ -102,8 +116,6 @@ const VideoDetails = () => {
     dispatch(createPlaylist({ data: { name, description } }))
       .then((res) => {
         if (res.meta.requestStatus === "fulfilled") {
-          if (!currentVideoID)
-            return toast.error("No video selected to add to playlist.");
           dispatch(
             addVideoToPlaylist({
               playlistId: res.payload?.data?._id,
@@ -128,52 +140,62 @@ const VideoDetails = () => {
     setShowPlaylistDropdown((prev) => !prev);
   };
 
-  const videoPlayerControlsOptions = {
-    controls: true,
-    responsive: true,
-    fluid: true,
-    fill: false, // Prevent automatic full-screen
-    autoplay: false,
-    sources: [
-      {
-        src: video?.data?.videoFile?.url || "",
-        type: "video/mp4",
-      },
-    ],
-    poster: video?.data?.thumbnail?.url || "/default-thumbnail.png",
-  };
+  // Dynamic player options based on current video
+  const videoPlayerControlsOptions = useMemo(() => {
+    if (!video?.data) {
+      return {
+        controls: true,
+        responsive: true,
+        fluid: true,
+        sources: [],
+        poster: "/default-thumbnail.png",
+        autoplay: false,
+      };
+    }
+
+    return {
+      controls: true,
+      responsive: true,
+      fluid: true,
+      fill: false,
+      autoplay: false,
+      playbackRates: [0.5, 1, 1.5, 2],
+      sources: [
+        {
+          src: video.data.videoFile?.url || "",
+          type: "video/mp4",
+        },
+      ],
+      poster: video.data.thumbnail?.url || "/default-thumbnail.png",
+    };
+  }, [video?.data]);
 
   const handlePlayerReady = (player) => {
     playerRef.current = player;
-    player.on("waiting", () => {
-      videojs.log("Player is waiting");
-    });
-    player.on("dispose", () => {
-      videojs.log("Player will dispose");
-    });
+    player.on("waiting", () => videojs.log("Player is waiting"));
+    player.on("dispose", () => videojs.log("Player will dispose"));
     player.on("error", () => {
       console.error("Video.js Error:", player.error());
       setTimeout(() => {
-        player.src(videoPlayerControlsOptions.sources);
+        if (playerRef.current) {
+          playerRef.current.src(videoPlayerControlsOptions.sources);
+          playerRef.current.load();
+        }
       }, 2000);
     });
   };
 
+  // Error State
   if (error) {
     return (
-      <div
-        className="flex items-center justify-center min-h-screen bg-white dark:bg-[#121212] transition-colors duration-300"
-        role="alert"
-        aria-live="assertive"
-      >
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#121212]">
         <div className="text-center space-y-4">
           <p className="text-lg font-medium text-gray-900 dark:text-white">
             Failed to load video
           </p>
           <button
             onClick={() => refetchVideo()}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white text-sm font-medium transition transform active:scale-95"
-            aria-label="Retry loading video"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-full text-white text-sm font-medium"
           >
             Retry
           </button>
@@ -182,7 +204,8 @@ const VideoDetails = () => {
     );
   }
 
-  if (isLoading || !video) {
+  // Loading / Fetching State
+  if (isLoading || isFetching || !video) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -200,20 +223,9 @@ const VideoDetails = () => {
                 <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
             </div>
-            <div className="space-y-4 mt-6">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-3 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="h-3 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
           <div className="lg:col-span-1 space-y-4">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(6)].map((Broadcast, i) => (
               <div key={i} className="flex gap-3 animate-pulse">
                 <div className="w-40 h-24 bg-gray-200 dark:bg-gray-800 rounded-lg"></div>
                 <div className="flex-1 space-y-2">
@@ -230,42 +242,43 @@ const VideoDetails = () => {
   }
 
   return (
-    <section
-      key={videoId}
-      className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 bg-white dark:bg-[#121212] transition-colors duration-300"
-    >
-      <div key={videoId} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <section className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 bg-white dark:bg-[#121212]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Video Player */}
-          <div className="w-full aspect-video rounded-xl overflow-hidden shadow-lg">
+          {/* Video Player with Black Background */}
+          <div className="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-lg relative">
             <VideoPlayer
               options={videoPlayerControlsOptions}
               onReady={handlePlayerReady}
             />
+            {isFetching && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
 
-          {/* Video Metadata */}
+          {/* Metadata */}
           <div className="space-y-4">
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white line-clamp-2">
-              {video?.data?.title || "Untitled Video"}
+              {video.data.title || "Untitled Video"}
             </h1>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                {video?.data?.views || 0} views •{" "}
-                {formatTimestamp(video?.data?.createdAt) || "Unknown date"}
+                {video.data.views || 0} views •{" "}
+                {formatTimestamp(video.data.createdAt)}
               </p>
               <div className="flex items-center gap-3 sm:gap-4">
                 <LikeComponent
-                  videoId={video?.data?._id}
-                  isLiked={video?.data?.isLiked || false}
-                  totalLikes={video?.data?.totalLikes || 0}
-                  isDisLiked={video?.data?.isDisLiked || false}
-                  totalDisLikes={video?.data?.totalDisLikes || 0}
+                  videoId={currentVideoID}
+                  isLiked={video.data.isLiked}
+                  totalLikes={video.data.totalLikes}
+                  isDisLiked={video.data.isDisLiked}
+                  totalDisLikes={video.data.totalDisLikes}
                 />
                 <button
                   onClick={() => setShowComments((prev) => !prev)}
-                  className="sm:hidden flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm font-medium text-gray-900 dark:text-white transition transform active:scale-95"
-                  aria-label="Toggle comments"
+                  className="sm:hidden flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm font-medium"
                 >
                   <MessageCircle className="w-5 h-5" />
                   <span>Comments</span>
@@ -277,21 +290,20 @@ const VideoDetails = () => {
                   />
                   <button
                     onClick={handleSavePlaylist}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm font-medium text-gray-900 dark:text-white transition transform active:scale-95"
-                    aria-label="Save to playlist"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-sm font-medium"
                   >
                     <FolderPlus className="w-5 h-5" />
                     <span>Save</span>
                   </button>
                   {isAuthenticated && showPlaylistDropdown && (
-                    <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-900 rounded-xl shadow-xl p-4 z-20 transition-all duration-200 animate-fade-in">
-                      <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white text-center">
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-900 rounded-xl shadow-xl p-4 z-20">
+                      <h2 className="text-lg font-semibold mb-4 text-center">
                         Save to playlist
                       </h2>
-                      <ul className="mb-4 max-h-48 overflow-y-auto scrollbar-hide">
+                      <ul className="mb-4 max-h-48 overflow-y-auto">
                         {playlistLoading ? (
-                          <li className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                            Loading playlists...
+                          <li className="text-sm text-center text-gray-500">
+                            Loading...
                           </li>
                         ) : playlists?.length > 0 ? (
                           playlists.map((item) => (
@@ -300,8 +312,7 @@ const VideoDetails = () => {
                                 <input
                                   type="checkbox"
                                   className="hidden peer"
-                                  id={`playlist-${item._id}`}
-                                  checked={item.isVideoPresent} // Use checked instead of defaultChecked
+                                  checked={item.isVideoPresent}
                                   onChange={(e) =>
                                     handlePlaylistVideo(
                                       item._id,
@@ -310,18 +321,16 @@ const VideoDetails = () => {
                                     )
                                   }
                                 />
-                                <span className="w-5 h-5 rounded border border-gray-300 dark:border-gray-600 peer-checked:bg-blue-600 peer-checked:border-blue-600 flex items-center justify-center transition">
+                                <span className="w-5 h-5 rounded border peer-checked:bg-blue-600 peer-checked:border-blue-600 flex items-center justify-center">
                                   <Check className="w-4 h-4 text-white" />
                                 </span>
-                                <span className="text-sm text-gray-900 dark:text-white">
-                                  {item.name}
-                                </span>
+                                <span className="text-sm">{item.name}</span>
                               </label>
                             </li>
                           ))
                         ) : (
-                          <li className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                            No playlists found
+                          <li className="text-sm text-center text-gray-500">
+                            No playlists
                           </li>
                         )}
                       </ul>
@@ -329,23 +338,20 @@ const VideoDetails = () => {
                         <input
                           type="text"
                           name="playlistName"
-                          placeholder="Enter playlist name..."
+                          placeholder="Playlist name..."
                           required
-                          className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                          aria-label="Playlist name"
+                          className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                         <input
                           type="text"
                           name="playlistDescription"
-                          placeholder="Enter playlist description..."
+                          placeholder="Description..."
                           required
-                          className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-                          aria-label="Playlist description"
+                          className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                         <button
                           type="submit"
-                          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium text-white transition transform active:scale-95"
-                          aria-label="Create new playlist"
+                          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-sm font-medium"
                         >
                           Create Playlist
                         </button>
@@ -356,26 +362,19 @@ const VideoDetails = () => {
               </div>
             </div>
 
-            {/* User Profile */}
-            <div className="w-full flex items-center">
-              <UserProfile
-                username={video?.data?.owner?.username || "Unknown"}
-              />
-            </div>
+            <UserProfile username={video.data.owner?.username || "Unknown"} />
 
-            {/* Description */}
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4">
               <p className="text-sm text-gray-600 dark:text-gray-300 whitespace-pre-wrap">
-                {video?.data?.description || "No description available"}
+                {video.data.description || "No description"}
               </p>
             </div>
 
-            {/* Comments */}
             <div className={`${showComments ? "block" : "hidden"} sm:block`}>
               <Comments
-                videoId={video?.data?._id}
+                videoId={currentVideoID}
                 ownerAvatar={
-                  video?.data?.owner?.avatar?.url || "/default-avatar.png"
+                  video.data.owner?.avatar?.url || "/default-avatar.png"
                 }
                 onClose={() => setShowComments(false)}
               />
@@ -385,7 +384,7 @@ const VideoDetails = () => {
 
         {/* Suggested Videos */}
         <div className="lg:col-span-1 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white hidden lg:block">
+          <h2 className="text-lg font-semibold hidden lg:block">
             Suggested Videos
           </h2>
           {suggestedVideos.length > 0 ? (
@@ -393,37 +392,37 @@ const VideoDetails = () => {
               <div
                 key={v._id}
                 className="flex gap-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl p-2 transition"
-                onClick={() => navigate(`/watch/${v._id}`)}
-                role="button"
-                aria-label={`Watch ${v.title}`}
+                onClick={() => {
+                  navigate(`/watch/${v._id}`, { replace: true });
+                  window.scrollTo(0, 0);
+                }}
               >
-                <div className="w-32 sm:w-40 h-20 sm:h-24 relative flex-shrink-0">
+                <div className="w-40 h-24 relative flex-shrink-0">
                   <img
                     src={v.thumbnail?.url || "/default-thumbnail.png"}
-                    alt={v.title || "Video thumbnail"}
+                    alt={v.title}
                     className="w-full h-full object-cover rounded-lg"
                   />
                   <span className="absolute bottom-1 right-1 bg-black bg-opacity-75 px-1.5 py-0.5 text-xs text-white rounded">
-                    {formatVideoDuration(v.duration) || "00:00"}
+                    {formatVideoDuration(v.duration)}
                   </span>
                 </div>
                 <div className="flex-1">
-                  <h6 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
-                    {v.title || "Untitled Video"}
+                  <h6 className="text-sm font-semibold line-clamp-2">
+                    {v.title}
                   </h6>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {v?.ownerDetails?.username || "Unknown"}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {v.views || 0} views •{" "}
-                    {formatTimestamp(v.createdAt) || "Unknown date"}
+                    {v.views || 0} views • {formatTimestamp(v.createdAt)}
                   </p>
                 </div>
               </div>
             ))
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
-              No suggested videos available
+            <p className="text-sm text-center text-gray-500">
+              No suggested videos
             </p>
           )}
         </div>
