@@ -1,156 +1,234 @@
-import { deleteTweet, updateTweet } from "@/app/Slices/tweetSlice";
+import {
+  deleteTweet,
+  getAllTweets,
+  updateTweet,
+} from "@/app/Slices/tweetSlice";
 import { formatTimestamp } from "@/utils/helpers/formatFigure";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import LikeComponent from "../core/LikeComponent";
+import { Edit2, Trash2, Check, X, Loader2, MoreHorizontal } from "lucide-react";
 
-const TweetLayout = ({ tweet, owner, authStatus }) => {
+const TweetLayout = ({ tweet, owner }) => {
   const dispatch = useDispatch();
-  const textareaRef = useRef();
+  const textareaRef = useRef(null);
 
   const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState(tweet?.content);
+  const [content, setContent] = useState(tweet?.content || "");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  // Sync content on refresh
+  useEffect(() => {
+    setContent(tweet?.content || "");
+  }, [tweet?.content]);
+
+  // Auto resize textarea
+  const adjustTextareaHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, []);
 
   useEffect(() => {
-    if (isEditing && textareaRef.current) {
-      textareaRef.current.focus();
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    if (isEditing) {
+      adjustTextareaHeight();
+      textareaRef.current?.focus();
     }
-  }, [isEditing]);
+  }, [isEditing, adjustTextareaHeight]);
 
+  // Cancel edit
   const handleCancel = () => {
-    setIsEditing(false);
     setContent(tweet?.content || "");
+    setIsEditing(false);
   };
 
-  const handleEditing = () => setIsEditing(true);
-
+  // Update tweet
   const handleUpdate = async () => {
-    if (!content.trim()) {
-      toast.warn("Please enter some content.");
-      return;
-    } else if (content.trim()?.length < 20) {
-      toast.error("Minimum 20 characters are required");
-      return;
-    } else if (content.trim()?.length > 700) {
-      toast.error("Maximum 700 characters are allowed");
-      return;
-    }
+    const trimmed = content.trim();
+    if (!trimmed) return toast.warn("Tweet cannot be empty");
+    if (trimmed.length < 20) return toast.error("Minimum 20 characters");
+    if (trimmed.length > 700) return toast.error("Maximum 700 characters");
 
+    setIsUpdating(true);
     try {
-      await dispatch(updateTweet({ tweetId: tweet?._id, content })).unwrap();
+      await dispatch(
+        updateTweet({ tweetId: tweet._id, content: trimmed })
+      ).unwrap();
       setIsEditing(false);
+      await dispatch(getAllTweets()).unwrap();
     } catch (error) {
       console.log(error);
-      setIsEditing(false);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
+  // Delete tweet
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this tweet?")) {
-      return;
-    }
-
+    if (!window.confirm("Delete this tweet permanently?")) return;
+    setIsDeleting(true);
     try {
-      await dispatch(deleteTweet({ tweetId: tweet?._id })).unwrap();
-    } catch (error) {
-      console.log(error);
+      await dispatch(deleteTweet(tweet._id)).unwrap();
+      setIsDeleting(false);
+    } catch {
+      setIsDeleting(false);
     }
   };
-  return (
-    <li>
-      <section className="flex flex-col sm:flex-row justify-between gap-4">
-        {/* Tweet content */}
-        <div className="flex w-full gap-3 sm:gap-4">
-          {/* Avatar */}
-          <div className="mt-2 w-10 h-10 sm:w-12 sm:h-12 shrink-0">
-            <Link to={`/user/${tweet?.owner?.username}`}>
-              <img
-                src={tweet?.owner?.avatar || "/default-avatar.png"}
-                alt={`${tweet?.owner?.username}'s avatar`}
-                className="w-full h-full object-cover rounded-full border border-gray-200 dark:border-gray-700"
-              />
-            </Link>
-          </div>
 
-          {/* Content */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2 sm:gap-3 text-sm">
+  // Deletion skeleton
+  if (isDeleting) {
+    return (
+      <li className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl animate-pulse">
+        <div className="flex gap-3">
+          <div className="w-10 h-10 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-300 dark:bg-gray-700 w-1/4 rounded"></div>
+            <div className="h-3 bg-gray-300 dark:bg-gray-700 w-3/4 rounded"></div>
+          </div>
+        </div>
+      </li>
+    );
+  }
+
+  return (
+    <li key={tweet?._id} className="group transition-all duration-300">
+      <article className="flex gap-4 p-4 bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg border border-gray-700">
+        {/* Avatar */}
+        <div className="flex-shrink-0">
+          <Link to={`/user/${tweet?.owner?.username}`}>
+            <img
+              src={tweet?.owner?.avatar || "/default-avatar.png"}
+              alt={tweet?.owner?.username}
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-1 ring-gray-300 dark:ring-gray-600 hover:ring-blue-500 transition-all"
+              loading="lazy"
+            />
+          </Link>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 min-w-0">
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div>
               <Link
                 to={`/user/${tweet?.owner?.username}`}
-                className="text-gray-900 dark:text-white font-semibold hover:underline"
+                className="font-semibold text-gray-900 dark:text-white hover:underline"
               >
                 @{tweet?.owner?.username}
               </Link>
-              <span className="text-gray-500 dark:text-gray-400 text-xs">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 {formatTimestamp(tweet?.createdAt)}
-              </span>
+              </div>
             </div>
 
-            <div className="my-2 text-sm text-gray-900 dark:text-white">
-              {isEditing ? (
+            {/* Menu Button */}
+            {tweet?.isOwner && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu((prev) => !prev)}
+                  className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </button>
+                {showMenu && (
+                  <div
+                    className="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 overflow-hidden"
+                    onMouseLeave={() => setShowMenu(false)}
+                  >
+                    <button
+                      onClick={() => {
+                        setIsEditing(true);
+                        setShowMenu(false);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <Edit2 className="w-4 h-4" /> Edit
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                    >
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Tweet Text */}
+          <div className="mt-2 text-gray-800 dark:text-gray-100 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+            {isEditing ? (
+              <div className="space-y-3">
                 <textarea
                   ref={textareaRef}
-                  name="content"
                   value={content}
                   onChange={(e) => {
                     setContent(e.target.value);
-                    const el = textareaRef.current;
-                    el.style.height = "auto";
-                    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+                    adjustTextareaHeight();
                   }}
-                  disabled={!tweet.isOwner}
-                  placeholder="Edit your tweet..."
-                  className="w-full resize-none bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-blue-500 outline-none text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors py-1"
-                  aria-label="Edit tweet"
+                  placeholder="What's on your mind?"
+                  className="w-full min-h-[60px] max-h-[160px] resize-none bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                 />
-              ) : (
-                <p>{tweet?.content}</p>
-              )}
-            </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span
+                    className={`${
+                      content.trim().length < 20 || content.trim().length > 700
+                        ? "text-red-500"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}
+                  >
+                    {content.trim().length}/700
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCancel}
+                      disabled={isUpdating}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition disabled:opacity-50"
+                    >
+                      <X className="w-4 h-4" /> Cancel
+                    </button>
+                    <button
+                      onClick={handleUpdate}
+                      disabled={
+                        isUpdating ||
+                        content.trim().length < 20 ||
+                        content.trim().length > 700
+                      }
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isUpdating ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4" />
+                      )}
+                      Update
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p>{tweet?.content}</p>
+            )}
+          </div>
 
-            {/* Likes Component */}
-            <div className="flex items-center gap-2">
-              <LikeComponent
-                commentId={tweet?._id}
-                isLiked={tweet?.isLiked}
-                totalLikes={tweet?.likesCount}
-                isDisLiked={tweet?.isDisLiked}
-                totalDisLikes={tweet?.disLikesCount}
-              />
-            </div>
+          {/* Footer (Likes, etc.) */}
+          <div className="mt-4 flex justify-between items-center">
+            <LikeComponent
+              commentId={tweet?._id}
+              isLiked={tweet?.isLiked}
+              totalLikes={tweet?.likesCount}
+              isDisLiked={tweet?.isDisLiked}
+              totalDisLikes={tweet?.disLikesCount}
+            />
           </div>
         </div>
-
-        {/* Comment controls - only for owner */}
-        {tweet?.isOwner && (
-          <div className="flex items-center sm:items-end gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={isEditing ? handleCancel : handleDelete}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition transform active:scale-95 ${
-                isEditing
-                  ? "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  : "text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/20"
-              }`}
-              aria-label={isEditing ? "Cancel editing" : "Delete comment"}
-            >
-              {isEditing ? "Cancel" : "Delete"}
-            </button>
-            <button
-              type="button"
-              onClick={isEditing ? handleUpdate : handleEditing}
-              className="px-3 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition transform active:scale-95"
-              aria-label={isEditing ? "Update comment" : "Edit comment"}
-            >
-              {isEditing ? "Update" : "Edit"}
-            </button>
-          </div>
-        )}
-      </section>
+      </article>
     </li>
   );
 };

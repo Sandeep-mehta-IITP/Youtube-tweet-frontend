@@ -2,103 +2,104 @@ import { createTweet, getAllTweets } from "@/app/Slices/tweetSlice";
 import LoginPopup from "@/components/auth/LoginPopup";
 import EmptyTweet from "@/components/Tweet/EmptyTweet";
 import TweetLayout from "@/components/Tweet/TweetLayout";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
 
 const FeedTweets = ({ owner = false }) => {
   const dispatch = useDispatch();
   const loginPopUpRef = useRef();
 
-  const { data, status } = useSelector(({ tweet }) => tweet);
-  const { isAuthenticated } = useSelector(({ auth }) => auth);
+  const { data, status, loading } = useSelector(({ tweet }) => tweet);
+  //console.log("tweet data", data);
+
+  const { isAuthenticated, user } = useSelector(({ auth }) => auth);
 
   const [localTweets, setLocalTweets] = useState([]);
+  const [isPosting, setIsPosting] = useState(false);
+
   const { register, handleSubmit, reset, setFocus } = useForm();
 
-  //  Fetch tweets on mount or when login changes
+  /** Fetch tweets **/
   useEffect(() => {
-    dispatch(getAllTweets()).then((res) => {
-      if (res?.payload?.docs) {
-        setLocalTweets(res.payload.docs);
-      } else if (Array.isArray(res?.payload)) {
-        setLocalTweets(res.payload);
-      } else {
+    const fetchTweets = async () => {
+      try {
+        const res = await dispatch(getAllTweets()).unwrap();
+        const tweetsArray = res?.docs || (Array.isArray(res) ? res : []);
+        setLocalTweets(tweetsArray);
+      } catch {
+        toast.error("Failed to load tweets");
         setLocalTweets([]);
       }
-    });
+    };
+    fetchTweets();
   }, [dispatch, isAuthenticated]);
 
-  //  Add tweet
-  const addTweet = (formData) => {
-    if (!isAuthenticated) {
-      return loginPopUpRef.current.open();
-    }
+  /** Handle add tweet **/
+  const addTweet = useCallback(
+    async (formData) => {
+      if (!isAuthenticated) return loginPopUpRef.current.open();
 
-    const tweetContent = formData.tweet?.trim();
-    if (!tweetContent) {
-      toast.error("Content is required");
-      return setFocus("tweet");
-    }
-    if (tweetContent.length < 20) {
-      toast.error("Minimum 20 characters are required");
-      return setFocus("tweet");
-    }
-    if (tweetContent.length > 700) {
-      toast.error("Maximum 700 characters are allowed");
-      return setFocus("tweet");
-    }
-
-    dispatch(createTweet({ content: tweetContent })).then((res) => {
-      if (res?.payload?.tweet || res?.payload?._id) {
-        const newTweet = res.payload.tweet || res.payload;
-        setLocalTweets((prev) => [newTweet, ...prev]);
-      } else {
-        dispatch(getAllTweets());
+      const tweetContent = formData.tweet?.trim();
+      if (!tweetContent) {
+        toast.error("Content is required");
+        return setFocus("tweet");
       }
-      reset();
-    });
-  };
+      if (tweetContent.length < 20) {
+        toast.error("Minimum 20 characters are required");
+        return setFocus("tweet");
+      }
+      if (tweetContent.length > 700) {
+        toast.error("Maximum 700 characters are allowed");
+        return setFocus("tweet");
+      }
 
-  //  Choose between global & local tweets safely
+      setIsPosting(true);
+      try {
+        await dispatch(createTweet({ content: tweetContent })).unwrap();
+        reset();
+        await dispatch(getAllTweets());
+      } catch {
+        toast.error("Failed to post tweet");
+      } finally {
+        setIsPosting(false);
+      }
+    },
+    [dispatch, isAuthenticated, reset, setFocus]
+  );
+
   const tweets = Array.isArray(data) && data.length > 0 ? data : localTweets;
 
-  //  Show skeleton when loading
-  if (!tweets || (tweets.length === 0 && !status)) {
+  /** Skeleton Loader **/
+  if (loading && (!tweets || tweets.length === 0)) {
     return (
-      <section className="w-full py-1 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0 animate-pulse">
-        {/* Input skeleton */}
-        <div className="mt-2 border pb-2 bg-gray-200/10 dark:bg-gray-800/30 rounded-md">
-          <div className="mb-2 h-12 w-full px-3 pt-2 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-          <div className="flex items-center justify-end gap-x-3 px-3">
-            <div className="w-20 h-10 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
+      <section className="w-full py-3 px-3 sm:ml-[70px] lg:ml-0 animate-pulse">
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 mb-5">
+          <div className="flex gap-3">
+            <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700" />
+            <div className="flex-1 space-y-3">
+              <div className="h-4 w-2/3 bg-gray-300 dark:bg-gray-700 rounded"></div>
+              <div className="h-4 w-1/3 bg-gray-300 dark:bg-gray-700 rounded"></div>
+            </div>
           </div>
         </div>
-
-        <hr className="my-3 border-gray-300/20 dark:border-gray-600/30" />
-
-        {/* Tweets skeleton */}
-        <div className="space-y-4">
-          {Array(6)
-            .fill()
-            .map((_, i) => (
-              <div key={i} className="px-1">
-                <div className="flex gap-x-4">
-                  <div className="mt-2 h-12 w-12 rounded-full bg-gray-200/20 dark:bg-gray-700/20"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-5 w-44 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-                      <div className="h-5 w-16 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-                    </div>
-                    <div className="h-3 w-32 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-                    <div className="h-6 w-1/2 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-                  </div>
-                </div>
-                <hr className="my-3 border-gray-300/20 dark:border-gray-700/20" />
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 mb-4"
+          >
+            <div className="flex gap-3">
+              <div className="w-10 h-10 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 w-1/4 rounded"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 w-3/4 rounded"></div>
+                <div className="h-4 bg-gray-300 dark:bg-gray-700 w-1/2 rounded"></div>
               </div>
-            ))}
-        </div>
+            </div>
+          </div>
+        ))}
       </section>
     );
   }
@@ -107,37 +108,49 @@ const FeedTweets = ({ owner = false }) => {
     <>
       <LoginPopup ref={loginPopUpRef} message="Sign in to Tweet..." />
 
-      <section className="w-full py-1 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
-        {/* Tweet Input */}
-        <form onSubmit={handleSubmit(addTweet)} className="mt-2 border pb-2">
-          <textarea
-            {...register("tweet")}
-            className="w-full resize-none overflow-hidden bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white px-3 py-2 rounded-lg focus:outline-none text-sm font-medium transition-colors"
-            placeholder="What's on your mind today..."
-          ></textarea>
+      <section className="w-full py-3 px-3 sm:ml-[70px] lg:ml-0">
+        {/* Tweet Composer */}
+        <form
+          onSubmit={handleSubmit(addTweet)}
+          className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm p-4 transition"
+        >
+          <div className="flex gap-3">
+            <textarea
+              {...register("tweet")}
+              className="flex-1 resize-none bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-0 min-h-[60px] mt-1"
+              placeholder="What's happening?"
+              maxLength={700}
+            />
+          </div>
 
-          <div className="flex items-center justify-end gap-x-3 px-3">
+          <div className="flex items-center justify-end gap-2 mt-3">
             <button
               type="button"
               onClick={() => reset()}
-              className="py-1 rounded-xl px-3 hover:text-black hover:bg-slate-500"
+              disabled={isPosting}
+              className="px-4 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-blue-500 px-3 py-2 font-semibold text-white rounded-xl hover:bg-blue-600 transition"
+              disabled={isPosting}
+              className="flex items-center gap-2 px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Tweet
+              {isPosting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Tweet"
+              )}
             </button>
           </div>
         </form>
 
-        <hr className="my-4 border-gray-200 dark:border-gray-700" />
+        <hr className="my-5 border-gray-200 dark:border-gray-700" />
 
-        {/* Tweet List */}
-        {tweets.length > 0 ? (
-          <ul>
+        {/* Tweet Feed */}
+        {tweets?.length > 0 ? (
+          <ul className="space-y-4">
             {tweets.map((tweet) => (
               <TweetLayout
                 key={tweet?._id}

@@ -5,7 +5,7 @@ import { MdSentimentDissatisfied } from 'react-icons/md';
 const EmptyTweet = () => {
   return (
     <section
-      className="flex min-h-[85vh] items-center justify-center p-6"
+      className="flex min-h-[65vh] items-center justify-center p-6"
       aria-label="Empty tweet section"
     >
       <motion.div

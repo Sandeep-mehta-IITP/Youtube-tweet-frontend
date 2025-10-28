@@ -101,15 +101,18 @@ function App() {
           <Route path="guest" element={<GuestComponent />} />
 
           {/* Playlists */}
-          <Route path="playlist/:playlistId" element={< PlaylistVideos />} />
+          <Route path="playlist/:playlistId" element={<PlaylistVideos />} />
+
+          <Route
+            path="/user/playlists"
+            element={<ChannelPlaylists owner={false} />}
+          />
+
+          <Route path="/watch/:videoId" element={<VideoDetails />} />
+
+          <Route path="/empty/tweet" element={<ChannelTweets />} />
+          <Route path="/feed/tweets" element={<FeedTweets />} />
         </Route>
-
-         <Route path="/user/playlists" element={<ChannelPlaylists owner={false} />} />
-        
-        <Route path="/watch/:videoId" element={<VideoDetails />} />
-
-        <Route path="/empty/tweet" element={<ChannelTweets />} />
-        <Route path="/feed/tweets" element={<FeedTweets />} />
       </Routes>
     </div>
   );
