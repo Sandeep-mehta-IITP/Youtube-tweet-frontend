@@ -170,6 +170,7 @@ function App() {
           >
             <Route path="subscribed" element={<Subscribed owner />} />
             <Route path="playlists" element={<ChannelPlaylists owner />} />
+            <Route path="tweets" element={<ChannelTweets owner />} />
           </Route>
         </Route>
       </Routes>

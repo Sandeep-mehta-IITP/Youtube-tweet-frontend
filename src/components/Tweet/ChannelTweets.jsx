@@ -1,62 +1,75 @@
-import { createTweet, getUserTweets } from "@/app/Slices/tweetSlice";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { MdSentimentDissatisfied } from "react-icons/md";
+import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+
+import { createTweet, getUserTweets } from "@/app/Slices/tweetSlice";
+import TweetLayout from "./TweetLayout";
+import MyChannelEmptyTweet from "./MyChannelEmptyTweet";
+import EmptyTweet from "./EmptyTweet";
 
 const ChannelTweets = ({ owner = false }) => {
   const dispatch = useDispatch();
-  let { username } = useParams();
+  const { username } = useParams();
 
-  const { data, status } = useSelector(({ tweet }) => tweet);
-  let userId = useSelector((state) => state.user.userData?._id);
+  const { data: tweetsData, status } = useSelector((state) => state.tweet);
   const { isAuthenticated, userData: currentUser } = useSelector(
-    ({ auth }) => auth
+    (state) => state.auth
   );
+  const userId = owner
+    ? currentUser?._id
+    : useSelector((state) => state.user.userData?._id);
 
-  const [localTweets, setLocalTweets] = useState(null);
+  const [tweets, setTweets] = useState([]);
   const { register, handleSubmit, reset, setFocus } = useForm();
 
-  useEffect(() => {
-    if (owner) {
-      userId = currentUser?._id;
-    }
-
+  /** Fetch user tweets */
+  const fetchTweets = useCallback(async () => {
     if (!userId) return;
+    const res = await dispatch(getUserTweets(userId));
+    if (res.meta.requestStatus === "fulfilled") {
+      setTweets(res.payload);
+    }
+  }, [dispatch, userId]);
 
-    dispatch(getUserTweets(userId)).then((res) => {
-      if (res.meta.requestStatus == "fulfilled") {
-        setLocalTweets(res.payload);
-      }
-    });
-  }, [userId, isAuthenticated, owner]);
+  useEffect(() => {
+    fetchTweets();
+  }, [fetchTweets, isAuthenticated]);
 
-  const addTweet = (data) => {
-    if (!data.tweet.trim()) {
-      toast.error("Content is required");
+  /** Add new tweet */
+  const handleAddTweet = async (formData) => {
+    const content = formData.tweet?.trim();
+
+    if (!content) {
+      toast.error("Tweet content is required");
       setFocus("tweet");
       return;
-    } else if (data.tweet.trim()?.length < 20) {
-      toast.error("Minimum 20 characters are required");
+    }
+    if (content.length < 20) {
+      toast.error("Minimum 20 characters required");
       setFocus("tweet");
       return;
-    } else if (data.tweet.trim()?.length > 700) {
-      toast.error("Maximum 700 characters are allowed");
+    }
+    if (content.length > 700) {
+      toast.error("Maximum 700 characters allowed");
       setFocus("tweet");
       return;
     }
 
-    dispatch(createTweet({ content: data })).then(() => {
-      getUserTweets(currentUser?._id);
+    const res = await dispatch(createTweet({ content }));
+    if (res.meta.requestStatus === "fulfilled") {
       reset();
-    });
+      fetchTweets();
+    }
   };
 
-  if (!localTweets) {
+  /** Skeleton Loader */
+  if (status === "loading" && !tweets.length) {
     return (
       <section className="w-full py-1 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0 animate-pulse">
-        {/* Top Input Skeleton */}
+        {/* Input Skeleton */}
         <div className="mt-2 border pb-2 bg-gray-200/10 dark:bg-gray-800/30 rounded-md">
           <div className="mb-2 h-12 w-full px-3 pt-2 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
           <div className="flex items-center justify-end gap-x-3 px-3">
@@ -66,24 +79,18 @@ const ChannelTweets = ({ owner = false }) => {
 
         <hr className="my-3 border-gray-300/20 dark:border-gray-600/30" />
 
-        {/* Tweets Skeleton List */}
+        {/* Tweet List Skeleton */}
         <div className="space-y-4">
-          {Array(7)
+          {Array(5)
             .fill()
             .map((_, i) => (
               <div key={i} className="px-1">
                 <div className="flex gap-x-4">
-                  {/* Avatar */}
-                  <div className="mt-2 h-12 w-12 rounded-full bg-gray-200/20 dark:bg-gray-700/20"></div>
-
-                  {/* Content */}
+                  <div className="mt-2 h-12 w-12 rounded-full bg-gray-200/20 dark:bg-gray-700/20" />
                   <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-5 w-44 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-                      <div className="h-5 w-16 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-                    </div>
-                    <div className="h-3 w-32 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
-                    <div className="h-6 w-1/2 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
+                    <div className="h-5 w-44 bg-gray-200/20 dark:bg-gray-700/20 rounded" />
+                    <div className="h-3 w-32 bg-gray-200/20 dark:bg-gray-700/20 rounded" />
+                    <div className="h-6 w-3/4 bg-gray-200/20 dark:bg-gray-700/20 rounded" />
                   </div>
                 </div>
                 <hr className="my-3 border-gray-300/20 dark:border-gray-700/20" />
@@ -94,50 +101,58 @@ const ChannelTweets = ({ owner = false }) => {
     );
   }
 
-  let tweets = data || localTweets;
-
-  if (!status && !tweets) {
-    return (
-      <div className="flex w-full h-screen flex-col gap-y-4 px-16 py-4 rounded bg-slate-100/10 animate-pulse"></div>
-    );
-  }
   return (
-    <>
+    <section className="w-full py-2 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
+      {/* --- Tweet Input (Visible only for owner) --- */}
       {owner && (
-        <form onSubmit={handleSubmit(addTweet)} className="mt-2 border pb-2">
+        <form
+          onSubmit={handleSubmit(handleAddTweet)}
+          className="mt-2 border border-gray-700/50 rounded-lg bg-[#181818] p-3"
+        >
           <textarea
             {...register("tweet")}
-            className="w-full resize-none overflow-hidden bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white px-3 py-2 rounded-lg focus:outline-none text-sm font-medium transition-colors"
-            placeholder="Write a tweet"
-          ></textarea>
-
-          <div className="flex items-center justify-end gap-x-3 px-3">
-            {/* Emoji button */}
+            rows={3}
+            placeholder="What's happening?"
+            className="w-full resize-none rounded-md bg-transparent px-3 py-2 text-gray-100 placeholder-gray-400 focus:outline-none text-sm font-medium"
+          />
+          <div className="flex items-center justify-end gap-2 mt-2">
             <button
               type="button"
-              className="inline-block h-5 w-5 hover:text-blue-400"
+              className="p-2 rounded-full hover:bg-gray-700/50 transition"
+              title="Add Emoji"
             >
-              <MdSentimentDissatisfied className="w-14 h-14 text-gray-200" />
+              <MdOutlineEmojiEmotions className="w-5 h-5 text-gray-300" />
             </button>
-            {/* Cancel button */}
             <button
               type="button"
               onClick={() => reset()}
-              className="py-1 rounded-xl px-3 hover:text-black hover:bg-slate-500"
+              className="px-3 py-1 text-sm rounded-md text-gray-400 hover:text-white transition"
             >
-              cancel
+              Cancel
             </button>
-            {/* send button */}
             <button
               type="submit"
-              className="bg-blue-500 px-3 py-2 font-semibold text-white"
+              className="px-4 py-1.5 bg-blue-600 text-sm font-semibold rounded-md text-white hover:bg-blue-700 active:scale-95 transition"
             >
               Tweet
             </button>
           </div>
         </form>
       )}
-    </>
+
+      {/* --- Tweets List --- */}
+      {tweets?.length > 0 ? (
+        <ul className="divide-y divide-gray-700/50 mt-4">
+          {tweets.map((tweet) => (
+            <TweetLayout key={tweet._id} tweet={tweet} owner={owner} />
+          ))}
+        </ul>
+      ) : owner ? (
+        <MyChannelEmptyTweet />
+      ) : (
+        <EmptyTweet />
+      )}
+    </section>
   );
 };
 
