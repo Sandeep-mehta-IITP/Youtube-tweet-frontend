@@ -13,7 +13,8 @@ export const getLikedVideos = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/likes/videos");
-      return response.data.data;
+      console.log("GET LIKED VIDEOS RESPONSE", response.data);
+      return response.data.data.map((item) => item.likedVideos);
     } catch (error) {
       console.log("FAILED TO FETCHED LIKED VIDEOS", error.userMessage);
       toast.error(error.userMessage || "Failed to fetched liked videos.");

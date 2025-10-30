@@ -32,7 +32,7 @@ const Aside = () => {
     {
       name: "Liked Videos",
       icon: <ThumbsUp className="w-6 h-6" />,
-      route: "/liked-videos",
+      route: "feed/liked-videos",
     },
     {
       name: "Playlists",

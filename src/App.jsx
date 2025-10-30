@@ -22,6 +22,8 @@ import ChannelTweets from "./components/Tweet/ChannelTweets";
 import FeedTweets from "./pages/FeedTweets";
 import GuestHistory from "./components/GuestPages/GuestHistory";
 import WatchHistory from "./pages/History";
+import LikedVideos from "./pages/LikedVideos";
+import GuestLikedVideos from "./components/GuestPages/GuestLikedVideos";
 
 function App() {
   const dispatch = useDispatch();
@@ -115,11 +117,28 @@ function App() {
           <Route path="/empty/tweet" element={<ChannelTweets />} />
           <Route path="feed/tweets" element={<FeedTweets />} />
 
+          {/* Watch history */}
           <Route
             path="feed/history"
             element={
-              <AuthLayout authentication={true} guestComponent={<GuestHistory />}>
+              <AuthLayout
+                authentication={true}
+                guestComponent={<GuestHistory />}
+              >
                 <WatchHistory />
+              </AuthLayout>
+            }
+          />
+
+          {/* Liked videos */}
+          <Route
+            path="feed/liked-videos"
+            element={
+              <AuthLayout
+                authentication={true}
+                guestComponent={<GuestLikedVideos />}
+              >
+                <LikedVideos />
               </AuthLayout>
             }
           />
