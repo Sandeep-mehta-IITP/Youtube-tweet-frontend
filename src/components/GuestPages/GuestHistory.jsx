@@ -7,7 +7,7 @@ function GuestHistory() {
     <GuestComponent
       title="Keep track of what you watch"
       description="Watch history isn't viewable when signed out."
-      icon={<HistoryIcon className="h-5 w-5 text-white/80 font-semibold" />}
+      icon={<HistoryIcon className="h-12 w-12 text-sky-600 font-semibold" />}
     />
   );
 }

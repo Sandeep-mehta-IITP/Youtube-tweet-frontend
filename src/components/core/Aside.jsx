@@ -22,7 +22,7 @@ const Aside = () => {
     {
       name: "History",
       icon: <History className="w-6 h-6" />,
-      route: "/history",
+      route: "/feed/history",
     },
     {
       name: "Subscriptions",

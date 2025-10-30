@@ -15,7 +15,7 @@ const FeedTweets = ({ owner = false }) => {
   const { data, status, loading } = useSelector(({ tweet }) => tweet);
   //console.log("tweet data", data);
 
-  const { isAuthenticated, user } = useSelector(({ auth }) => auth);
+  const { isAuthenticated } = useSelector(({ auth }) => auth);
 
   const [localTweets, setLocalTweets] = useState([]);
   const [isPosting, setIsPosting] = useState(false);

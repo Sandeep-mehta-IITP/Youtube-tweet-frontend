@@ -12,23 +12,17 @@ const AuthLayout = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (authentication && isAuthenticated !== authentication) {
-      if (guestComponent) return;
+    if (authentication && !isAuthenticated && !guestComponent) {
       navigate("/login");
-    } else if (!authentication && isAuthenticated !== authentication) {
+    } else if (!authentication && isAuthenticated) {
       navigate("/");
     }
-
     setLoading(false);
   }, [authentication, isAuthenticated, navigate, guestComponent]);
 
   if (loading) {
     return (
-      <div
-        className="flex items-center justify-center min-h-screen bg-white dark:bg-[#121212] transition-colors duration-300"
-        role="status"
-        aria-live="polite"
-      >
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-[#121212] transition-colors duration-300">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-gray-900 dark:text-white text-lg font-medium">
@@ -39,7 +33,7 @@ const AuthLayout = ({
     );
   }
 
-  if (!isAuthenticated && guestComponent) {
+  if (authentication && !isAuthenticated && guestComponent) {
     return <>{guestComponent}</>;
   }
 

@@ -160,10 +160,12 @@ export const watchHistory = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/users/history");
+      console.log("WatchHistory data", response.data.data);
+      
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO FETCHED WATCHHISTORY", error.userMessage);
-      toast.error(error.userMessage || "Failed to fetch watchHistory.");
+      
       return rejectWithValue(error.userMessage);
     }
   }
@@ -370,7 +372,7 @@ const authSlice = createSlice({
     builder.addCase(watchHistory.fulfilled, (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
-      state.userData = action.payload;
+      state.userData.watchHistory = action.payload;
     });
 
     builder.addCase(watchHistory.rejected, (state) => {
