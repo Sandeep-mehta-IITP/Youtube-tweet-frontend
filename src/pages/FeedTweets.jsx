@@ -72,6 +72,9 @@ const FeedTweets = ({ owner = false }) => {
 
   const tweets = Array.isArray(data) && data.length > 0 ? data : localTweets;
 
+  //console.log("tweets in feed tweets", tweets);
+  
+
   /** Skeleton Loader **/
   if (loading && (!tweets || tweets.length === 0)) {
     return (
@@ -155,7 +158,7 @@ const FeedTweets = ({ owner = false }) => {
               <TweetLayout
                 key={tweet?._id}
                 tweet={tweet}
-                owner={tweet?.isOwner}
+                owner={owner}
               />
             ))}
           </ul>

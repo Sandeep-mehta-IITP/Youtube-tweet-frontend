@@ -12,6 +12,8 @@ import LikeComponent from "../core/LikeComponent";
 import { Edit2, Trash2, Check, X, Loader2, MoreHorizontal } from "lucide-react";
 
 const TweetLayout = ({ tweet, owner }) => {
+  //console.log("tweets in tweetlayout", tweet);
+  
   const dispatch = useDispatch();
   const textareaRef = useRef(null);
 
@@ -100,10 +102,10 @@ const TweetLayout = ({ tweet, owner }) => {
       <article className="flex gap-4 p-4 bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg border border-gray-700">
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <Link to={`/user/${tweet?.owner?.username}`}>
+          <Link to={`/user/${tweet?.ownerDetails?.username}`}>
             <img
-              src={tweet?.owner?.avatar || "/default-avatar.png"}
-              alt={tweet?.owner?.username}
+              src={tweet?.ownerDetails?.avatar || "/default-avatar.png"}
+              alt={tweet?.ownerDetails?.username}
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover ring-1 ring-gray-300 dark:ring-gray-600 hover:ring-blue-500 transition-all"
               loading="lazy"
             />
@@ -116,10 +118,10 @@ const TweetLayout = ({ tweet, owner }) => {
           <div className="flex items-start justify-between">
             <div>
               <Link
-                to={`/user/${tweet?.owner?.username}`}
+                to={`/user/${tweet?.ownerDetails?.username}`}
                 className="font-semibold text-gray-900 dark:text-white hover:underline"
               >
-                @{tweet?.owner?.username}
+                @{tweet?.ownerDetails?.username}
               </Link>
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 {formatTimestamp(tweet?.createdAt)}
@@ -127,7 +129,7 @@ const TweetLayout = ({ tweet, owner }) => {
             </div>
 
             {/* Menu Button */}
-            {tweet?.isOwner && (
+            {(owner || tweet?.isOwner) && (
               <div className="relative">
                 <button
                   onClick={() => setShowMenu((prev) => !prev)}

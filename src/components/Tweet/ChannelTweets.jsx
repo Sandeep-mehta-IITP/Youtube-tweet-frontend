@@ -32,7 +32,7 @@ const ChannelTweets = ({ owner = false }) => {
     if (res.meta.requestStatus === "fulfilled") {
       setTweets(res.payload);
     }
-  }, [dispatch, userId]);
+  }, [username, dispatch, userId]);
 
   useEffect(() => {
     fetchTweets();
@@ -64,6 +64,8 @@ const ChannelTweets = ({ owner = false }) => {
       fetchTweets();
     }
   };
+
+  //console.log("tweets in channelTweets", tweets);
 
   /** Skeleton Loader */
   if (status === "loading" && !tweets.length) {
@@ -142,9 +144,9 @@ const ChannelTweets = ({ owner = false }) => {
 
       {/* --- Tweets List --- */}
       {tweets?.length > 0 ? (
-        <ul className="divide-y divide-gray-700/50 mt-4">
+        <ul className="divide-y  divide-gray-700/50 mt-4 flex flex-col gap-y-3">
           {tweets.map((tweet) => (
-            <TweetLayout key={tweet._id} tweet={tweet} owner={owner} />
+            <TweetLayout key={tweet?._id} tweet={tweet} owner={owner} />
           ))}
         </ul>
       ) : owner ? (

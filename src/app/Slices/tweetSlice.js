@@ -14,7 +14,7 @@ export const getUserTweets = createAsyncThunk(
     try {
       const response = await axiosInstance.get(`/tweets/user/${userId}`);
 
-      return response.data;
+      return response.data.data;
     } catch (error) {
       console.log("FAILED TO FETCHED USER TWEETS", error.userMessage);
       toast.error(error.userMessage || "Failed to fetched user tweets.");
@@ -100,7 +100,10 @@ const tweetSlice = createSlice({
     builder.addCase(getUserTweets.fulfilled, (state, action) => {
       state.loading = false;
       state.status = true;
-      state.data = action.payload;
+      const newTweet = action.payload?.tweet || action.payload;
+      if (newTweet?._id) {
+        state.data = [newTweet, ...state.data];
+      }
     });
 
     builder.addCase(getUserTweets.rejected, (state) => {
