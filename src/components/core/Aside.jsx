@@ -16,6 +16,7 @@ import { NavLink } from "react-router-dom";
 
 const Aside = () => {
   const asideOpen = useSelector((state) => state.ui.asideOpen);
+  const username = useSelector((state) => state.auth.userData?.username);
 
   const navElements = [
     { name: "Home", icon: <Home className="w-6 h-6" />, route: "/" },
@@ -27,7 +28,7 @@ const Aside = () => {
     {
       name: "Subscriptions",
       icon: <MonitorPlay className="w-6 h-6" />,
-      route: "/subscriptions",
+      route: `/channel/${username}/subscribed`,
     },
     {
       name: "Liked Videos",
@@ -37,18 +38,18 @@ const Aside = () => {
     {
       name: "Playlists",
       icon: <ListVideo className="w-6 h-6" />,
-      route: "/user/playlists",
+      route: `/channel/${username}/playlists`,
     },
     {
       name: "Your Videos",
       icon: <VideoIcon className="w-6 h-6" />,
-      route: "/your-videos",
+      route: `/channel/${username}`,
     },
     { name: "Tweets", icon: <Twitter className="w-6 h-6" />, route: "/feed/tweets" },
     {
       name: "Dashboard",
       icon: <BarChart2 className="w-6 h-6" />,
-      route: "/dashboard",
+      route: "/admin/dashboard",
     },
     {
       name: "Support",

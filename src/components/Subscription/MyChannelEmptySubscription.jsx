@@ -1,8 +1,9 @@
-import React from "react";;
+import React from "react";
 import { motion } from "framer-motion";
-import { MdSentimentDissatisfied } from 'react-icons/md';
+// import { MdSentimentDissatisfied } from "react-icons/md";
+import { Users } from "lucide-react"
 
-const EmptyTweet = () => {
+const MyChannelEmptySubscription = () => {
   return (
     <section
       className="flex min-h-[65vh] items-center justify-center p-6"
@@ -16,7 +17,7 @@ const EmptyTweet = () => {
       >
         {/* Icon Container */}
         <div className="inline-flex items-center justify-center mb-6 rounded-2xl bg-gray-800/70 p-5 shadow-md backdrop-blur-sm">
-          <MdSentimentDissatisfied
+          <Users
             className="w-14 h-14 text-sky-600"
             aria-hidden="true"
           />
@@ -24,18 +25,19 @@ const EmptyTweet = () => {
 
         {/* Title */}
         <h2 className="text-xl sm:text-3xl font-semibold text-gray-100 mb-2">
-          No Tweets Yet
+          No Subscribers Yet
         </h2>
 
         {/* Subtitle */}
         <p className="text-gray-400 text-lg sm:text-xl leading-relaxed">
-          This channel hasn’t posted any{" "}
-          <span className="font-medium text-blue-400">tweets</span> yet.  
-          Stay tuned for updates and announcements.
+          Your channel doesn’t have any subscribers yet. Keep{" "}
+          <span className="font-medium text-blue-400">creating</span> and
+          sharing engaging content to grow your audience and build your
+          community.
         </p>
       </motion.div>
     </section>
   );
 };
 
-export default EmptyTweet;
+export default MyChannelEmptySubscription;

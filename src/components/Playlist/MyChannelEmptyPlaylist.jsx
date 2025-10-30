@@ -1,34 +1,47 @@
-import { Play, Plus } from "lucide-react";
 import React from "react";
+import { motion } from "framer-motion";
+import { Play, Plus } from "lucide-react";
 
 const MyChannelEmptyPlaylist = ({ onClickBtn }) => {
   return (
-    <section className="flex justify-between mt-2">
-      <div className="w-full max-w-sm text-center">
-        {/* Play icon */}
-        <p className="w-full mb-4">
-          <span className="inline-flex rounded-full bg-gray-800 p-2 text-[#f6f5f6] font-semibold">
-            <Play className="w-6 h-6 " />
-          </span>
+    <section
+      className="flex min-h-[65vh] items-center justify-center p-6"
+      aria-label="Empty playlist section"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 25 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md text-center"
+      >
+        {/* Icon Container */}
+        <div className="inline-flex items-center justify-center mb-6 rounded-2xl bg-gray-800/70 p-5 shadow-md backdrop-blur-sm">
+          <Play className="w-14 h-14 text-sky-500" aria-hidden="true" />
+        </div>
+
+        {/* Title */}
+        <h2 className="text-xl sm:text-3xl font-semibold text-gray-100 mb-3">
+          No Playlists Created
+        </h2>
+
+        {/* Subtitle */}
+        <p className="text-gray-400 text-lg sm:text-xl leading-relaxed mb-6">
+          You haven’t created any playlists yet. Start organizing your favorite{" "}
+          <span className="font-medium text-blue-400">videos</span> and make
+          your channel more engaging.
         </p>
 
-        <h5 className="mb-3 text-[#f6f5f6] font-semibold">
-          No playlists created
-        </h5>
-        <p className="text-sm text-[#f6f5f6] font-medium">
-          Your Channel has yet to create a playlist. <br /> create a playlist
-          and add some videos.
-        </p>
-
-        {/* Add button */}
-        <button
-          onCanPlay={() => onClickBtn()}
-          className="mt-5 inline-flex items-center gap-x-3 border border-transparent hover:border-dotted hover:border-white px-4 py-2 font-semibold bg-blue-400 text-[#121212]"
+        {/* Add Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={onClickBtn}
+          className="inline-flex items-center gap-x-3 rounded-lg border border-transparent bg-blue-500 px-5 py-2.5 font-semibold text-[#121212] hover:bg-blue-400 transition-all duration-200"
         >
           <Plus className="w-5 h-5" />
           Create New Playlist
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </section>
   );
 };

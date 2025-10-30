@@ -17,7 +17,7 @@ const MyChannelEmptyTweet = () => {
         {/* Icon Container */}
         <div className="inline-flex items-center justify-center mb-6 rounded-2xl bg-gray-800/70 p-5 shadow-md backdrop-blur-sm">
           <MdSentimentDissatisfied
-            className="w-14 h-14 text-gray-200"
+            className="w-14 h-14 text-sky-600"
             aria-hidden="true"
           />
         </div>

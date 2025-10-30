@@ -24,6 +24,10 @@ import GuestHistory from "./components/GuestPages/GuestHistory";
 import WatchHistory from "./pages/History";
 import LikedVideos from "./pages/LikedVideos";
 import GuestLikedVideos from "./components/GuestPages/GuestLikedVideos";
+import Subscribed from "./components/Subscription/Subscribed";
+import GuestMyChannel from "./components/GuestPages/GuestMyChannel";
+import Channel from "./pages/Channel";
+import GuestTweets from "./components/GuestPages/GuestTweets";
 
 function App() {
   const dispatch = useDispatch();
@@ -107,15 +111,27 @@ function App() {
           {/* Playlists */}
           <Route path="playlist/:playlistId" element={<PlaylistVideos />} />
 
-          <Route
-            path="/user/playlists"
-            element={<ChannelPlaylists owner={false} />}
-          />
-
           <Route path="/watch/:videoId" element={<VideoDetails />} />
 
-          <Route path="/empty/tweet" element={<ChannelTweets />} />
-          <Route path="feed/tweets" element={<FeedTweets />} />
+          {/* Home Page Feed Tweets */}
+          <Route
+            path="feed/tweets"
+            element={
+              <AuthLayout authentication guestComponent={<GuestTweets />}>
+                <FeedTweets />
+              </AuthLayout>
+            }
+          />
+
+          {/* All other channels */}
+          <Route path="user/:username" element={<Channel />}>
+            <Route
+              path="playlists"
+              element={<ChannelPlaylists owner={false} />}
+            />
+            <Route path="tweet" element={<ChannelTweets owner={false} />} />
+            <Route path="subscribed" element={<Subscribed owner={false} />} />
+          </Route>
 
           {/* Watch history */}
           <Route
@@ -142,6 +158,19 @@ function App() {
               </AuthLayout>
             }
           />
+
+          {/* Channel Subscriptions for currently logged in user */}
+          <Route
+            path="/channel/:username"
+            element={
+              <AuthLayout authentication guestComponent={<GuestMyChannel />}>
+                <Channel owner />
+              </AuthLayout>
+            }
+          >
+            <Route path="subscribed" element={<Subscribed owner />} />
+            <Route path="playlists" element={<ChannelPlaylists owner />} />
+          </Route>
         </Route>
       </Routes>
     </div>
