@@ -26,7 +26,7 @@ const Channel = ({ owner = false }) => {
     { name: "Videos", route: "" },
     { name: "Playlists", route: "playlists" },
     { name: "Tweets", route: "tweets" },
-    { name: "Subscribed", route: "subscribed" },
+    { name: "Subscribers", route: "subscribed" },
     { name: "About", route: "about" },
   ];
 
