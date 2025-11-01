@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { MdOutlineEmojiEmotions } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
 
 import { createTweet, getUserTweets } from "@/app/Slices/tweetSlice";
 import TweetLayout from "./TweetLayout";
@@ -14,29 +15,33 @@ const ChannelTweets = ({ owner = false }) => {
   const dispatch = useDispatch();
   const { username } = useParams();
 
+  // Redux states
   const { data: tweetsData, status } = useSelector((state) => state.tweet);
   const { isAuthenticated, userData: currentUser } = useSelector(
     (state) => state.auth
   );
-  const userId = owner
-    ? currentUser?._id
-    : useSelector((state) => state.user.userData?._id);
+  const viewedUser = useSelector((state) => state.user.userData);
+  const userId = owner ? currentUser?._id : viewedUser?._id;
 
-  const [tweets, setTweets] = useState([]);
+  const [isPosting, setIsPosting] = useState(false);
   const { register, handleSubmit, reset, setFocus } = useForm();
 
-  /** Fetch user tweets */
-  const fetchTweets = useCallback(async () => {
-    if (!userId) return;
-    const res = await dispatch(getUserTweets(userId));
-    if (res.meta.requestStatus === "fulfilled") {
-      setTweets(res.payload);
-    }
-  }, [username, dispatch, userId]);
-
+  /** Fetch user tweets on mount or user change */
   useEffect(() => {
-    fetchTweets();
-  }, [fetchTweets, isAuthenticated]);
+  const fetchTweets = async () => {
+    if (userId) {
+      try {
+        const res = await dispatch(getUserTweets(userId)).unwrap();
+        //console.log("Fetched Tweets:", res);
+      } catch (error) {
+        console.error("Error fetching tweets:", error);
+      }
+    }
+  };
+
+  fetchTweets();
+}, [dispatch, userId, username, isAuthenticated]);
+
 
   /** Add new tweet */
   const handleAddTweet = async (formData) => {
@@ -44,44 +49,43 @@ const ChannelTweets = ({ owner = false }) => {
 
     if (!content) {
       toast.error("Tweet content is required");
-      setFocus("tweet");
-      return;
+      return setFocus("tweet");
     }
     if (content.length < 20) {
       toast.error("Minimum 20 characters required");
-      setFocus("tweet");
-      return;
+      return setFocus("tweet");
     }
     if (content.length > 700) {
       toast.error("Maximum 700 characters allowed");
-      setFocus("tweet");
-      return;
+      return setFocus("tweet");
     }
 
-    const res = await dispatch(createTweet({ content }));
-    if (res.meta.requestStatus === "fulfilled") {
+    setIsPosting(true);
+    try {
+      await dispatch(createTweet({ content })).unwrap();
       reset();
-      fetchTweets();
+      await dispatch(getUserTweets(userId)); // instantly refresh tweets
+    } catch (error) {
+      toast.error("Failed to post tweet");
+      console.error(error);
+    } finally {
+      setIsPosting(false);
     }
   };
 
-  //console.log("tweets in channelTweets", tweets);
-
+  //console.log("Tweets data", tweetsData);
+  
   /** Skeleton Loader */
-  if (status === "loading" && !tweets.length) {
+  if (status === "loading" && (!tweetsData || tweetsData.length === 0)) {
     return (
       <section className="w-full py-1 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0 animate-pulse">
-        {/* Input Skeleton */}
         <div className="mt-2 border pb-2 bg-gray-200/10 dark:bg-gray-800/30 rounded-md">
           <div className="mb-2 h-12 w-full px-3 pt-2 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
           <div className="flex items-center justify-end gap-x-3 px-3">
             <div className="w-20 h-10 bg-gray-200/20 dark:bg-gray-700/20 rounded"></div>
           </div>
         </div>
-
         <hr className="my-3 border-gray-300/20 dark:border-gray-600/30" />
-
-        {/* Tweet List Skeleton */}
         <div className="space-y-4">
           {Array(5)
             .fill()
@@ -103,9 +107,10 @@ const ChannelTweets = ({ owner = false }) => {
     );
   }
 
+  /** Main UI */
   return (
     <section className="w-full py-2 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
-      {/* --- Tweet Input (Visible only for owner) --- */}
+      {/* --- Tweet Input (only for owner) --- */}
       {owner && (
         <form
           onSubmit={handleSubmit(handleAddTweet)}
@@ -129,23 +134,29 @@ const ChannelTweets = ({ owner = false }) => {
               type="button"
               onClick={() => reset()}
               className="px-3 py-1 text-sm rounded-md text-gray-400 hover:text-white transition"
+              disabled={isPosting}
             >
               Cancel
             </button>
             <button
               type="submit"
+              disabled={isPosting}
               className="px-4 py-1.5 bg-blue-600 text-sm font-semibold rounded-md text-white hover:bg-blue-700 active:scale-95 transition"
             >
-              Tweet
+              {isPosting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "Tweet"
+              )}
             </button>
           </div>
         </form>
       )}
 
       {/* --- Tweets List --- */}
-      {tweets?.length > 0 ? (
-        <ul className="divide-y  divide-gray-700/50 mt-4 flex flex-col gap-y-3">
-          {tweets.map((tweet) => (
+      {tweetsData?.length > 0 ? (
+        <ul className="divide-y divide-gray-700/50 mt-4 flex flex-col gap-y-3">
+          {tweetsData.map((tweet) => (
             <TweetLayout key={tweet?._id} tweet={tweet} owner={owner} />
           ))}
         </ul>

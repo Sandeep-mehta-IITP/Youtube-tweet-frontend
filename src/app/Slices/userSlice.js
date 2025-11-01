@@ -90,7 +90,7 @@ const userSlice = createSlice({
       state.loading = false;
       state.isAuthenticated = true;
       state.userData = action.payload;
-      console.log(" channel data in user slice", state.userData);
+      //console.log(" channel data in user slice", state.userData);
     });
 
     builder.addCase(channelProfile.rejected, (state) => {

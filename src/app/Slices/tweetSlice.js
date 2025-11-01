@@ -74,7 +74,7 @@ export const updateTweet = createAsyncThunk(
 export const deleteTweet = createAsyncThunk(
   "tweet/deleteTweet",
   async (tweetId, { rejectWithValue }) => {
-    console.log("tweet ID in tweet slice", tweetId);
+    //console.log("tweet ID in tweet slice", tweetId);
 
     try {
       const response = await axiosInstance.delete(`/tweets/${tweetId}`);
@@ -100,10 +100,11 @@ const tweetSlice = createSlice({
     builder.addCase(getUserTweets.fulfilled, (state, action) => {
       state.loading = false;
       state.status = true;
-      const newTweet = action.payload?.tweet || action.payload;
-      if (newTweet?._id) {
-        state.data = [newTweet, ...state.data];
-      }
+      // const newTweet = action.payload?.tweet || action.payload;
+      // if (newTweet?._id) {
+      //   state.data = [newTweet, ...state.data];
+      // }
+      state.data = Array.isArray(action.payload) ? action.payload : [];
     });
 
     builder.addCase(getUserTweets.rejected, (state) => {
