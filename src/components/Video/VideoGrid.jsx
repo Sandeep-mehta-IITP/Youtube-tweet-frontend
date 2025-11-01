@@ -95,7 +95,6 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
                   <Link
                     to={`/user/${video?.ownerDetails?.username}`}
                     className="hover:text-sky-500 transition-colors duration-200"
-                    
                   >
                     {video?.ownerDetails?.username}
                   </Link>
@@ -131,9 +130,7 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
       )}
 
       {/* No Videos Message */}
-      {!loading && !fetching && videos.length === 0 && (
-        <NoVIdeoFound />
-      )}
+      {!loading && !fetching && videos.length === 0 && <NoVIdeoFound />}
     </div>
   );
 };

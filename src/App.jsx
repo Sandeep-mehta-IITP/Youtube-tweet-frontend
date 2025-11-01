@@ -28,6 +28,7 @@ import Subscribed from "./components/Subscription/Subscribed";
 import GuestMyChannel from "./components/GuestPages/GuestMyChannel";
 import Channel from "./pages/Channel";
 import GuestTweets from "./components/GuestPages/GuestTweets";
+import ChannelVideos from "./components/Video/ChannelVideos";
 
 function App() {
   const dispatch = useDispatch();
@@ -125,6 +126,7 @@ function App() {
 
           {/* All other channels */}
           <Route path="user/:username" element={<Channel />}>
+            <Route path="" element={<ChannelVideos owner={false} />} />
             <Route
               path="playlists"
               element={<ChannelPlaylists owner={false} />}
@@ -168,6 +170,7 @@ function App() {
               </AuthLayout>
             }
           >
+            <Route path="" element={<ChannelVideos owner />} />
             <Route path="subscribed" element={<Subscribed owner />} />
             <Route path="playlists" element={<ChannelPlaylists owner />} />
             <Route path="tweets" element={<ChannelTweets owner />} />
