@@ -30,6 +30,7 @@ import Channel from "./pages/Channel";
 import GuestTweets from "./components/GuestPages/GuestTweets";
 import ChannelVideos from "./components/Video/ChannelVideos";
 import SearchResult from "./components/core/SearchResult";
+import ChangePassword from "./components/Settings/ChangePassword";
 
 function App() {
   const dispatch = useDispatch();
@@ -180,6 +181,16 @@ function App() {
             <Route path="tweets" element={<ChannelTweets owner />} />
           </Route>
         </Route>
+
+        {/* Settings */}
+        <Route
+          path="settings"
+          element={
+            <AuthLayout authentication>
+              <ChangePassword />
+            </AuthLayout>
+          }
+        />
       </Routes>
     </div>
   );

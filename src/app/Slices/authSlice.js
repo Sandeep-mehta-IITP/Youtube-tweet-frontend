@@ -61,7 +61,7 @@ export const getCurrentUser = createAsyncThunk(
   }
 );
 
-export const changePaswword = createAsyncThunk(
+export const changePassword = createAsyncThunk(
   "auth/changePassword",
   async (data, { rejectWithValue }) => {
     try {
@@ -296,18 +296,18 @@ const authSlice = createSlice({
       state.userData = null;
     });
 
-    // chnage password
-    builder.addCase(changePaswword.pending, (state) => {
+    // change password
+    builder.addCase(changePassword.pending, (state) => {
       state.loading = true;
     });
 
-    builder.addCase(changePaswword.fulfilled, (state, action) => {
+    builder.addCase(changePassword.fulfilled, (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
       state.userData = action.payload;
     });
 
-    builder.addCase(changePaswword.rejected, (state) => {
+    builder.addCase(changePassword.rejected, (state) => {
       state.loading = false;
       state.isAuthenticated = false;
       state.userData = null;
