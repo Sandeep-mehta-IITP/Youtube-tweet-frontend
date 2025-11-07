@@ -43,7 +43,7 @@ const ChangePassword = () => {
       const res = await dispatch(changePWD({ oldPassword, newPassword }));
 
       if (res.type.includes("fulfilled")) {
-        toast.success("Password changed successfully!");
+        
         setFormData({ oldPassword: "", newPassword: "", confPassword: "" });
       } else {
         toast.error(res?.payload?.message || "Failed to change password.");

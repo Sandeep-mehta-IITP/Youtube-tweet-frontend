@@ -33,7 +33,7 @@ const Channel = ({ owner = false }) => {
   return profile ? (
     <section className="w-full pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
       {/* --- Cover Image --- */}
-      <div className="relative mt-2 w-full aspect-[16/10] md:aspect-[16/3.5]">
+      <div className="relative mt-2 w-full aspect-[16/10] md:aspect-[16/3.5] overflow-hidden rounded-lg">
         <img
           src={profile?.coverImage}
           alt={profile?.username}

@@ -65,7 +65,7 @@ export const changePassword = createAsyncThunk(
   "auth/changePassword",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.patch(
+      const response = await axiosInstance.post(
         "/users/change-password",
         data,
         {
@@ -80,8 +80,7 @@ export const changePassword = createAsyncThunk(
       );
       return response.data.data;
     } catch (error) {
-      console.log("FAILED TO CHANGE PASSWORD", error.userMessage);
-      toast.error(error.userMessage || "Failed to change password.");
+      console.log("FAILED TO CHANGE PASSWORD", error);
       return rejectWithValue(error.userMessage);
     }
   }
@@ -90,6 +89,8 @@ export const changePassword = createAsyncThunk(
 export const updateProfile = createAsyncThunk(
   "auth/updateProfile",
   async (data, { rejectWithValue }) => {
+    //console.log("data in update profile slice", data);
+
     try {
       const response = await axiosInstance.patch(
         "/users/update-details",
@@ -161,11 +162,11 @@ export const watchHistory = createAsyncThunk(
     try {
       const response = await axiosInstance.get("/users/history");
       console.log("WatchHistory data", response.data.data);
-      
+
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO FETCHED WATCHHISTORY", error.userMessage);
-      
+
       return rejectWithValue(error.userMessage);
     }
   }
