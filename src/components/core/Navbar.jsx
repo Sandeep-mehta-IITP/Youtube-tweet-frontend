@@ -80,7 +80,7 @@ const Navbar = () => {
       return;
     }
 
-    navigate(`/results?search-query=${searchQuery}`);
+    navigate(`/results?search_query=${searchQuery}`);
   };
 
 

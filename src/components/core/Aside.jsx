@@ -78,7 +78,7 @@ const Aside = () => {
                 end
                 className={({ isActive }) =>
                   `flex items-center transition-all duration-200 rounded-lg group
-                  ${isActive ? "bg-[#121212] text-white" : "text-gray-400 hover:bg-[#383838] hover:text-white"} px-3 py-2 min-w-0`
+                  ${isActive ? "bg-[#383737] text-white" : "text-gray-400 hover:bg-[#383838] hover:text-white"} px-3 py-2 min-w-0`
                 }
               >
                 <span className="w-7 h-7 flex-shrink-0 flex items-center justify-center">

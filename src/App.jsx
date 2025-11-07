@@ -29,6 +29,7 @@ import GuestMyChannel from "./components/GuestPages/GuestMyChannel";
 import Channel from "./pages/Channel";
 import GuestTweets from "./components/GuestPages/GuestTweets";
 import ChannelVideos from "./components/Video/ChannelVideos";
+import SearchResult from "./components/core/SearchResult";
 
 function App() {
   const dispatch = useDispatch();
@@ -123,6 +124,9 @@ function App() {
               </AuthLayout>
             }
           />
+
+          {/* Search Results */}
+          <Route path="/results" element={<SearchResult />} />
 
           {/* All other channels */}
           <Route path="user/:username" element={<Channel />}>

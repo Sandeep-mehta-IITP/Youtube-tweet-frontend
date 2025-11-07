@@ -10,7 +10,7 @@ const VideoList = ({ videos = [], loading = true, fetching = false }) => {
   const navigate = useNavigate();
 
   console.log("videos in video list", videos);
-  
+
   if (loading)
     return (
       <section className="w-full pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
@@ -81,17 +81,21 @@ const VideoList = ({ videos = [], loading = true, fetching = false }) => {
                   <button
                     onClick={(e) => {
                       e.preventDefault();
-                      navigate(`/user/${video.owner?.username}`);
+                      navigate(
+                        `/user/${video.owner?.username || video.ownerDetails?.username}`
+                      );
                     }}
                     className="flex items-center gap-2"
                   >
                     <img
-                      src={video.owner?.avatar}
-                      alt={video.owner?.username}
+                      src={video.owner?.avatar || video.ownerDetails?.avatar}
+                      alt={
+                        video.owner?.username || video.ownerDetails?.username
+                      }
                       className="h-9 w-9 rounded-full object-cover"
                     />
                     <p className="text-sm text-gray-200 font-medium hover:text-sky-300 transition-colors">
-                      {video.owner?.fullName}
+                      {video.owner?.fullName || video.ownerDetails?.fullName}
                     </p>
                   </button>
                 </div>
