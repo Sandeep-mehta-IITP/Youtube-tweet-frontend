@@ -71,7 +71,6 @@ export const verifyPassword = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.log("FAILED TO VERIFY PASSWORD", error.userMessage);
-      toast.error(error.userMessage || "Failed verify password.");
       return rejectWithValue(error.userMessage);
     }
   }
@@ -309,277 +308,84 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   extraReducers: (builder) => {
-    // login user
-    builder.addCase(loginUser.pending, (state) => {
-      state.loading = true;
-    });
+    // LOGIN
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userData = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(loginUser.rejected, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.userData = null;
+      });
 
-    builder.addCase(loginUser.fulfilled, (state, action) => {
-      //console.log("Payload in slice:", action.payload);
-      state.loading = false;
-      state.userData = action.payload;
-      state.isAuthenticated = true;
-    });
+    // LOGOUT
+    builder
+      .addCase(logoutUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.userData = null;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        state.loading = false;
+      });
 
-    builder.addCase(loginUser.rejected, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-      state.error = action.payload;
-    });
+    // GET CURRENT USER (Token Check)
+    builder
+      .addCase(getCurrentUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(getCurrentUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.userData = action.payload;
+      })
+      .addCase(getCurrentUser.rejected, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.userData = null;
+      });
 
-    // logout user
-    builder.addCase(logoutUser.pending, (state) => {
-      state.loading = true;
-    });
+    // → Sirf loading handle karo, userData ko touch mat karo!
+    const safeCases = [
+      verifyPassword,
+      changePassword,
+      sendOTP,
+      verifyOTP,
+      resetPassword,
+      updateProfile,
+      updateAvatar,
+      updateCoverImage,
+      watchHistory,
+      clearWatchHistory,
+      addLink,
+      updateLink,
+      removeLink,
+    ];
 
-    builder.addCase(logoutUser.fulfilled, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    builder.addCase(logoutUser.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-    });
-
-    // Fetch current user
-    builder.addCase(getCurrentUser.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(getCurrentUser.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(getCurrentUser.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // verify password
-    builder.addCase(verifyPassword.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(verifyPassword.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(verifyPassword.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // change password
-    builder.addCase(changePassword.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(changePassword.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(changePassword.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // send otp
-    builder.addCase(sendOTP.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(sendOTP.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(sendOTP.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // verify  otp
-    builder.addCase(verifyOTP.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(verifyOTP.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(verifyOTP.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // rest password
-    builder.addCase(resetPassword.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(resetPassword.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(resetPassword.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // update profile
-    builder.addCase(updateProfile.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(updateProfile.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(updateProfile.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // update avatar
-    builder.addCase(updateAvatar.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(updateAvatar.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(updateAvatar.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // update cover image
-    builder.addCase(updateCoverImage.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(updateCoverImage.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(updateCoverImage.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // watch history
-    builder.addCase(watchHistory.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(watchHistory.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData.watchHistory = action.payload;
-    });
-
-    builder.addCase(watchHistory.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // clear watch history
-    builder.addCase(clearWatchHistory.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(clearWatchHistory.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(clearWatchHistory.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // add link
-    builder.addCase(addLink.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(addLink.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(addLink.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // update link
-    builder.addCase(updateLink.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(updateLink.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(updateLink.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
-    });
-
-    // remove link
-    builder.addCase(removeLink.pending, (state) => {
-      state.loading = true;
-    });
-
-    builder.addCase(removeLink.fulfilled, (state, action) => {
-      state.loading = false;
-      state.isAuthenticated = true;
-      state.userData = action.payload;
-    });
-
-    builder.addCase(removeLink.rejected, (state) => {
-      state.loading = false;
-      state.isAuthenticated = false;
-      state.userData = null;
+    safeCases.forEach((thunk) => {
+      builder
+        .addCase(thunk.pending, (state) => {
+          state.loading = true;
+        })
+        .addCase(thunk.fulfilled, (state, action) => {
+          state.loading = false;
+          // Agar payload mein updated user hai → merge karo
+          if (action.payload && typeof action.payload === "object") {
+            state.userData = { ...state.userData, ...action.payload };
+          }
+        })
+        .addCase(thunk.rejected, (state) => {
+          state.loading = false;
+        });
     });
   },
 });
