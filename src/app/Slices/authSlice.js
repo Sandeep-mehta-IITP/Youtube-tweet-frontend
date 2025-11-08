@@ -61,6 +61,22 @@ export const getCurrentUser = createAsyncThunk(
   }
 );
 
+export const verifyPassword = createAsyncThunk(
+  "auth/verifyPassword",
+  async (oldPassword, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("/users/verify-password", {
+        oldPassword,
+      });
+      return response.data;
+    } catch (error) {
+      console.log("FAILED TO VERIFY PASSWORD", error.userMessage);
+      toast.error(error.userMessage || "Failed verify password.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
 export const changePassword = createAsyncThunk(
   "auth/changePassword",
   async (data, { rejectWithValue }) => {
@@ -81,6 +97,54 @@ export const changePassword = createAsyncThunk(
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO CHANGE PASSWORD", error);
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const sendOTP = createAsyncThunk(
+  "auth/sendOTP",
+  async (email, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/users/forgot-password", { email });
+      toast.success("OTP sent to your email!");
+      return res.data;
+    } catch (error) {
+      console.log("FAILED TO SEND OTP", error.userMessage);
+      toast.error(error.userMessage || "Failed to send OTP.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const verifyOTP = createAsyncThunk(
+  "auth/verifyOTP",
+  async ({ email, otp }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/users/verify-otp", { email, otp });
+      toast.success("OTP verified!");
+      return res.data.data;
+    } catch (error) {
+      console.log("FAILED TO VERIFIED OTP", error.userMessage);
+      toast.error(error.userMessage || "Invalid OTP.");
+      return rejectWithValue(error.userMessage);
+    }
+  }
+);
+
+export const resetPassword = createAsyncThunk(
+  "auth/resetPassword",
+  async ({ token, newPassword }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/users/reset-password", {
+        token,
+        newPassword,
+      });
+      toast.success("Password changed successfully!");
+      return res.data;
+    } catch (error) {
+      console.log("FAILED TO RESET PASSWORD ", error.userMessage);
+      toast.error(error.userMessage || "Failed to reset password.");
       return rejectWithValue(error.userMessage);
     }
   }
@@ -297,6 +361,23 @@ const authSlice = createSlice({
       state.userData = null;
     });
 
+    // verify password
+    builder.addCase(verifyPassword.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(verifyPassword.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(verifyPassword.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
     // change password
     builder.addCase(changePassword.pending, (state) => {
       state.loading = true;
@@ -309,6 +390,57 @@ const authSlice = createSlice({
     });
 
     builder.addCase(changePassword.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // send otp
+    builder.addCase(sendOTP.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(sendOTP.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(sendOTP.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // verify  otp
+    builder.addCase(verifyOTP.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(verifyOTP.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(verifyOTP.rejected, (state) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
+
+    // rest password
+    builder.addCase(resetPassword.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(resetPassword.fulfilled, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload;
+    });
+
+    builder.addCase(resetPassword.rejected, (state) => {
       state.loading = false;
       state.isAuthenticated = false;
       state.userData = null;

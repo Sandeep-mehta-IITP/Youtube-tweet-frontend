@@ -31,6 +31,7 @@ import GuestTweets from "./components/GuestPages/GuestTweets";
 import ChannelVideos from "./components/Video/ChannelVideos";
 import SearchResult from "./components/core/SearchResult";
 import Settings from "./pages/Settings";
+import ForgotPassword from "./components/core/ForgotPassword";
 
 function App() {
   const dispatch = useDispatch();
@@ -190,6 +191,9 @@ function App() {
               </AuthLayout>
             }
           />
+
+          {/* Forgot password */}
+          <Route path="forgot-password" element={<ForgotPassword />} />
         </Route>
       </Routes>
     </div>

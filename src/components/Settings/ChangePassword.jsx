@@ -1,173 +1,183 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { changePassword as changePWD } from "@/app/Slices/authSlice";
+import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
+import { verifyPassword, changePassword } from "@/app/Slices/authSlice";
 
 const ChangePassword = () => {
-  const [formData, setFormData] = useState({
-    oldPassword: "",
-    newPassword: "",
-    confPassword: "",
-  });
-  const [showPassword, setShowPassword] = useState({
-    old: false,
-    new: false,
-    confirm: false,
-  });
-
   const dispatch = useDispatch();
+  const [step, setStep] = useState(1); // 1: verify old, 2: set new
+  const [loading, setLoading] = useState(false);
 
-  // handle input change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const [oldPassword, setOldPassword] = useState("");
+  const [showOld, setShowOld] = useState(false);
 
-  // form submission
-  const handleSaveChange = async (e) => {
+  const [newPassword, setNewPassword] = useState("");
+  const [confPassword, setConfPassword] = useState("");
+  const [showNew, setShowNew] = useState(false);
+  const [showConf, setShowConf] = useState(false);
+
+  // Step 1: Verify Old Password
+  const handleVerify = async (e) => {
     e.preventDefault();
+    if (!oldPassword.trim()) return toast.error("Current password required");
 
-    const { oldPassword, newPassword, confPassword } = formData;
+    setLoading(true);
+    const result = await dispatch(verifyPassword(oldPassword));
+    setLoading(false);
 
-    // --- validations ---
-    if (!oldPassword.trim())
-      return toast.error("Current password is required.");
-    if (!newPassword.trim()) return toast.error("New password is required.");
-    if (newPassword.length < 8)
-      return toast.error("New password must be at least 8 characters long.");
-    if (newPassword !== confPassword)
-      return toast.error("Passwords do not match.");
-
-    try {
-      const res = await dispatch(changePWD({ oldPassword, newPassword }));
-
-      if (res.type.includes("fulfilled")) {
-        
-        setFormData({ oldPassword: "", newPassword: "", confPassword: "" });
-      } else {
-        toast.error(res?.payload?.message || "Failed to change password.");
-      }
-    } catch (err) {
-      toast.error("Something went wrong. Please try again.");
+    if (result.type.includes("fulfilled")) {
+      toast.success("Password verified!");
+      setStep(2);
+    } else {
+      toast.error(result.payload || "Wrong password");
     }
   };
 
-  const handleCancel = () =>
-    setFormData({ oldPassword: "", newPassword: "", confPassword: "" });
+  // Step 2: Change Password
+  const handleChange = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 8) return toast.error("Password must be 8+ chars");
+    if (newPassword !== confPassword) return toast.error("Passwords don't match");
 
-  // toggle password visibility
-  const toggleVisibility = (field) => {
-    setShowPassword((prev) => ({ ...prev, [field]: !prev[field] }));
+    setLoading(true);
+    const result = await dispatch(changePassword({ oldPassword, newPassword }));
+    setLoading(false);
+
+    if (result.type.includes("fulfilled")) {
+      toast.success("Password changed successfully!");
+      resetForm();
+    }
+  };
+
+  const resetForm = () => {
+    setOldPassword("");
+    setNewPassword("");
+    setConfPassword("");
+    setStep(1);
+  };
+
+  const goToForgotPassword = () => {
+    // Navigate to forgot password page
+    window.location.href = "/forgot-password";
+    // Or use router: navigate("/forgot-password")
   };
 
   return (
     <section className="flex justify-center flex-wrap gap-y-6 py-6 text-gray-100">
       <div className="w-full sm:w-1/2 lg:w-1/3">
-        <h5 className="text-lg font-semibold text-white mb-1">Password</h5>
+        <h5 className="text-lg font-semibold text-white mb-1">Change Password</h5>
         <p className="text-gray-300 text-sm">
-          Please enter your current password to set a new one.
+          {step === 1
+            ? "Enter your current password to continue."
+            : "Set a strong new password."}
         </p>
       </div>
 
       <div className="w-full sm:w-1/2 lg:w-2/3">
-        <form
-          onSubmit={handleSaveChange}
-          className="border border-gray-700 rounded-xl bg-gray-900/30 backdrop-blur-sm"
-        >
-          <div className="flex flex-col gap-5 p-6">
-            {/* Current Password */}
-            <div className="relative">
-              <label htmlFor="oldPassword" className="block mb-1.5 text-sm">
-                Current Password
-              </label>
-              <input
-                type={showPassword.old ? "text" : "password"}
-                id="oldPassword"
-                name="oldPassword"
-                autoComplete="current-password"
-                className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your current password"
-                value={formData.oldPassword}
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={() => toggleVisibility("old")}
-                className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
-              >
-                {showPassword.old ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
+        <div className="border border-gray-700 rounded-xl bg-gray-900/30 backdrop-blur-sm p-6">
+          {step === 1 ? (
+            // STEP 1: Verify Old Password
+            <form onSubmit={handleVerify} className="space-y-5">
+              <div className="relative">
+                <label className="block mb-1.5 text-sm">Current Password</label>
+                <input
+                  type={showOld ? "text" : "password"}
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="••••••••"
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOld(!showOld)}
+                  className="absolute right-3 top-10 text-gray-400"
+                >
+                  {showOld ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
 
-            {/* New Password */}
-            <div className="relative">
-              <label htmlFor="newPassword" className="block mb-1.5 text-sm">
-                New Password
-              </label>
-              <input
-                type={showPassword.new ? "text" : "password"}
-                id="newPassword"
-                name="newPassword"
-                autoComplete="new-password"
-                className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your new password"
-                value={formData.newPassword}
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={() => toggleVisibility("new")}
-                className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
-              >
-                {showPassword.new ? <FaEyeSlash /> : <FaEye />}
-              </button>
-              <p className="mt-1 text-xs text-red-500">
-                Password must be at least 8 characters long.
-              </p>
-            </div>
+              <div className="flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={goToForgotPassword}
+                  className="text-blue-400 text-sm hover:underline"
+                >
+                  Forgot password?
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-blue-600 px-5 py-2 rounded-lg text-white hover:bg-blue-500 transition flex items-center gap-2"
+                >
+                  {loading && <FaSpinner className="animate-spin" />}
+                  Verify
+                </button>
+              </div>
+            </form>
+          ) : (
+            // STEP 2: Set New Password
+            <form onSubmit={handleChange} className="space-y-5">
+              <div className="relative">
+                <label className="block mb-1.5 text-sm">New Password</label>
+                <input
+                  type={showNew ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter new password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNew(!showNew)}
+                  className="absolute right-3 top-10 text-gray-400"
+                >
+                  {showNew ? <FaEyeSlash /> : <FaEye />}
+                </button>
+                <p className="mt-1 text-xs text-blue-400">
+                  Minimum 8 characters
+                </p>
+              </div>
 
-            {/* Confirm Password */}
-            <div className="relative">
-              <label htmlFor="confPassword" className="block mb-1.5 text-sm">
-                Confirm New Password
-              </label>
-              <input
-                type={showPassword.confirm ? "text" : "password"}
-                id="confPassword"
-                name="confPassword"
-                autoComplete="new-password"
-                className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Re-enter your new password"
-                value={formData.confPassword}
-                onChange={handleChange}
-              />
-              <button
-                type="button"
-                onClick={() => toggleVisibility("confirm")}
-                className="absolute right-3 top-10 text-gray-400 hover:text-gray-200"
-              >
-                {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-          </div>
+              <div className="relative">
+                <label className="block mb-1.5 text-sm">Confirm Password</label>
+                <input
+                  type={showConf ? "text" : "password"}
+                  value={confPassword}
+                  onChange={(e) => setConfPassword(e.target.value)}
+                  className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Confirm new password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConf(!showConf)}
+                  className="absolute right-3 top-10 text-gray-400"
+                >
+                  {showConf ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
 
-          <div className="flex justify-end border-t border-gray-700 p-4 gap-3">
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="rounded-lg border border-gray-600 px-4 py-2 text-gray-300 hover:bg-gray-700 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-500 transition"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="border border-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-blue-600 px-5 py-2 rounded-lg text-white hover:bg-blue-500 transition flex items-center gap-2"
+                >
+                  {loading && <FaSpinner className="animate-spin" />}
+                  Change Password
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </section>
   );
