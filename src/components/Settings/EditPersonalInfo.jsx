@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateProfile } from "../../app/Slices/authSlice";
 import { toast } from "react-toastify";
-import { MdEmail } from "react-icons/md";
+import { MdEmail, MdEdit } from "react-icons/md";
 
 function EditPersonalInfo({ userData }) {
   const defaultValues = {
@@ -12,6 +12,7 @@ function EditPersonalInfo({ userData }) {
   };
 
   const [data, setData] = useState(defaultValues);
+  const [isEditing, setIsEditing] = useState(false);
   const dispatch = useDispatch();
 
   const handleChange = (e) => {
@@ -31,14 +32,15 @@ function EditPersonalInfo({ userData }) {
       email: data.email,
     };
 
-    try {
-      await dispatch(updateProfile(formData));
-    } catch {
-      toast.error("Failed to update profile.");
-    }
+    const result = await dispatch(updateProfile(formData));
   };
 
-  const handleCancel = () => setData(defaultValues);
+  const handleCancel = () => {
+    setData(defaultValues);
+    setIsEditing(false);
+  };
+
+  const handleEdit = () => setIsEditing(true);
 
   const isUnchanged = JSON.stringify(data) === JSON.stringify(defaultValues);
 
@@ -52,80 +54,99 @@ function EditPersonalInfo({ userData }) {
       </div>
 
       <div className="w-full sm:w-1/2 lg:w-2/3">
-        <form
-          onSubmit={handleSaveChange}
-          className="rounded-lg border border-gray-700 bg-gray-900/40 p-4"
-        >
-          <div className="flex flex-wrap gap-y-4">
-            <div className="w-full lg:w-1/2 lg:pr-2">
-              <label htmlFor="firstname" className="mb-1 inline-block text-sm">
-                First name
-              </label>
-              <input
-                id="firstname"
-                name="firstname"
-                type="text"
-                value={data.firstname}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter first name"
-              />
-            </div>
+        <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-6">
+          {/* Header with Edit Button */}
+          <div className="flex justify-between items-center mb-6">
+            <h6 className="text-lg font-medium">Your Details</h6>
+            {!isEditing && (
+              <button
+                onClick={handleEdit}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition"
+              >
+                <MdEdit size={16} />
+                Edit
+              </button>
+            )}
+          </div>
 
-            <div className="w-full lg:w-1/2 lg:pl-2">
-              <label htmlFor="lastname" className="mb-1 inline-block text-sm">
-                Last name
-              </label>
-              <input
-                id="lastname"
-                name="lastname"
-                type="text"
-                value={data.lastname}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-gray-700 bg-transparent px-3 py-2.5 focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter last name"
-              />
-            </div>
-
-            <div className="w-full">
-              <label htmlFor="email" className="mb-1 inline-block text-sm">
-                Email address
-              </label>
-              <div className="relative">
+          <form onSubmit={handleSaveChange} className="space-y-5">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm mb-1.5">First name</label>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={data.email}
+                  type="text"
+                  name="firstname"
+                  value={data.firstname}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-700 bg-transparent py-2.5 pl-10 pr-3 focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter email address"
+                  disabled={!isEditing}
+                  className={`w-full rounded-lg border ${
+                    isEditing
+                      ? "border-gray-600 bg-transparent focus:ring-2 focus:ring-blue-500"
+                      : "border-gray-700 bg-gray-800/50 cursor-not-allowed"
+                  } px-3 py-2.5 text-white transition`}
+                  placeholder="First name"
                 />
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  <MdEmail className="w-5 h-5" />
-                </span>
+              </div>
+
+              <div>
+                <label className="block text-sm mb-1.5">Last name</label>
+                <input
+                  type="text"
+                  name="lastname"
+                  value={data.lastname}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className={`w-full rounded-lg border ${
+                    isEditing
+                      ? "border-gray-600 bg-transparent focus:ring-2 focus:ring-blue-500"
+                      : "border-gray-700 bg-gray-800/50 cursor-not-allowed"
+                  } px-3 py-2.5 text-white transition`}
+                  placeholder="Last name"
+                />
               </div>
             </div>
-          </div>
 
-          <div className="flex justify-end gap-3 border-t border-gray-700 pt-4 mt-4">
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={isUnchanged}
-              className="rounded-lg border border-gray-600 px-4 py-2 text-gray-300 hover:bg-gray-700 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isUnchanged}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-500 disabled:cursor-not-allowed"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
+            <div>
+              <label className="block text-sm mb-1.5">Email address</label>
+              <div className="relative">
+                <input
+                  type="email"
+                  name="email"
+                  value={data.email}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className={`w-full rounded-lg border pl-10 pr-3 py-2.5 ${
+                    isEditing
+                      ? "border-gray-600 bg-transparent focus:ring-2 focus:ring-blue-500"
+                      : "border-gray-700 bg-gray-800/50 cursor-not-allowed"
+                  } text-white transition`}
+                  placeholder="email@example.com"
+                />
+                <MdEmail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            {isEditing && (
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-700">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="px-5 py-2.5 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUnchanged}
+                  className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium"
+                >
+                  Save Changes
+                </button>
+              </div>
+            )}
+          </form>
+        </div>
       </div>
     </div>
   );
