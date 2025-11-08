@@ -32,6 +32,8 @@ import ChannelVideos from "./components/Video/ChannelVideos";
 import SearchResult from "./components/core/SearchResult";
 import Settings from "./pages/Settings";
 import ForgotPassword from "./components/core/ForgotPassword";
+import AdminVideoLayout from "./components/Dashboard/AdminVideoLayout";
+import AdminPanelVideos from "./components/Dashboard/AdminPanelVideos";
 
 function App() {
   const dispatch = useDispatch();
@@ -194,6 +196,9 @@ function App() {
 
           {/* Forgot password */}
           <Route path="forgot-password" element={<ForgotPassword />} />
+
+          {/* Admin Dashboard */}
+          <Route path="admin/dashboard" element={<AdminPanelVideos />} />
         </Route>
       </Routes>
     </div>
