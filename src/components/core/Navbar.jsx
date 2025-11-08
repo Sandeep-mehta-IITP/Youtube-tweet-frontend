@@ -25,6 +25,8 @@ import { logoutUser } from "@/app/Slices/authSlice";
 
 const Navbar = () => {
   let { userData, isAuthenticated } = useSelector((state) => state.auth);
+  const username = userData?.username
+  
   //console.log(userData)
   const navigate = useNavigate();
   const dipatch = useDispatch();
@@ -232,28 +234,28 @@ const Navbar = () => {
                     : "opacity-0 invisible transform translate-y-2"
                 } transition-all duration-200`}
               >
-                <a
-                  href="/profile"
+                <Link
+                   to={`/channel/${username}`}
                   className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3"
                 >
                   <CircleUser className="w-5 h-5" />
                   <span>Your Profile</span>
-                </a>
+                </Link>
 
-                <a
-                  href="/"
+                <Link
+                  to={`/channel/${username}`}
                   className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3"
                 >
                   <TvMinimal className="w-5 h-5" />
                   <span>Your channel</span>
-                </a>
-                <a
-                  href="/"
+                </Link>
+                <Link
+                  to="/settings"
                   className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3"
                 >
                   <Settings className="w-5 h-5" />
                   <span>Settings</span>
-                </a>
+                </Link>
                 <button className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500 hover:bg-opacity-10" onClick={logoutHandler}>
                   <LogOutIcon className="w-5 h-5 text-red-500 inline mr-2" />
                   Sign out

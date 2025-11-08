@@ -308,7 +308,25 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   extraReducers: (builder) => {
-    // LOGIN
+    // ONLY THESE 3 LOGOUT THE USER
+    builder
+      .addCase(loginUser.rejected, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.userData = null;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.userData = null;
+      })
+      .addCase(getCurrentUser.rejected, (state) => {
+        state.loading = false;
+        state.isAuthenticated = false;
+        state.userData = null;
+      });
+
+    //FULL USER UPDATE (login, getCurrentUser)
     builder
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
@@ -318,44 +336,52 @@ const authSlice = createSlice({
         state.userData = action.payload;
         state.isAuthenticated = true;
       })
-      .addCase(loginUser.rejected, (state) => {
-        state.loading = false;
-        state.isAuthenticated = false;
-        state.userData = null;
-      });
-
-    // LOGOUT
-    builder
-      .addCase(logoutUser.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(logoutUser.fulfilled, (state) => {
-        state.loading = false;
-        state.isAuthenticated = false;
-        state.userData = null;
-      })
-      .addCase(logoutUser.rejected, (state) => {
-        state.loading = false;
-      });
-
-    // GET CURRENT USER (Token Check)
-    builder
       .addCase(getCurrentUser.pending, (state) => {
         state.loading = true;
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.isAuthenticated = true;
         state.userData = action.payload;
-      })
-      .addCase(getCurrentUser.rejected, (state) => {
-        state.loading = false;
-        state.isAuthenticated = false;
-        state.userData = null;
+        state.isAuthenticated = true;
       });
 
-    // → Sirf loading handle karo, userData ko touch mat karo!
-    const safeCases = [
+    //SPECIAL CASE: watchHistory (returns array)
+    builder
+      .addCase(watchHistory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(watchHistory.fulfilled, (state, action) => {
+        state.loading = false;
+        // Direct assign → array of videos
+        if (state.userData) {
+          state.userData.watchHistory = action.payload || [];
+        }
+      })
+      .addCase(watchHistory.rejected, (state) => {
+        state.loading = false;
+      });
+
+    // SPECIAL CASE: clearWatchHistory (returns user object or empty)
+    builder
+      .addCase(clearWatchHistory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(clearWatchHistory.fulfilled, (state, action) => {
+        state.loading = false;
+        if (state.userData) {
+          state.userData.watchHistory = [];
+          // Agar full user aaya to merge
+          if (action.payload && typeof action.payload === "object") {
+            state.userData = { ...state.userData, ...action.payload };
+          }
+        }
+      })
+      .addCase(clearWatchHistory.rejected, (state) => {
+        state.loading = false;
+      });
+
+   
+    const safeActions = [
       verifyPassword,
       changePassword,
       sendOTP,
@@ -364,23 +390,27 @@ const authSlice = createSlice({
       updateProfile,
       updateAvatar,
       updateCoverImage,
-      watchHistory,
-      clearWatchHistory,
       addLink,
       updateLink,
       removeLink,
     ];
 
-    safeCases.forEach((thunk) => {
+    safeActions.forEach((thunk) => {
       builder
         .addCase(thunk.pending, (state) => {
           state.loading = true;
         })
         .addCase(thunk.fulfilled, (state, action) => {
           state.loading = false;
-          // Agar payload mein updated user hai → merge karo
-          if (action.payload && typeof action.payload === "object") {
-            state.userData = { ...state.userData, ...action.payload };
+          if (action.payload && state.userData) {
+            // Agar full user object hai → merge
+            if (action.payload._id || action.payload.fullName) {
+              state.userData = { ...state.userData, ...action.payload };
+            }
+            // Agar sirf nested field hai (jaise links)
+            else if (action.payload.links) {
+              state.userData.links = action.payload.links;
+            }
           }
         })
         .addCase(thunk.rejected, (state) => {
