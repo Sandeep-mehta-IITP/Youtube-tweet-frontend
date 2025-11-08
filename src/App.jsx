@@ -34,6 +34,8 @@ import Settings from "./pages/Settings";
 import ForgotPassword from "./components/core/ForgotPassword";
 import AdminVideoLayout from "./components/Dashboard/AdminVideoLayout";
 import AdminPanelVideos from "./components/Dashboard/AdminPanelVideos";
+import Dashboard from "./pages/Dashboard";
+import GuestAdmin from "./components/GuestPages/GuestAdmin";
 
 function App() {
   const dispatch = useDispatch();
@@ -198,7 +200,14 @@ function App() {
           <Route path="forgot-password" element={<ForgotPassword />} />
 
           {/* Admin Dashboard */}
-          <Route path="admin/dashboard" element={<AdminPanelVideos />} />
+          <Route
+            path="admin/dashboard"
+            element={
+              <AuthLayout authentication guestComponent={<GuestAdmin />}>
+                <Dashboard />
+              </AuthLayout>
+            }
+          />
         </Route>
       </Routes>
     </div>

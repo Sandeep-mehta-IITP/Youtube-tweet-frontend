@@ -7,7 +7,7 @@ const GuestAdmin = () => {
     <GuestComponent
       title="Manage your content with ease"
       description="Sign in to access moderation tools and channel settings."
-      icon={<User2Icon className="h-5 w-5 text-white/80 font-semibold"/>}
+      icon={<User2Icon className="h-12 w-12 text-sky-600 font-semibold"/>}
     />
   );
 };
