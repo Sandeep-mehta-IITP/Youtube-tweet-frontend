@@ -22,11 +22,12 @@ import Button from "../ui/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleAside } from "@/app/Slices/uiSlice";
 import { logoutUser } from "@/app/Slices/authSlice";
+import VideoUploadForm from "../Dashboard/VideoUploadForm";
 
 const Navbar = () => {
   let { userData, isAuthenticated } = useSelector((state) => state.auth);
-  const username = userData?.username
-  
+  const username = userData?.username;
+
   //console.log(userData)
   const navigate = useNavigate();
   const dipatch = useDispatch();
@@ -41,6 +42,7 @@ const Navbar = () => {
 
   const createDropdownRef = useRef();
   const userDropdownRef = useRef();
+  const uploadRef = useRef();
 
   const createDropdownHandler = () => {
     setCreateDropdownOpen(!createDropdownOpen);
@@ -50,7 +52,7 @@ const Navbar = () => {
     setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
-  // Dropdown Closer 
+  // Dropdown Closer
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -73,7 +75,7 @@ const Navbar = () => {
     };
   }, []);
 
-  // Search Query 
+  // Search Query
   const handleSearchQuery = (input) => {
     let searchQuery = input.trim();
 
@@ -85,12 +87,11 @@ const Navbar = () => {
     navigate(`/results?search_query=${searchQuery}`);
   };
 
-
   // Logout Handler
   const logoutHandler = () => {
-    dipatch(logoutUser())
-    navigate("/")
-  }
+    dipatch(logoutUser());
+    navigate("/");
+  };
 
   return (
     <header className="sticky inset-x-0 top-0 z-50 w-full border-b border-gray-800 bg-[#121212] px-4 ">
@@ -134,7 +135,6 @@ const Navbar = () => {
           </div>
         </form>
 
-     
         {/* Mobile Search */}
         <div className="flex items-center sm:hidden ml-auto">
           {!mobileSearchOpen ? (
@@ -192,10 +192,15 @@ const Navbar = () => {
                     : "opacity-0 invisible translate-y-2"
                 }`}
               >
-                <Link className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] active:text-blue-700 hover:bg-gray-700 flex items-center space-x-3 cursor-pointer">
+                <button
+                  onClick={() => uploadRef.current.open()}
+                  className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] active:text-blue-700 hover:bg-gray-700 flex items-center space-x-3 cursor-pointer"
+                >
                   <Video className="w-4 h-4" />
                   <span>Upload Video</span>
-                </Link>
+                </button>
+
+                <VideoUploadForm ref={uploadRef} />
                 <Link className="px-4 py-2 text-sm font-medium text-[#f6f5f6 active:text-blue-700 hover:bg-gray-700 flex items-center space-x-3 cursor-pointer">
                   <NotebookPenIcon className="w-4 h-4" />
                   <span>Create Post</span>
@@ -235,7 +240,7 @@ const Navbar = () => {
                 } transition-all duration-200`}
               >
                 <Link
-                   to={`/channel/${username}`}
+                  to={`/channel/${username}`}
                   className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3"
                 >
                   <CircleUser className="w-5 h-5" />
@@ -256,7 +261,10 @@ const Navbar = () => {
                   <Settings className="w-5 h-5" />
                   <span>Settings</span>
                 </Link>
-                <button className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500 hover:bg-opacity-10" onClick={logoutHandler}>
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-500 hover:bg-opacity-10"
+                  onClick={logoutHandler}
+                >
                   <LogOutIcon className="w-5 h-5 text-red-500 inline mr-2" />
                   Sign out
                 </button>
