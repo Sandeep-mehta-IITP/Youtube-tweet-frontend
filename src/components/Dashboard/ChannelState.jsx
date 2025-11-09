@@ -42,6 +42,8 @@ const ChannelState = ({ channelStates = null }) => {
     );
   }
 
+  //console.log("channel states", channelStates);
+  
   return (
     <>
       {/* Headers */}
@@ -49,7 +51,7 @@ const ChannelState = ({ channelStates = null }) => {
         {/* Welcoming Headers */}
         <div className="block">
           <h1 className="text-2xl font-bold">
-            Welcome Back, {channelStates?.ownerName}
+            Welcome Back, <span className="text-sky-600">{channelStates?.ownerName}</span>
           </h1>
           <p className="text-sm text-gray-300">
             Seamless Video Management, Elevated Results.

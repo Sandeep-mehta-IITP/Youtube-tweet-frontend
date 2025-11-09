@@ -11,8 +11,8 @@ const Dashboard = () => {
     ({ dashboard }) => dashboard?.data
   );
 
-  console.log(channelStats);
-  console.log(channelVideos);
+  //console.log("dashboard stats", channelStats);
+  //console.log(channelVideos);
 
   useEffect(() => {
     dispatch(getChannelStats());

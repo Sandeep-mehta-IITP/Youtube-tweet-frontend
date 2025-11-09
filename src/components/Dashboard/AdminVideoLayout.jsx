@@ -1,6 +1,6 @@
 import { getChannelVideos } from "@/app/Slices/dashboardSlice";
-import { togglePublishStatus } from "@/app/Slices/videoSlice";
-import { formatDate, formatDateFigure } from "@/utils/helpers/formatFigure";
+import { deleteVideo, togglePublishStatus } from "@/app/Slices/videoSlice";
+import { formatDateFigure } from "@/utils/helpers/formatFigure";
 import { Trash2 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { MdEdit } from "react-icons/md";
@@ -13,8 +13,7 @@ const AdminVideoLayout = ({ video }) => {
   const dispatch = useDispatch();
   const confirmDialog = useRef();
   const editDialog = useRef();
-
-  console.log("video in admin video layout", video);
+  const deleteDialog = useRef()
 
   const [publishedStatus, setPublishedStatus] = useState(video.isPublished);
 
@@ -29,13 +28,15 @@ const AdminVideoLayout = ({ video }) => {
 
   const handleDeleteVideo = (isConfirm) => {
     if (isConfirm) {
-      dispatch(deleteVideo(video?._id));
-      dispatch(getChannelVideos());
+      dispatch(deleteVideo(video?._id)).then(() => {
+        dispatch(getChannelVideos());
+      });
     }
   };
+
   return (
     <tr key={video?._id} className="group border">
-      {/* Publish-Unpublished toggle box */}
+      {/* Toggle */}
       <td>
         <div className="flex justify-center">
           <label
@@ -46,49 +47,45 @@ const AdminVideoLayout = ({ video }) => {
               type="checkbox"
               onChange={handleTogglePublish}
               id={"vid-pub-" + video._id}
-              defaultChecked={publishedStatus}
+              checked={publishedStatus}
               className="peer sr-only"
             />
-            <span
-              className="
-      block h-6 w-full rounded-full bg-gray-300 transition-colors duration-300
-      after:absolute after:left-1 after:top-1 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition-all
-      peer-checked:bg-indigo-500 peer-checked:after:translate-x-6
-    "
-            ></span>
+            <span className="block h-6 w-full rounded-full bg-gray-300 transition-colors duration-300 after:absolute after:left-1 after:top-1 after:h-4 after:w-4 after:rounded-full after:bg-white after:shadow-sm after:transition-all peer-checked:bg-indigo-500 peer-checked:after:translate-x-6"></span>
           </label>
         </div>
       </td>
-      {/* Publish-Unpublished label */}
+
+      {/* Status Label */}
       <td className="border-collapse border-b border-gray-600 px-4 py-3 group-last:border-none">
         <div className="flex justify-center">
           <span
-            className={`inline-block rounded-2xl px-2 py-1 ${publishedStatus ? "border border-green-600 bg-green-100 text-green-800" : "border border-orange-600 bg-red-100 text-orange-800"}`}
+            className={`inline-block rounded-2xl px-2 py-1 ${
+              publishedStatus
+                ? "border border-green-600 bg-green-100 text-green-800"
+                : "border border-orange-600 bg-red-100 text-orange-800"
+            }`}
           >
             {publishedStatus ? "Published" : "Unpublished"}
           </span>
         </div>
       </td>
 
-      {/* Thumbnail  and title*/}
+      {/* Thumbnail + Title */}
       <td className="border-collapse border-b border-gray-600 px-4 py-3 group-last:border-none">
         <div className="flex items-center gap-4">
           {publishedStatus ? (
-            <Link
-              to={`/video/${video._id}`}
-              className="flex items-center gap-2"
-            >
+            <Link to={`/watch/${video._id}`} className="flex items-center gap-2">
               <img
                 src={video?.thumbnail?.url}
                 alt={video?.title}
-                className="h-16 w-28 rounded-md"
+                className="h-16 w-28 rounded-md object-cover"
               />
             </Link>
           ) : (
             <img
               src={video?.thumbnail?.url}
               alt={video?.title}
-              className="h-16 w-28 rounded-md"
+              className="h-16 w-28 rounded-md object-cover"
             />
           )}
 
@@ -96,11 +93,11 @@ const AdminVideoLayout = ({ video }) => {
             {publishedStatus ? (
               <Link to={`/watch/${video._id}`} className="hover:text-gray-300">
                 {video.title?.length > 35
-                  ? video.title.substr(0, 35) + "..."
+                  ? video.title.substring(0, 35) + "..."
                   : video.title}
               </Link>
             ) : video.title?.length > 35 ? (
-              video.title.substr(0, 35) + "..."
+              video.title.substring(0, 35) + "..."
             ) : (
               video.title
             )}
@@ -108,9 +105,9 @@ const AdminVideoLayout = ({ video }) => {
         </div>
       </td>
 
-      {/* Upload date */}
+      {/* Date */}
       <td className="border-collapse text-center border-b border-gray-600 px-4 py-3 group-last:border-none">
-        {formatDateFigure(video.formattedDate)}
+        {formatDateFigure(video.createdAt)}
       </td>
 
       {/* Views */}
@@ -118,12 +115,12 @@ const AdminVideoLayout = ({ video }) => {
         {video.views}
       </td>
 
-      {/* Comments Count */}
+      {/* Comments */}
       <td className="border-collapse text-center border-b border-gray-600 px-4 py-3 group-last:border-none">
-        {video.commentsCount}
+        {video.commentsCount || 0}
       </td>
 
-      {/* Like-Dislike Count */}
+      {/* Likes/Dislikes */}
       <td className="border-collapse border-b border-gray-600 px-4 py-3 group-last:border-none">
         <div className="flex justify-center gap-4">
           <span className="inline-block rounded-xl bg-green-200 px-1.5 py-0.5 text-green-700">
@@ -135,33 +132,38 @@ const AdminVideoLayout = ({ video }) => {
         </div>
       </td>
 
-      {/* Video Manipulation*/}
+      {/* Actions */}
       <td className="border-collapse border-b border-gray-600 px-4 py-3 group-last:border-none">
+        {/* Confirm Delete Popup */}
         <ConfirmPopup
-          title={"Permanently delete this video?"}
+          ref={confirmDialog}
+          title="Permanently delete this video?"
           subtitle={`${video.title} - total views: ${video.views}`}
           confirm="Delete"
           cancel="Cancel"
           critical
           checkbox="I understand that deleting is permanent, and can't be undone"
-          ref={confirmDialog}
           actionFunction={handleDeleteVideo}
         />
+
+        {/* Edit Form */}
         <VideoUploadForm ref={editDialog} video={video} />
-        <div className="flex gap-4">
-          {/* Delete Button */}
+
+        <div className="flex gap-4 justify-center">
           <button
             onClick={() => confirmDialog.current?.open()}
-            className="h-5 w-5 hover:text-red-500"
+            className="hover:text-red-500 transition"
+            title="Delete video"
           >
-            <Trash2 size={14} className="text-red-500 font-bold" />
+            <Trash2 size={18} className="text-red-500" />
           </button>
-          {/* Edit Button */}
+
           <button
             onClick={() => editDialog.current?.open()}
-            className="h-5 w-5 hover:text-[#3b82f6]"
+            className="hover:text-blue-500 transition"
+            title="Edit video"
           >
-            <MdEdit size={16} className="text-blue-500 font-bold" />
+            <MdEdit size={20} className="text-blue-500" />
           </button>
         </div>
       </td>

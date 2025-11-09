@@ -16,6 +16,9 @@ export const getChannelStats = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/dashboard/stats");
+
+      //console.log("channel stats tunk res", response);
+      
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO FETCH CHANNEL STATS", error.userMessage);

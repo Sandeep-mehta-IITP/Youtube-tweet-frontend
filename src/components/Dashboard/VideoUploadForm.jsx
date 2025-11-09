@@ -132,6 +132,12 @@ const VideoUploadForm = forwardRef(({ video = null }, ref) => {
       setIsUploading(false);
       uploadingRef.current?.close();
       successRef.current?.open();
+
+      reset(); // clears form fields
+      setVideoPreview(null);
+      setThumbnailPreview(null);
+      setCurrentUploadData(null);
+
       dispatch(getChannelVideos());
     } catch (err) {
       if (err.name === "AbortError") {
