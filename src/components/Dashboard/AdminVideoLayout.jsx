@@ -8,12 +8,14 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import ConfirmPopup from "../core/ConfirmPopup";
 import VideoUploadForm from "./VideoUploadForm";
+import DeletingVideo from "./DeleteVideo";
 
 const AdminVideoLayout = ({ video }) => {
   const dispatch = useDispatch();
   const confirmDialog = useRef();
   const editDialog = useRef();
-  const deleteDialog = useRef()
+  const deleteDialog = useRef();
+  const deletingModalRef = useRef();
 
   const [publishedStatus, setPublishedStatus] = useState(video.isPublished);
 
@@ -26,14 +28,21 @@ const AdminVideoLayout = ({ video }) => {
     });
   };
 
-  const handleDeleteVideo = (isConfirm) => {
-    if (isConfirm) {
-      dispatch(deleteVideo(video?._id)).then(() => {
-        dispatch(getChannelVideos());
-      });
+  const handleDeleteVideo = async (isConfirm) => {
+    if (!isConfirm) return;
+
+    confirmDialog.current?.close();
+    deletingModalRef.current?.open();
+
+    try {
+      await dispatch(deleteVideo(video?._id)).unwrap();
+      dispatch(getChannelVideos());
+    } catch (err) {
+      console.error("Delete failed:", err);
+    } finally {
+      deletingModalRef.current?.close();
     }
   };
-
   return (
     <tr key={video?._id} className="group border">
       {/* Toggle */}
@@ -74,7 +83,10 @@ const AdminVideoLayout = ({ video }) => {
       <td className="border-collapse border-b border-gray-600 px-4 py-3 group-last:border-none">
         <div className="flex items-center gap-4">
           {publishedStatus ? (
-            <Link to={`/watch/${video._id}`} className="flex items-center gap-2">
+            <Link
+              to={`/watch/${video._id}`}
+              className="flex items-center gap-2"
+            >
               <img
                 src={video?.thumbnail?.url}
                 alt={video?.title}
@@ -107,7 +119,7 @@ const AdminVideoLayout = ({ video }) => {
 
       {/* Date */}
       <td className="border-collapse text-center border-b border-gray-600 px-4 py-3 group-last:border-none">
-        {formatDateFigure(video.createdAt)}
+        {formatDateFigure(video.formattedDate)}
       </td>
 
       {/* Views */}
@@ -148,6 +160,9 @@ const AdminVideoLayout = ({ video }) => {
 
         {/* Edit Form */}
         <VideoUploadForm ref={editDialog} video={video} />
+
+        {/* Delete video */}
+        <DeletingVideo ref={deletingModalRef} video={video} />
 
         <div className="flex gap-4 justify-center">
           <button
