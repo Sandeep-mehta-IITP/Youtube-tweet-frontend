@@ -41,7 +41,7 @@ const ChannelProfileLayout = ({ profile, owner = false }) => {
           <h2 className="text-xl font-bold text-white">{profile?.fullName}</h2>
           <p className="text-sm text-gray-400">@{profile?.username}</p>
           <p className="text-sm text-gray-400 mt-1">
-            {formatCount(profile?.subscribersCount)} subscribers ·{" "}
+            {formatCount(profile?.subscribersCount)} ·{" "}
             {profile.channelsSubscribedToCount} subscribed
           </p>
         </div>

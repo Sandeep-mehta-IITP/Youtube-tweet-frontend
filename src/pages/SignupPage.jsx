@@ -43,7 +43,7 @@ export default function SignupPage() {
     dispatch(registerUser(formData)).then((res) => {
       if (registerUser.fulfilled.match(res)) {
         reset();
-        navigate("/");
+        navigate("/login");
       }
     });
   };

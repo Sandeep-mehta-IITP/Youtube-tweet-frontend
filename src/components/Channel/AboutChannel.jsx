@@ -9,7 +9,7 @@ const AboutChannel = ({ owner = false }) => {
   const dispatch = useDispatch();
   const { username } = useParams();
 
-  const aboutChannel = useSelector(({ user }) => user?.userData);
+  const aboutChannel = useSelector((state) => state.user.channelAbout);
   const channelId = useSelector((state) => state.user?.userData?._id);
   const currentUserId = useSelector((state) => state.auth?.userData?._id);
 

@@ -38,6 +38,7 @@ import Dashboard from "./pages/Dashboard";
 import GuestAdmin from "./components/GuestPages/GuestAdmin";
 import GuestSettings from "./components/GuestPages/GuestSettings";
 import AboutChannel from "./components/Channel/AboutChannel";
+import GuestSubscription from "./components/GuestPages/GuestSubscription";
 
 function App() {
   const dispatch = useDispatch();
@@ -143,7 +144,7 @@ function App() {
               path="playlists"
               element={<ChannelPlaylists owner={false} />}
             />
-            <Route path="tweet" element={<ChannelTweets owner={false} />} />
+            <Route path="tweets" element={<ChannelTweets owner={false} />} />
             <Route path="subscribed" element={<Subscribed owner={false} />} />
             <Route path="about" element={<AboutChannel owner={false} />} />
           </Route>
@@ -184,12 +185,31 @@ function App() {
             }
           >
             <Route path="" element={<ChannelVideos owner />} />
-            <Route path="subscribed" element={<Subscribed owner />} />
+            <Route
+              path="subscribed"
+              element={
+                <AuthLayout
+                  authentication
+                  guestComponent={<GuestSubscription />}
+                >
+                  <Subscribed owner isSubscribers />
+                </AuthLayout>
+              }
+            />
             <Route path="playlists" element={<ChannelPlaylists owner />} />
             <Route path="tweets" element={<ChannelTweets owner />} />
             <Route path="about" element={<AboutChannel owner />} />
           </Route>
-          
+
+          {/* <Subscribers /> */}
+          {/* <Route
+            path="feed/subscribers"
+            element={
+              <AuthLayout authentication guestComponent={<GuestSubscription />}>
+                <Subscribed owner isSubscribers />
+              </AuthLayout>
+            }
+          /> */}
 
           {/* Settings */}
           <Route

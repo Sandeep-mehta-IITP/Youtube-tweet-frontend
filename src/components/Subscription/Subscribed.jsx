@@ -26,7 +26,8 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
     if (!channelId && !isSubscribers) return;
     if (isSubscribers) {
       console.log("isSubscribes", isSubscribers);
-      dispatch(getChannelSubscribers(currentUser?._id));
+      const res = dispatch(getChannelSubscribers(currentUser?._id));
+      console.log("subscribers res", res);
     } else {
       dispatch(getSubscribedChannels(channelId));
     }
@@ -86,23 +87,25 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
     }
   };
 
-  return data.length > 0 ? (
+  console.log("data in subscrition", data);
+
+  return data && data.length > 0 ? (
     <ul
-      className={`flex w-full flex-col gap-y-4 ${isSubscribers ? "px-8 py-8 sm:px-16 sm:py-12" : "py-4"}`}
+      className={`flex w-full flex-col gap-y-4 ${
+        isSubscribers ? "px-8 py-8 sm:px-16 sm:py-12" : "py-4"
+      }`}
     >
-      {/* Search Bar */}
-      <div className="relative mb-2 rounded-lg bg-white py-2 pl-8 pr-3 text-black">
+      <div className="relative max-w-2xl mb-2 rounded-lg bg-white/60 py-2 pl-8 pr-3 text-black">
         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
-          <Search className="w-6 h-6 text-[#f6f5f6] font-bold" />
+          <Search className="w-6 h-6 text-blue-600 font-bold" />{" "}
         </span>
         <input
           onChange={(e) => handleInputData(e.target.value.trim())}
-          className="w-full bg-transparent outline-none"
+          className="w-full bg-transparent outline-none ml-4 text-black font-semibold"
           placeholder="Search"
         />
       </div>
 
-      {/* Subscribed Users List */}
       {subscribed.map((profile) => (
         <SubscriptionUser key={profile._id} profile={profile} />
       ))}

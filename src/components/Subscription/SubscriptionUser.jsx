@@ -1,8 +1,10 @@
 import { toggleSubscription } from "@/app/Slices/subscriptionSlice";
 import React, { useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import LoginPopup from "../auth/LoginPopup";
 import { formatCount } from "@/utils/helpers/formatFigure";
+import { Link } from "react-router-dom";
+import { CheckCircle, UserPlus } from "lucide-react";
 
 const SubscriptionUser = ({ profile }) => {
   const dispatch = useDispatch();
@@ -23,14 +25,14 @@ const SubscriptionUser = ({ profile }) => {
   return (
     <>
       <LoginPopup ref={loginPopupRef} message="Sign in to Subscribe...." />
-      <li key={profile._id} className="w-full flex justify-between">
+      <li key={profile._id} className="w-full flex justify-between mb-3">
         <div className="flex items-center gap-x-2">
           <div className="h-14 w-14 shrink-0">
             <Link to={`/user/${profile.username}`}>
               <img
                 src={profile.avatar}
                 alt={profile.username}
-                className="h-full w-full rounded-full"
+                className="h-full w-full rounded-full object-cover"
               />
             </Link>
           </div>
@@ -39,7 +41,7 @@ const SubscriptionUser = ({ profile }) => {
               <Link to={`/user/${profile.username}`}>{profile.fullName}</Link>
             </h6>
             <p className="text-sm text-gray-300">
-              {formatCount(profile.subscribersCount)}
+              {formatCount(profile.totalSubscribers)}
             </p>
           </div>
         </div>

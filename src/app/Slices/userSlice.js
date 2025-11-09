@@ -106,7 +106,7 @@ const userSlice = createSlice({
     builder.addCase(getAboutChannel.fulfilled, (state, action) => {
       state.loading = false;
       state.isAuthenticated = true;
-      state.userData = action.payload;
+      state.channelAbout = action.payload;
       console.log(" channel data in user slice", state.userData);
     });
 
