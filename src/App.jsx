@@ -37,6 +37,7 @@ import AdminPanelVideos from "./components/Dashboard/AdminPanelVideos";
 import Dashboard from "./pages/Dashboard";
 import GuestAdmin from "./components/GuestPages/GuestAdmin";
 import GuestSettings from "./components/GuestPages/GuestSettings";
+import AboutChannel from "./components/Channel/AboutChannel";
 
 function App() {
   const dispatch = useDispatch();
@@ -144,6 +145,7 @@ function App() {
             />
             <Route path="tweet" element={<ChannelTweets owner={false} />} />
             <Route path="subscribed" element={<Subscribed owner={false} />} />
+            <Route path="about" element={<AboutChannel owner={false} />} />
           </Route>
 
           {/* Watch history */}
@@ -185,6 +187,7 @@ function App() {
             <Route path="subscribed" element={<Subscribed owner />} />
             <Route path="playlists" element={<ChannelPlaylists owner />} />
             <Route path="tweets" element={<ChannelTweets owner />} />
+            <Route path="about" element={<AboutChannel owner />} />
           </Route>
           
 
