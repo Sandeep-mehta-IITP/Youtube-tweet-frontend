@@ -14,7 +14,9 @@ const UserProfile = ({ username }) => {
   const dispatch = useDispatch();
 
   const { userData, loading } = useSelector((state) => state.user);
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, userData: user } = useSelector(
+    (state) => state.auth
+  );
 
   //console.log("UserData in UserProfile:", userData);
 
@@ -76,6 +78,8 @@ const UserProfile = ({ username }) => {
       <div className="flex w-full h-screen flex-col gap-y-4 px-16 py-4 rounded bg-slate-100/10 animate-pulse"></div>
     );
 
+  const isOwner = user?._id === profileData?._id;
+
   return (
     <div className="w-full mt-4 flex overflow-hidden items-center justify-between mx-2 sm:mx-4">
       <LoginPopup ref={loginPopupRef} message="Sign in to subscribe..." />
@@ -87,7 +91,7 @@ const UserProfile = ({ username }) => {
             <img
               src={profileData?.avatar}
               alt={profileData?.fullName}
-              className="w-full h-full rounded-full"
+              className="w-full h-full rounded-full object-cover"
             />
           </Link>
         </div>
@@ -106,13 +110,14 @@ const UserProfile = ({ username }) => {
       </div>
 
       {/* Subscription button */}
-      <div
-        key="subscribe-btn"
-        onClick={() => subscripationToggleHandler(profileData._id)}
-        className="block mr-1 sm:mr-3"
-      >
-        <button
-          className={`flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-3 rounded-full font-semibold text-sm transition-all duration-200
+      {!isOwner && (
+        <div
+          key="subscribe-btn"
+          onClick={() => subscripationToggleHandler(profileData._id)}
+          className="block mr-1 sm:mr-3"
+        >
+          <button
+            className={`flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-3 rounded-full font-semibold text-sm transition-all duration-200
     ${
       profileData?.isSubscribed
         ? "bg-teal-600 text-white shadow-md hover:bg-teal-800"
@@ -121,17 +126,20 @@ const UserProfile = ({ username }) => {
     focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500
     active:scale-95 active:shadow-none
     sm:w-auto w-full justify-center`}
-        >
-          <span className="inline-block w-6">
-            {profileData?.isSubscribed ? (
-              <CheckCircle size={20} strokeWidth={2} />
-            ) : (
-              <UserPlus size={20} strokeWidth={2} />
-            )}
-          </span>
-          <span>{profileData?.isSubscribed ? "Subscribed" : "Subscribe"}</span>
-        </button>
-      </div>
+          >
+            <span className="inline-block w-6">
+              {profileData?.isSubscribed ? (
+                <CheckCircle size={20} strokeWidth={2} />
+              ) : (
+                <UserPlus size={20} strokeWidth={2} />
+              )}
+            </span>
+            <span>
+              {profileData?.isSubscribed ? "Subscribed" : "Subscribe"}
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
