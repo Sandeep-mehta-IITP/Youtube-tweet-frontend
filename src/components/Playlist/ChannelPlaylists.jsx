@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import PlaylistForm from "./PlaylistForm";
-import { Plus } from "lucide-react";
+import { Plus, PlaySquare, MoreVertical } from "lucide-react";
 import { formatTimestamp } from "@/utils/helpers/formatFigure";
 import MyChannelEmptyPlaylist from "./MyChannelEmptyPlaylist";
 import EmptyPlaylist from "./EmptyPlaylist";
@@ -11,150 +11,157 @@ import EmptyPlaylist from "./EmptyPlaylist";
 const ChannelPlaylists = ({ owner = false }) => {
   const dialog = useRef();
   const dispatch = useDispatch();
-  const [playlists, setPlaylists] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  let { username } = useParams();
-  let userId = useSelector((state) => state.user.userData?._id);
-  let currentUser = useSelector((state) => state.auth.userData);
-
-  console.log("UserId in channel playlist", userId);
-  console.log("Current user in channel Playlist", currentUser);
-  
-  
+  const { username } = useParams();
+  const userId = useSelector((state) => state.user.userData?._id);
+  const currentUser = useSelector((state) => state.auth.userData);
 
   useEffect(() => {
-    if (owner) {
-      userId = currentUser?._id;
-    }
+    const idToFetch = owner ? currentUser?._id : userId;
+    if (!idToFetch) return;
 
-    if (!userId) return;
-
-    dispatch(getUserPlaylists(userId)).then((res) => {
+    dispatch(getUserPlaylists(idToFetch)).then((res) => {
       setLoading(false);
-      setPlaylists(res.payload);
+      const data = res?.payload?.data || [];
+      setPlaylists(data);
     });
-  }, [username, userId]);
+  }, [dispatch, owner, currentUser, userId, username]);
 
-  const popupPlaylistForm = () => {
-    dialog.current.open();
-  };
+  const openPlaylistForm = () => dialog.current?.open();
 
+  // Loading Skeleton
   if (loading) {
     return (
-      <div className="grid gap-4 pt-2 mt-3 sm:grid-cols-[repeat(auto-fit,_minmax(400px,_1fr))]">
-        {[...Array(3)].map((_, index) => (
-          <div key={index} className="w-full">
-            <div className="relative mb-1 w-full pt-[62%]">
-              <div className="absolute inset-0">
-                {/* Skeleton for the image */}
-                <div className="h-full w-full bg-slate-100/10 animate-pulse"></div>
-                <div className="absolute inset-x-0 bottom-0">
-                  <div className="relative border-t bg-white/10 p-4 backdrop-blur-sm before:absolute before:inset-0 before:bg-black/40">
-                    <div className="relative z-[1]">
-                      <div className="flex justify-between">
-                        <div className="inline-block h-6 mb-2 bg-slate-100/10 rounded w-1/2 animate-pulse"></div>
-                        <div className="inline-block h-6 bg-slate-100/10 rounded w-20 animate-pulse"></div>
-                      </div>
-                      <div className="text-sm text-gray-700 h-6 bg-slate-100/10 rounded w-3/4 animate-pulse"></div>
-                    </div>
-                  </div>
-                </div>
+      <div className="grid gap-6 sm:gap-8 pt-6 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="group cursor-pointer">
+            <div className="animate-pulse">
+              <div className="bg-gray-800 rounded-2xl aspect-video w-full"></div>
+              <div className="mt-4 space-y-3">
+                <div className="h-5 bg-gray-700 rounded-lg w-11/12"></div>
+                <div className="h-4 bg-gray-700 rounded-lg w-8/12"></div>
+                <div className="h-3 bg-gray-700 rounded-lg w-6/12"></div>
               </div>
             </div>
-
-            <div className="mb-1 font-semibold h-5 bg-slate-100/10 rounded w-1/2 animate-pulse"></div>
-            <div className="flex h-5 bg-slate-100/10 rounded w-3/4 animate-pulse"></div>
           </div>
         ))}
       </div>
     );
   }
 
+  // Empty State
+  if (playlists.length === 0) {
+    return owner ? (
+      <MyChannelEmptyPlaylist onClickBtn={openPlaylistForm} />
+    ) : (
+      <EmptyPlaylist />
+    );
+  }
+
   return (
     <>
       <PlaylistForm ref={dialog} />
-      {playlists?.length > 0 ? (
-        <>
-          {/* Create new playlist */}
-          {owner && playlists.length > 0 && (
-            <div className="flex items-center justify-center px-2 py-2">
-              <button
-                onCanPlay={popupPlaylistForm}
-                className="mt-5 inline-flex items-center gap-x-3 border border-transparent hover:border-dotted hover:border-white px-4 py-2 font-semibold bg-blue-400 text-[#121212]"
-              >
-                <Plus className="w-5 h-5" />
-                New Playlist
-              </button>
-            </div>
-          )}
 
-          {/* Playlists */}
-          <ul
-            className={`grid gap-4 pt-2 grid-cols-[repeat(auto-fit,_minmax(400px,_1fr))] ${
-              playlists?.length < 4 &&
-              "lg:grid-cols-[repeat(auto-fit,_minmax(400px,400px))]"
-            }`}
+      {/* Header + Create Button */}
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-2xl font-bold text-white">Playlists</h2>
+
+        {owner && (
+          <button
+            onClick={openPlaylistForm}
+            className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-full shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
           >
-            {playlists.map(
-              (playlist) =>
-                playlist.videoCount > 0 &&
-                owner && (
-                  <li key={playlist._id} className="w-full">
-                    <Link to={`/playlist/${playlist._id}`}>
-                      {/* playlist thumbnail */}
-                      <div className="relative w-full pt-[56%]">
-                        <div className="absolute inset-0">
-                          <img
-                            src={playlist.thumbnail}
-                            alt={playlist.name}
-                            className="w-full h-full resize"
-                          />
+            <Plus className="w-5 h-5" />
+            <span>Create Playlist</span>
+          </button>
+        )}
+      </div>
 
-                          <div className="absolute inset-x-0 bottom-0">
-                            <div className="relative border-t bg-white/30 p-4 text-white backdrop-blur-sm before:absolute before:inset-0 before:bg-black/40">
-                              <div className="relative z-[1]">
-                                <p className="flex justify-between">
-                                  {/* Playlist name */}
-                                  <span className="inline-block text-lg font-medium text-[#f6f5f6]">
-                                    {playlist.name}
-                                  </span>
+      {/* Playlists Grid */}
+      <div className="grid gap-6 sm:gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        {playlists.map((playlist) => {
+          const hasVideos = playlist.totalVideos > 0;
+          const thumbnail =
+            playlist.thumbnail ||
+            `https://via.placeholder.com/480x270/1a1a1a/ffffff?text=${encodeURIComponent(playlist.name)}`;
 
-                                  {/* Platlist videos count */}
-                                  <span className="inline-block text-sm font-medium text-[#f6f5f6]">
-                                    {playlist.videosCount} video
-                                    {playlist.videosCount > 1 ? "s" : ""}
-                                  </span>
-                                </p>
+          return (
+            <Link
+              key={playlist._id}
+              to={`/playlist/${playlist._id}`}
+              className="group relative block transform transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
+            >
+              {/* Card Container */}
+              <div className="bg-gray-900/50 backdrop-blur-xl rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-all duration-300 shadow-xl hover:shadow-2xl">
+                {/* Thumbnail */}
+                <div className="relative aspect-video overflow-hidden">
+                  <img
+                    src={thumbnail}
+                    alt={playlist.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
 
-                                {/* Playlist creation time */}
-                                <p className="text-sm text-gray-200">
-                                  {playlist.totalViews} view
-                                  {playlist.totalViews > 1 ? "s" : ""} ·{" "}
-                                  {formatTimestamp(playlist.createdAt)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {/* Playlist discription */}
-                      <div className="flex py-2 px-3 min-h-8 bg-[#21212199]">
-                        <p className="flex text-sm text-gray-200 max-h-12 overflow-hidden">
-                          {playlist.description}
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                )
-            )}
-          </ul>
-        </>
-      ) : owner ? (
-        <MyChannelEmptyPlaylist onClickBtn={popupPlaylistForm} />
-      ) : (
-        <EmptyPlaylist />
-      )}
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  {/* Play Icon */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-white/20 backdrop-blur-md rounded-full p-4 shadow-2xl">
+                      <PlaySquare className="w-12 h-12 text-white drop-shadow-lg" />
+                    </div>
+                  </div>
+
+                  {/* Video Count Badge */}
+                  {hasVideos && (
+                    <div className="absolute bottom-3 right-3 bg-black/90 backdrop-blur-sm text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-lg">
+                      <PlaySquare className="w-4 h-4" />
+                      {playlist.totalVideos} video
+                      {playlist.totalVideos > 1 ? "s" : ""}
+                    </div>
+                  )}
+
+                  {/* Empty Playlist Badge */}
+                  {!hasVideos && (
+                    <div className="absolute top-3 left-3 bg-gray-900/80 backdrop-blur-sm text-gray-300 px-3 py-1 rounded-full text-xs font-medium">
+                      Empty
+                    </div>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-white line-clamp-2 group-hover:text-blue-400 transition-colors">
+                    {playlist.name}
+                  </h3>
+
+                  <p className="text-sm text-gray-400 mt-2 line-clamp-2 leading-relaxed">
+                    {playlist.description || "No description"}
+                  </p>
+
+                  <div className="flex items-center justify-between mt-4 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                      {playlist.totalViews} view
+                      {playlist.totalViews !== 1 ? "s" : ""}
+                    </span>
+                    <span>{formatTimestamp(playlist.createdAt)}</span>
+                  </div>
+                </div>
+
+                {/* More Options (Owner only) */}
+                {owner && (
+                  <button className="absolute top-3 right-3 p-2 rounded-full bg-black/40 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60">
+                    <MoreVertical className="w-5 h-5 text-white" />
+                  </button>
+                )}
+              </div>
+            </Link>
+          );
+        })}
+      </div>
     </>
   );
 };
