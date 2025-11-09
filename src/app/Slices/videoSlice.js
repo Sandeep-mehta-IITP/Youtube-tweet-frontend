@@ -11,22 +11,21 @@ const initialState = {
 
 export const publishVideo = createAsyncThunk(
   "video/publishVideo",
-  async ({ data }, { signal, rejectWithValue }) => {
+  async ({ data, signal }, { rejectWithValue }) => {
     try {
-      const formData = new FormData();
+      // const formData = new FormData();
 
-      for (const key in data) formData.append(key, data[key]);
-      formData.append("thumbnail", data.thumbnail[0]);
-      formData.append("videoFile", data.videoFile[0]);
+      // for (const key in data) formData.append(key, data[key]);
+      // formData.append("thumbnail", data.thumbnail[0]);
+      // formData.append("videoFile", data.videoFile[0]);
 
-      const response = await axiosInstance.post("/videos/", formData, {
+      const response = await axiosInstance.post("/videos/", data, {
         signal,
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      toast.success(response.data.message || "Video published successfully.");
       return response.data.data;
     } catch (error) {
       if (axios.isCancel(error)) {
@@ -34,7 +33,7 @@ export const publishVideo = createAsyncThunk(
         return rejectWithValue("Cancelled by user");
       }
 
-      console.log("FAILED TO PUBLSIH VIDEO", error.userMessage);
+      console.log("FAILED TO PUBLSIH VIDEO", error);
       toast.error(error.userMessage || "Failed to publsih video.");
       return rejectWithValue(error.userMessage);
     }
@@ -44,22 +43,21 @@ export const publishVideo = createAsyncThunk(
 export const updateVideo = createAsyncThunk(
   "video/updateVideo",
   async ({ videoId, data }, { rejectWithValue }) => {
+    //console.log("data", data);
+
     try {
-      const formData = new FormData();
-      for (const key in data) formData.append(key, data[key]);
-      if (data.thumbnail) formData.append("thumbnail", data.thumbnail[0]);
+      // const formData = new FormData();
+      // for (const key in data) formData.append(key, data[key]);
+      // if (data.thumbnail) formData.append("thumbnail", data.thumbnail[0]);
 
-      const response = await axiosInstance.patch(
-        `/videos/${videoId}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      // console.log("formData", formData);
 
-      toast.success(response.data.message || "Video updated successfully.");
+      const response = await axiosInstance.patch(`/videos/${videoId}`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       return response.data.data;
     } catch (error) {
       console.log("FAILED TO UPDATE VIDEO", error.userMessage);

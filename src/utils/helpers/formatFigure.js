@@ -68,3 +68,30 @@ export const formatCount = (count, str = "Subscriber") => {
 
   return `${count} ${word}`;
 };
+
+
+export const formatDateFigure = (dateObj) => {
+  if (!dateObj) return "";
+
+  // If it's an object like {date, month, year}
+  if (typeof dateObj === "object" && dateObj.date && dateObj.month && dateObj.year) {
+    const { date, month, year } = dateObj;
+
+    // Convert numeric month to readable name (e.g. 11 -> Nov)
+    const monthNames = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    const monthName = monthNames[month - 1] || month;
+
+    return `${date} ${monthName} ${year}`;
+  }
+
+  // Otherwise if it's a string (ISO date)
+  const d = new Date(dateObj);
+  return d.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};

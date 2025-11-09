@@ -36,6 +36,7 @@ import AdminVideoLayout from "./components/Dashboard/AdminVideoLayout";
 import AdminPanelVideos from "./components/Dashboard/AdminPanelVideos";
 import Dashboard from "./pages/Dashboard";
 import GuestAdmin from "./components/GuestPages/GuestAdmin";
+import GuestSettings from "./components/GuestPages/GuestSettings";
 
 function App() {
   const dispatch = useDispatch();
@@ -190,7 +191,7 @@ function App() {
           <Route
             path="settings"
             element={
-              <AuthLayout authentication>
+              <AuthLayout authentication guestComponent={<GuestSettings />}>
                 <Settings />
               </AuthLayout>
             }

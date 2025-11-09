@@ -1,12 +1,13 @@
 import { getChannelVideos } from "@/app/Slices/dashboardSlice";
 import { togglePublishStatus } from "@/app/Slices/videoSlice";
-import { formatDate } from "@/utils/helpers/formatFigure";
+import { formatDate, formatDateFigure } from "@/utils/helpers/formatFigure";
 import { Trash2 } from "lucide-react";
 import React, { useRef, useState } from "react";
 import { MdEdit } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import ConfirmPopup from "../core/ConfirmPopup";
+import VideoUploadForm from "./VideoUploadForm";
 
 const AdminVideoLayout = ({ video }) => {
   const dispatch = useDispatch();
@@ -14,7 +15,6 @@ const AdminVideoLayout = ({ video }) => {
   const editDialog = useRef();
 
   console.log("video in admin video layout", video);
-  
 
   const [publishedStatus, setPublishedStatus] = useState(video.isPublished);
 
@@ -110,7 +110,7 @@ const AdminVideoLayout = ({ video }) => {
 
       {/* Upload date */}
       <td className="border-collapse text-center border-b border-gray-600 px-4 py-3 group-last:border-none">
-        {formatDate(video.createdAt)}
+        {formatDateFigure(video.formattedDate)}
       </td>
 
       {/* Views */}
@@ -147,7 +147,7 @@ const AdminVideoLayout = ({ video }) => {
           ref={confirmDialog}
           actionFunction={handleDeleteVideo}
         />
-        {/* <UploadVideo ref={editDialog} video={video} /> */}
+        <VideoUploadForm ref={editDialog} video={video} />
         <div className="flex gap-4">
           {/* Delete Button */}
           <button

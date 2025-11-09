@@ -112,6 +112,8 @@ const AdminPanelVideos = ({ channelVideos = null }) => {
 
   let videos = filteredVideos || channelVideos;
 
+  console.log("videos in admin panel", videos);
+  
   return (
     <>
       {/* Search Bar */}

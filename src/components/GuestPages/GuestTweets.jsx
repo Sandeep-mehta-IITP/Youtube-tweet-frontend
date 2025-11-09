@@ -6,7 +6,7 @@ function GuestTweets() {
   return (
     <GuestComponent
       title="Explore What's Happening Now by Tweets"
-      subtitle="See the latest conversations and trending topics. Share your voice!"
+      description="See the latest conversations and trending topics. Share your voice!"
       icon={<span className="p-4 w-full">{<Twitter className="h-12 w-12 text-sky-600 font-semibold"/>}</span>}
     />
   );
