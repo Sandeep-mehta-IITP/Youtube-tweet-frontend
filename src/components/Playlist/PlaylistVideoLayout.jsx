@@ -35,6 +35,9 @@ const PlaylistVideoLayout = ({ video, playlistId, owner = false }) => {
       });
     }
   };
+
+  console.log("video of playlist", video);
+  
   return (
     <li key={video?._id} className="border">
       <div className="w-full sm:flex gap-x-4">
@@ -44,7 +47,7 @@ const PlaylistVideoLayout = ({ video, playlistId, owner = false }) => {
             <div className="w-full pt-[56%]">
               <div className="absolute inset-0">
                 <img
-                  src={video?.thumbnail}
+                  src={video?.thumbnail?.url}
                   alt={video?.title}
                   className="h-full w-full"
                 />

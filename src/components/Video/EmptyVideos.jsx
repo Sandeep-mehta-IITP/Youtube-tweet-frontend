@@ -27,7 +27,7 @@ const EmptyVideos = () => {
         {/* Subtitle */}
         <p className="text-gray-400 text-lg sm:text-xl leading-relaxed">
           This channel hasn’t uploaded any videos yet.{" "}
-          <span className="font-medium text-red-500">Check</span> back soon for
+          <span className="font-medium text-red-500">Check</span> back soon for{" "}
           <span className="font-medium text-blue-400">new uploads</span> or
           explore other creators to discover fresh and exciting content.
         </p>

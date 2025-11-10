@@ -13,7 +13,7 @@ export const getPlaylistByID = createAsyncThunk(
   async (playlistId, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/playlist/${playlistId}`);
-      console.log("response", response.data);
+      console.log("response", response.data?.data);
 
       return response.data;
     } catch (error) {

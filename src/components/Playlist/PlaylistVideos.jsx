@@ -49,6 +49,8 @@ const PlaylistVideos = () => {
     <section className="w-full pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
       {playlists.map((playlistData) => {
         const isOwner = currentUser === playlistData?.owner?._id;
+        console.log("playlistData", playlistData);
+        
 
         return (
           <div

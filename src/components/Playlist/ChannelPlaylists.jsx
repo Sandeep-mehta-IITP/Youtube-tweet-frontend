@@ -82,6 +82,8 @@ const ChannelPlaylists = ({ owner = false }) => {
       {/* Playlists Grid */}
       <div className="grid gap-6 sm:gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
         {playlists.map((playlist) => {
+         
+          
           const hasVideos = playlist.totalVideos > 0;
           const thumbnail =
             playlist.thumbnail ||
