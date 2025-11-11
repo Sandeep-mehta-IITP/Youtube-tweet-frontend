@@ -36,18 +36,26 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
     },
   }));
 
+  // Prevent background scroll when popup is open
   useEffect(() => {
-    if (showPopup) dialogRef.current.showModal();
+    if (showPopup) {
+      document.body.style.overflow = "hidden";
+      dialogRef.current?.showModal();
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [showPopup]);
 
+  // Auto-close when logged in
   useEffect(() => {
-    if (isAuthenticated && showPopup) {
-      handleClose();
-    }
+    if (isAuthenticated && showPopup) handleClose();
   }, [isAuthenticated, showPopup]);
 
-  const handleLogin = (data) => {
-    const response = dispatch(
+  const handleLogin = async (data) => {
+    const response = await dispatch(
       loginUser({ identifier: data.identifier, password: data.password })
     );
 
@@ -59,9 +67,7 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
   };
 
   const handleClose = () => {
-    if (dialogRef.current) {
-      dialogRef.current.close();
-    }
+    dialogRef.current?.close();
     reset();
     setShowPopup(false);
   };
@@ -71,25 +77,29 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
   return createPortal(
     <dialog
       ref={dialogRef}
-      className="mx-auto mt-32 w-[90%] sm:w-[60%] lg:w-[40%] xl:w-[30%] bg-[#464444] rounded-2xl p-6 text-white overflow-y-auto backdrop:backdrop-blur-sm"
+      className="mx-auto mt-24 w-[90%] sm:w-[60%] lg:w-[40%] xl:w-[28%] bg-gradient-to-b from-[#2d2d2d] to-[#1a1a1a] rounded-2xl p-8 text-white backdrop:backdrop-blur-md shadow-2xl border border-gray-700/40"
     >
-      <div className="relative flex flex-col items-center gap-4">
+      <div className="relative flex flex-col items-center gap-5">
+        {/* Close button */}
         <button
           type="button"
           onClick={handleClose}
-          className="absolute top-3 right-3 text-gray-400 hover:text-white"
+          className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors"
         >
           ✕
         </button>
+
+        {/* Logo + Heading */}
         <Logo width="w-16 h-16" className="mb-1" />
-        <h2 className="text-2xl font-bold text-center">{message}</h2>
-        <p className="text-gray-400 text-sm text-center mb-2">
-          Don't have an account?{" "}
+        <h2 className="text-2xl font-bold text-center tracking-wide">{message}</h2>
+        <p className="text-gray-400 text-sm text-center">
+          Don’t have an account?{" "}
           <Link to="/signup" className="text-blue-500 hover:underline">
-            Signup
+            Sign up
           </Link>
         </p>
 
+        {/* Form */}
         <form
           onSubmit={handleSubmit(handleLogin)}
           className="w-full flex flex-col gap-4"
@@ -103,26 +113,45 @@ function LoginPopup({ route, message = "Login to Continue..." }, ref) {
             className="text-black text-base sm:text-lg font-medium"
           />
 
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Enter your password"
-            name="password"
-            register={register}
-            error={errors.password?.message}
-            className="text-black text-base sm:text-lg font-medium"
-          />
+          <div>
+            <Input
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              name="password"
+              register={register}
+              error={errors.password?.message}
+              className="text-black text-base sm:text-lg font-medium"
+            />
+            <div className="flex justify-end mt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  handleClose();
+                  navigate("/forgot-password");
+                }}
+                className="text-sm text-blue-400 hover:text-blue-500 transition-colors"
+              >
+                Forgot Password?
+              </button>
+            </div>
+          </div>
 
-          <div className="flex  items-center justify-center gap-x-5">
+          {/* Buttons */}
+          <div className="flex items-center justify-center gap-x-4 mt-3">
             <Button
               type="button"
               onClick={handleClose}
-              className="bg-black/20 hover:bg-black/30 text-white w-1/2"
+              className="bg-black/30 hover:bg-black/40 text-white w-1/2 border border-gray-700/60"
             >
               Cancel
             </Button>
-            <Button type="submit" isLoading={loading} className="w-1/2">
-              Log in
+            <Button
+              type="submit"
+              isLoading={loading}
+              className="w-1/2 bg-blue-600 hover:bg-blue-700 transition-colors"
+            >
+              Log In
             </Button>
           </div>
         </form>

@@ -87,6 +87,15 @@ const LoginPage = () => {
         <Button type="submit" isLoading={loading}>
           Log in
         </Button>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => navigate("/forgot-password")}
+            className="text-sm font-medium text-blue-400 hover:text-blue-500 transition-colors"
+          >
+            Forgot Password?
+          </button>
+        </div>
       </form>
 
       {/* Login link */}

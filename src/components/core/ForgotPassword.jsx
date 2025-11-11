@@ -4,6 +4,9 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { FaEnvelope, FaLock, FaSpinner } from "react-icons/fa";
 import { sendOTP, verifyOTP, resetPassword } from "@/app/Slices/authSlice";
+import Button from "../ui/Button";
+import { ArrowLeft, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
   const dispatch = useDispatch();
@@ -49,7 +52,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg[#121212] flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="bg-gray-800/50 backdrop-blur-lg rounded-2xl border border-gray-700 p-8 shadow-2xl">
           <h2 className="text-2xl font-bold text-white text-center mb-2">
@@ -155,10 +158,23 @@ const ForgotPassword = () => {
             </form>
           )}
 
-          <div className="mt-6 text-center">
-            <a href="/login" className="text-blue-400 text-sm hover:underline">
-              Back to Login
-            </a>
+          <div className="mt-6 text-center flex flex-col sm:flex-row gap-5 justify-between items-center">
+            <Button className="px-5 py-1.5 text-lg font-semibold rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-xl transform transition-all duration-300 hover:scale-105 hover:shadow-2xl flex items-center gap-3 group">
+              <LogIn className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
+              <Link to="/login">Go to Login</Link>
+            </Button>
+            <Button
+              variant="outline"
+              className="px-5 py-1.5 text-lg font-semibold rounded-xl border-2 border-blue-500 text-blue-400 hover:bg-blue-500/10 backdrop-blur-sm transition-all duration-300 hover:scale-105 flex items-center gap-3 group"
+            >
+              <ArrowLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+              <span
+                onClick={() => window.history.back()}
+                className="cursor-pointer"
+              >
+                Go Back
+              </span>
+            </Button>
           </div>
         </div>
       </div>

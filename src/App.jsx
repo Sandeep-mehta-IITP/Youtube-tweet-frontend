@@ -96,25 +96,9 @@ function App() {
       />
 
       <Routes>
-        <Route
-          path="/signup"
-          element={
-            <AuthLayout authentication={false}>
-              <SignupPage />
-            </AuthLayout>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <AuthLayout authentication={false}>
-              <LoginPage />
-            </AuthLayout>
-          }
-        />
-
         <Route path="/" element={<Feed />}>
           {/* <Route index element={<HomePage />} /> "/" route */}
+
           {/* More child routes can be added */}
           <Route path="" element={<FeedVideos />} />
           <Route path="support" element={<SupportPage />} />
@@ -235,9 +219,31 @@ function App() {
             }
           />
 
+          
+
           {/* 404 - Page Not Found */}
-      <Route path="*" element={<PageNotFound />} />
+          <Route path="*" element={<PageNotFound />} />
         </Route>
+
+        {/* Signup */}
+          <Route
+            path="/signup"
+            element={
+              <AuthLayout authentication={false}>
+                <SignupPage />
+              </AuthLayout>
+            }
+          />
+
+          {/* Login */}
+          <Route
+            path="/login"
+            element={
+              <AuthLayout authentication={false}>
+                <LoginPage />
+              </AuthLayout>
+            }
+          />
       </Routes>
     </div>
   );

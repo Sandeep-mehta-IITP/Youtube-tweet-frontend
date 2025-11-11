@@ -3,9 +3,11 @@ import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
 import { verifyPassword, changePassword } from "@/app/Slices/authSlice";
+import { useNavigate } from "react-router-dom";
 
 const ChangePassword = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -62,7 +64,7 @@ const ChangePassword = () => {
   };
 
   const goToForgotPassword = () => {
-    window.location.href = "/forgot-password";
+     navigate("/forgot-password");
   };
 
   return (

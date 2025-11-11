@@ -1,13 +1,13 @@
+import { Loader2 } from "lucide-react";
 import React from "react";
 
-// Reusable Button component
 const Button = ({
-  children, // Button ka text ya content
-  type = "button", // button, submit, reset
+  children,
+  type = "button",
   onClick,
   disabled = false,
-  isLoading = false, // loading state
-  className = "", // extra styling
+  isLoading = false,
+  className = "",
   ...rest
 }) => {
   return (
@@ -15,10 +15,26 @@ const Button = ({
       type={type}
       onClick={onClick}
       disabled={disabled || isLoading}
-      className={`bg-blue-500 text-white font-medium py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`relative flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold py-2.5 px-5 
+        rounded-lg transition-all duration-200 ease-in-out 
+        hover:bg-blue-700 focus:ring-2 focus:ring-blue-400 focus:outline-none 
+        disabled:opacity-60 disabled:cursor-not-allowed ${className}`}
       {...rest}
     >
-      {isLoading ? "Loading..." : children}
+      {isLoading ? (
+        <>
+          {/* Smooth rotating loader */}
+          <Loader2 className="w-5 h-5 animate-spin text-white" />
+          <span className="text-white text-sm font-medium">Loading...</span>
+        </>
+      ) : (
+        children
+      )}
+
+      {/* Subtle overlay animation during loading */}
+      {isLoading && (
+        <span className="absolute inset-0 bg-white/10 rounded-lg animate-pulse"></span>
+      )}
     </button>
   );
 };
