@@ -39,6 +39,7 @@ import GuestAdmin from "./components/GuestPages/GuestAdmin";
 import GuestSettings from "./components/GuestPages/GuestSettings";
 import AboutChannel from "./components/Channel/AboutChannel";
 import GuestSubscription from "./components/GuestPages/GuestSubscription";
+import PageNotFound from "./components/core/PageNotFound";
 
 function App() {
   const dispatch = useDispatch();
@@ -233,6 +234,9 @@ function App() {
               </AuthLayout>
             }
           />
+
+          {/* 404 - Page Not Found */}
+      <Route path="*" element={<PageNotFound />} />
         </Route>
       </Routes>
     </div>
