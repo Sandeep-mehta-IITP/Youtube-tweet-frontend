@@ -12,6 +12,9 @@ const ChannelProfileLayout = ({ profile, owner = false }) => {
   const loginPopupRef = useRef();
   const { isAuthenticated } = useSelector(({ auth }) => auth);
 
+  console.log("profile in channel", profile);
+  
+
   const [isSubscribed, setIsSubscribed] = useState(
     profile?.isSubscribed || false
   );

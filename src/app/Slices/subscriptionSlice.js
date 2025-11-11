@@ -52,7 +52,7 @@ export const getSubscribedChannels = createAsyncThunk(
       const response = await axiosInstance.get(
         `/subscriptions/u/${subscriberId}`
       );
-      return response.data.data;
+      return response.data.data.docs;
     } catch (error) {
       console.log("FAILED TO GET SUBSCRIBED CHANNELS", error.userMessage);
       toast.error(

@@ -9,10 +9,12 @@ import { useParams } from "react-router-dom";
 import SubscriptionUser from "./SubscriptionUser";
 import MyChannelEmptySubscription from "./MyChannelEmptySubscription";
 import EmptySubscription from "./EmptySubscription";
+import EmptySubscribers from "./EmptySubscribers";
 
 const Subscribed = ({ owner = false, isSubscribers = false }) => {
   const dispatch = useDispatch();
   const { username } = useParams();
+  //console.log("username", username);
 
   const userStateId = useSelector((state) => state.user.userData?._id);
   const currentUser = useSelector((state) => state.auth.userData);
@@ -25,9 +27,9 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
   useEffect(() => {
     if (!channelId && !isSubscribers) return;
     if (isSubscribers) {
-      console.log("isSubscribes", isSubscribers);
+      //console.log("isSubscribes", isSubscribers);
       const res = dispatch(getChannelSubscribers(currentUser?._id));
-      console.log("subscribers res", res);
+      //console.log("subscribers res", res);
     } else {
       dispatch(getSubscribedChannels(channelId));
     }
@@ -87,25 +89,25 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
     }
   };
 
-  console.log("data in subscrition", data);
+  //console.log("data in subscrition", data);
+  //console.log("subscribed", subscribed);
 
   return data && data.length > 0 ? (
-    <ul
-      className={`flex w-full flex-col gap-y-4 ${
-        isSubscribers ? "px-8 py-8 sm:px-16 sm:py-12" : "py-4"
-      }`}
-    >
-      <div className="relative max-w-2xl mb-2 rounded-lg bg-white/60 py-2 pl-8 pr-3 text-black">
-        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">
-          <Search className="w-6 h-6 text-blue-600 font-bold" />{" "}
+    <ul className="flex w-full flex-col gap-y-4 px-8 py-8 sm:px-16 sm:py-12">
+      {/* Search input */}
+      <div className="relative max-w-2xl mb-4 rounded-lg bg-gray-200 py-2 pl-10 pr-3 text-black focus-within:ring-2 focus-within:ring-blue-500">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">
+          <Search className="w-5 h-5" />
         </span>
         <input
-          onChange={(e) => handleInputData(e.target.value.trim())}
-          className="w-full bg-transparent outline-none ml-4 text-black font-semibold"
+          type="text"
+          onChange={(e) => handleInputData(e.target.value)}
+          className="w-full bg-transparent outline-none pl-1 text-black font-semibold placeholder-gray-500"
           placeholder="Search"
         />
       </div>
 
+      {/* Render subscriber list */}
       {subscribed.map((profile) => (
         <SubscriptionUser key={profile._id} profile={profile} />
       ))}
@@ -113,7 +115,7 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
   ) : owner ? (
     <MyChannelEmptySubscription />
   ) : (
-    <EmptySubscription />
+    <EmptySubscribers />
   );
 };
 
