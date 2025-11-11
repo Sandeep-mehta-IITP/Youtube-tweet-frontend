@@ -72,6 +72,14 @@ const FeedTweets = ({ owner = false }) => {
 
   const tweets = Array.isArray(data) && data.length > 0 ? data : localTweets;
 
+  console.log("tweets in feed tweet", tweets);
+
+  tweets.map((tweet) => (
+    console.log("tweet in fedd", tweet)
+    
+  ))
+  
+
   //console.log("tweets in feed tweets", tweets);
   
 

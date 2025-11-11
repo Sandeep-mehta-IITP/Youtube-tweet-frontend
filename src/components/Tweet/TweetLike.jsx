@@ -70,7 +70,7 @@ const TweetLike = ({
         aria-pressed={like.isLiked}
       >
         <ThumbsUp
-          className={`w-4 h-4 ${like.isLiked ? "fill-blue-600 dark:fill-blue-400" : "fill-none"}`}
+          className={`w-4 h-4 ${like.isLiked ? "fill-blue-600 " : "fill-none"}`}
         />
         <span className="text-sm font-medium">{like.totalLikes}</span>
       </button>

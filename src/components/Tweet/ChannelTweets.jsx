@@ -107,6 +107,14 @@ const ChannelTweets = ({ owner = false }) => {
     );
   }
 
+  console.log("TweetsData", tweetsData);
+
+  tweetsData.map((tweet) => (
+    console.log("tweet", tweet)
+    
+  ))
+  
+
   /** Main UI */
   return (
     <section className="w-full py-2 px-3 pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">

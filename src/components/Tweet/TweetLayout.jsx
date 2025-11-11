@@ -12,7 +12,7 @@ import LikeComponent from "../core/LikeComponent";
 import { Edit2, Trash2, Check, X, Loader2, MoreHorizontal } from "lucide-react";
 
 const TweetLayout = ({ tweet, owner }) => {
-  //console.log("tweets in tweetlayout", tweet);
+  console.log("tweet in tweetlayout", tweet);
   
   const dispatch = useDispatch();
   const textareaRef = useRef(null);
@@ -222,11 +222,11 @@ const TweetLayout = ({ tweet, owner }) => {
           {/* Footer (Likes, etc.) */}
           <div className="mt-4 flex justify-between items-center">
             <LikeComponent
-              commentId={tweet?._id}
+              tweetId={tweet?._id}
               isLiked={tweet?.isLiked}
-              totalLikes={tweet?.likesCount}
+              totalLikes={tweet?.totalLikes}
               isDisLiked={tweet?.isDisLiked}
-              totalDisLikes={tweet?.disLikesCount}
+              totalDisLikes={tweet?.totalDislikes}
             />
           </div>
         </div>
