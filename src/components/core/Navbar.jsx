@@ -110,27 +110,34 @@ const Navbar = () => {
             handleSearchQuery(searchInputRef.current.value);
           }}
         >
-          <div className="flex w-full">
-            {/* Input */}
-            <div className="relative flex-1">
-              <Input
+          <div className="flex w-full max-w-2xl mx-auto">
+            {/* Input Container */}
+            <div className="relative flex-1 group">
+              {/* Input */}
+              <input
                 ref={searchInputRef}
                 placeholder="Search"
-                className="w-full bg-[#121212] border border-gray-600 rounded-l-full py-2 pl-12 pr-3 text-gray-100 font-medium text-lg outline-none sm:py-3 focus:border-blue-500 focus:ring-1"
+                className="w-full bg-[#121212] text-gray-100 placeholder-gray-400 font-medium text-lg 
+                 py-2 pl-12 pr-4 sm:py-2.5 rounded-l-full border border-gray-600 focus:border-blue-500 
+                 focus:ring-0 focus:ring-blue-500 outline-none transition-all duration-200 shadow-sm"
               />
 
               {/* Left Icon */}
-              <span className="absolute left-3 top-1/2 -translate-y-1/2">
-                <Search className="w-6 h-6 text-gray-400" />
+              <span
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 
+                 opacity-0 group-focus-within:opacity-100 transition-opacity duration-200 pointer-events-none"
+              >
+                <Search className="w-5 h-5" />
               </span>
             </div>
 
             {/* Search Button */}
             <button
               type="submit"
-              className="bg-[#1f1f1f] border border-gray-600 border-l-0 rounded-r-full px-5 flex items-center justify-center hover:bg-gray-700"
+              className="bg-[#1f1f1f] border border-gray-600 border-l-0 rounded-r-full px-5 flex items-center justify-center 
+               hover:bg-gray-700 transition-colors duration-200 active:scale-95"
             >
-              <Search className="w-6 h-6 text-white hover:text-blue-500" />
+              <Search className="w-5 h-5 text-white hover:text-blue-500 transition-colors duration-200" />
             </button>
           </div>
         </form>
