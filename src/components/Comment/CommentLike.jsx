@@ -42,6 +42,7 @@ const CommentLike = ({
     // Dispatch action to server
     dispatch(toggleCommentLike({ commentId, toggleLike: isLikeAction })).then(
       (res) => {
+        
         if (res.payload) {
           const { isLiked, totalLikes, isDisLiked, totalDisLikes } =
             res.payload;
@@ -70,7 +71,7 @@ const CommentLike = ({
         aria-pressed={like.isLiked}
       >
         <ThumbsUp
-          className={`w-4 h-4 ${like.isLiked ? "fill-blue-600 dark:fill-blue-400" : "fill-none"}`}
+          className={`w-4 h-4 ${like.isLiked ? "fill-blue-600" : "fill-none"}`}
         />
         <span className="text-sm font-medium">{like.totalLikes}</span>
       </button>
@@ -87,7 +88,7 @@ const CommentLike = ({
         aria-pressed={disLike.isDisLiked}
       >
         <ThumbsDown
-          className={`w-4 h-4 ${disLike.isDisLiked ? "fill-blue-600 dark:fill-blue-400" : "fill-none"}`}
+          className={`w-4 h-4 ${disLike.isDisLiked ? "fill-blue-600 " : "fill-none"}`}
         />
         <span className="text-sm font-medium">{disLike.totalDisLikes}</span>
       </button>

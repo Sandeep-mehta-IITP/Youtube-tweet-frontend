@@ -107,12 +107,12 @@ const ChannelTweets = ({ owner = false }) => {
     );
   }
 
-  console.log("TweetsData", tweetsData);
+  // console.log("TweetsData", tweetsData);
 
-  tweetsData.map((tweet) => (
-    console.log("tweet", tweet)
+  // tweetsData.map((tweet) => (
+  //   console.log("tweet", tweet)
     
-  ))
+  // ))
   
 
   /** Main UI */

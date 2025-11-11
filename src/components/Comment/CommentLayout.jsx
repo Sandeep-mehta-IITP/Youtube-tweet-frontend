@@ -73,6 +73,9 @@ const CommentLayout = ({
     }
   };
 
+  //console.log("Comment", comment);
+  
+
   return (
     <section className="flex flex-col sm:flex-row justify-between gap-4">
       {/* Comment content */}
@@ -129,9 +132,9 @@ const CommentLayout = ({
             <LikeComponent
               commentId={comment._id}
               isLiked={comment.isLiked}
-              totalLikes={comment.likesCount}
+              totalLikes={comment.totalLikes}
               isDisLiked={comment.isDisLiked}
-              totalDisLikes={comment.disLikesCount}
+              totalDisLikes={comment.totalDisLikes}
             />
             {comment.isLikedByVideoOwner && (
               <div className="relative flex items-center justify-center">
