@@ -15,7 +15,7 @@ const SubscriptionUser = ({ profile }) => {
   const { isAuthenticated, userData } = useSelector((state) => state.auth);
   const [isSubscribed, setIsSubscribed] = useState(profile.isSubscribed);
 
-  console.log("userData in subsriptionuser", userData);
+  //console.log("userData in subsriptionuser", userData);
   const isOwner = userData?._id === profile._id;
 
   const handleSubscribe = async () => {

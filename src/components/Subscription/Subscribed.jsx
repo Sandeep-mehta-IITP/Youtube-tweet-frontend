@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import SubscriptionUser from "./SubscriptionUser";
 import MyChannelEmptySubscription from "./MyChannelEmptySubscription";
-import EmptySubscription from "./EmptySubscription";
 import EmptySubscribers from "./EmptySubscribers";
 
 const Subscribed = ({ owner = false, isSubscribers = false }) => {
@@ -19,6 +18,10 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
   const userStateId = useSelector((state) => state.user.userData?._id);
   const currentUser = useSelector((state) => state.auth.userData);
   let { data, loading, status } = useSelector((state) => state.subscription);
+  console.log("data in subscribed", data);
+  
+  //console.log("userStateId", userStateId);
+  
 
   const channelId = owner ? currentUser?._id : userStateId;
 
@@ -27,7 +30,7 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
   useEffect(() => {
     if (!channelId && !isSubscribers) return;
     if (isSubscribers) {
-      //console.log("isSubscribes", isSubscribers);
+      console.log("isSubscribes", isSubscribers);
       const res = dispatch(getChannelSubscribers(currentUser?._id));
       //console.log("subscribers res", res);
     } else {
@@ -89,8 +92,8 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
     }
   };
 
-  //console.log("data in subscrition", data);
-  //console.log("subscribed", subscribed);
+  console.log("data in subscrition", data);
+  console.log("subscribed", subscribed);
 
   return data && data.length > 0 ? (
     <ul className="flex w-full flex-col gap-y-4 px-8 py-8 sm:px-16 sm:py-12">
