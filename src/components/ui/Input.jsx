@@ -28,8 +28,8 @@ const Input = forwardRef(
           type={type}
           placeholder={placeholder}
           {...(register ? register(name) : {})} // React Hook Form support
-          className={`border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            error ? "border-red-500" : "border-gray-300"
+          className={`border rounded-md p-2 focus:outline-none focus:ring-2  ${
+            error ? "border-red-500 focus:ring-red-600" : "border-gray-300 focus:ring-blue-500"
           } ${className}`}
           {...rest}
         />

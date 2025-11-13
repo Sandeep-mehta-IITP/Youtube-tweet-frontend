@@ -15,6 +15,7 @@ export const toggleSubscription = createAsyncThunk(
       const response = await axiosInstance.post(
         `/subscriptions/c/${channelId}`
       );
+
       toast.success(
         response.data.message || "Subscription toggled successfully."
       );
@@ -33,7 +34,7 @@ export const getChannelSubscribers = createAsyncThunk(
     try {
       const response = await axiosInstance.get(`/subscriptions/c/${channelId}`);
       console.log("res of subs", response.data);
-      
+
       return response.data.data.docs;
     } catch (error) {
       console.log("FAILED TO GET CHANNEL SUBSCRIBERS", error.userMessage);
@@ -69,51 +70,65 @@ const subscriptionSlice = createSlice({
   extraReducers: (builder) => {
     // toggle subscriptions
     builder.addCase(toggleSubscription.pending, (state) => {
-        state.loading = true;
-    })
+      state.loading = true;
+    });
 
     builder.addCase(toggleSubscription.fulfilled, (state, action) => {
-        state.loading = false;
-        state.status = true;
-        state.data = action.payload
-    })
+      state.loading = false;
+      state.status = true;
+      const updatedChannel = action.payload; 
+
+  // Case 1:  (ChannelProfileLayout)
+  if (state.data && !Array.isArray(state.data)) {
+    if (state.data._id === updatedChannel._id) {
+      state.data = { ...state.data, ...updatedChannel };
+    }
+  }
+
+  // Case 2: (Subscribed / Subscribers tab)
+  if (Array.isArray(state.data)) {
+    state.data = state.data.map((ch) =>
+      ch._id === updatedChannel._id ? { ...ch, ...updatedChannel } : ch
+    );
+  }
+    });
 
     builder.addCase(toggleSubscription.rejected, (state) => {
-        state.loading = false;
-        state.status = false;
-    })
+      state.loading = false;
+      state.status = false;
+    });
 
     // get channel subscribers
     builder.addCase(getChannelSubscribers.pending, (state) => {
-        state.loading = true;
-    })
+      state.loading = true;
+    });
 
     builder.addCase(getChannelSubscribers.fulfilled, (state, action) => {
-        state.loading = false;
-        state.status = true;
-        state.data = action.payload
-    })
+      state.loading = false;
+      state.status = true;
+      state.data = action.payload;
+    });
 
     builder.addCase(getChannelSubscribers.rejected, (state) => {
-        state.loading = false;
-        state.status = false;
-    })
+      state.loading = false;
+      state.status = false;
+    });
 
     // get subscribed channels
     builder.addCase(getSubscribedChannels.pending, (state) => {
-        state.loading = true;
-    })
+      state.loading = true;
+    });
 
     builder.addCase(getSubscribedChannels.fulfilled, (state, action) => {
-        state.loading = false;
-        state.status = true;
-        state.data = action.payload
-    })
+      state.loading = false;
+      state.status = true;
+      state.data = action.payload;
+    });
 
     builder.addCase(getSubscribedChannels.rejected, (state) => {
-        state.loading = false;
-        state.status = false;
-    })
+      state.loading = false;
+      state.status = false;
+    });
   },
 });
 

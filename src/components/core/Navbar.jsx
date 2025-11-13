@@ -104,7 +104,7 @@ const Navbar = () => {
 
         {/* Search bar */}
         <form
-          className="hidden w-full max-w-lg mx-auto sm:flex"
+          className="hidden w-full max-w-2xl mx-auto sm:flex"
           onSubmit={(event) => {
             event.preventDefault();
             handleSearchQuery(searchInputRef.current.value);

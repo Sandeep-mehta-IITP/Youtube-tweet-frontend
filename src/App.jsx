@@ -130,7 +130,7 @@ function App() {
               element={<ChannelPlaylists owner={false} />}
             />
             <Route path="tweets" element={<ChannelTweets owner={false} />} />
-            <Route path="subscribed" element={<Subscribed owner={false} />} />
+            <Route path="subscribed" element={<Subscribed owner={false} isSubscribers={true} />} />
             <Route path="about" element={<AboutChannel owner={false} />} />
           </Route>
 
@@ -206,9 +206,6 @@ function App() {
             }
           />
 
-          {/* Forgot password */}
-          <Route path="forgot-password" element={<ForgotPassword />} />
-
           {/* Admin Dashboard */}
           <Route
             path="admin/dashboard"
@@ -219,31 +216,32 @@ function App() {
             }
           />
 
-          
-
           {/* 404 - Page Not Found */}
           <Route path="*" element={<PageNotFound />} />
         </Route>
 
         {/* Signup */}
-          <Route
-            path="/signup"
-            element={
-              <AuthLayout authentication={false}>
-                <SignupPage />
-              </AuthLayout>
-            }
-          />
+        <Route
+          path="/signup"
+          element={
+            <AuthLayout authentication={false}>
+              <SignupPage />
+            </AuthLayout>
+          }
+        />
 
-          {/* Login */}
-          <Route
-            path="/login"
-            element={
-              <AuthLayout authentication={false}>
-                <LoginPage />
-              </AuthLayout>
-            }
-          />
+        {/* Login */}
+        <Route
+          path="/login"
+          element={
+            <AuthLayout authentication={false}>
+              <LoginPage />
+            </AuthLayout>
+          }
+        />
+
+        {/* Forgot password */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </div>
   );

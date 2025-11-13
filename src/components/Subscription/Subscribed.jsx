@@ -13,7 +13,7 @@ import EmptySubscribers from "./EmptySubscribers";
 const Subscribed = ({ owner = false, isSubscribers = false }) => {
   const dispatch = useDispatch();
   const { username } = useParams();
-  //console.log("username", username);
+  console.log("subscribers of ", username);
 
   const userStateId = useSelector((state) => state.user.userData?._id);
   const currentUser = useSelector((state) => state.auth.userData);
