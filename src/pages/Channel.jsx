@@ -1,6 +1,6 @@
 import { channelProfile } from "@/app/Slices/userSlice";
 import ChannelProfileLayout from "@/components/core/ChannelProfileLayout";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";  // Removed useState
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 
@@ -12,14 +12,16 @@ const Channel = ({ owner = false }) => {
   const loggedInUsername = useSelector(
     (state) => state.auth.userData?.username
   );
-  const [profile, setProfile] = useState(null);
+  // Get profile from Redux instead of local state
+  const profile = useSelector((state) => state.user.userData);  // Adjust 'state.user.channelProfile' based on your userSlice structure
 
   useEffect(() => {
     if (!owner && loggedInUsername === username)
       navigate(`/channel/${loggedInUsername}`);
     if (!username) return;
 
-    dispatch(channelProfile(username)).then((res) => setProfile(res.payload));
+    // Dispatch to load/update profile in Redux
+    dispatch(channelProfile(username));
   }, [dispatch, username, loggedInUsername, navigate, owner]);
 
   const tabList = [
@@ -69,7 +71,7 @@ const Channel = ({ owner = false }) => {
       </div>
     </section>
   ) : (
-    // Skeleton
+    // Skeleton (unchanged)
     <section className="w-full pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
       <div className="relative w-full aspect-[16/5] bg-gray-700/30 animate-pulse" />
 

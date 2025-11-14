@@ -104,13 +104,13 @@ const Navbar = () => {
 
         {/* Search bar */}
         <form
-          className="hidden w-full max-w-2xl mx-auto sm:flex"
+          className="hidden w-full sm:max-w-lg xl:max-w-2xl mx-auto sm:flex"
           onSubmit={(event) => {
             event.preventDefault();
             handleSearchQuery(searchInputRef.current.value);
           }}
         >
-          <div className="flex w-full max-w-2xl mx-auto">
+          <div className="flex w-full mx-auto">
             {/* Input Container */}
             <div className="relative flex-1 group">
               {/* Input */}
@@ -179,7 +179,7 @@ const Navbar = () => {
         </div>
 
         {/*  Create Button */}
-        <div className="mr-16 hidden sm:block">
+        <div className="mr-16 hidden md:block">
           {isAuthenticated && (
             <div className="relative" ref={createDropdownRef}>
               <button

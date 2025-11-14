@@ -1,136 +1,178 @@
 import {
   addVideoToPlaylist,
+  getPlaylistByID,
   removeVideoFromPlaylist,
 } from "@/app/Slices/playlistSlice";
 import {
   formatTimestamp,
   formatVideoDuration,
 } from "@/utils/helpers/formatFigure";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { Play, RotateCcw, Trash2, MoreVertical } from "lucide-react";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
-const PlaylistVideoLayout = ({ video, playlistId, owner = false }) => {
+const PlaylistVideoLayout = ({
+  video,
+  playlistId,
+  owner = false,
+  className = "",
+}) => {
   const dispatch = useDispatch();
-
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
-  const buttonClickHandler = () => {
-    if (isDeleted) {
-      dispatch(addVideoToPlaylist({ videoId: video?._id, playlistId })).then(
-        (res) => {
-          if (res.meta.requestStatus === "fulfilled") {
-            setIsDeleted(false);
-          }
-        }
-      );
-    } else {
-      dispatch(
-        removeVideoFromPlaylist({ videoId: video?._id, playlistId })
-      ).then((res) => {
-        if (res.meta.requestStatus === "fulfilled") {
-          setIsDeleted(true);
-        }
-      });
-    }
-  };
+  // const buttonClickHandler =async () => {
+  //   if (isDeleted) {
+  //     await dispatch(addVideoToPlaylist({ videoId: video?._id, playlistId })).then(
+  //       (res) => {
+  //         if (res.meta.requestStatus === "fulfilled") {
+  //           dispatch(getPlaylistByID(playlistId));
+  //           setIsDeleted(false);
+  //         }
+  //       }
+  //     );
+  //   } else {
+  //     await dispatch(
+  //       removeVideoFromPlaylist({ videoId: video?._id, playlistId })
+  //     ).then((res) => {
+  //       if (res.meta.requestStatus === "fulfilled") {
+  //          dispatch(getPlaylistByID(playlistId));
+  //         setIsDeleted(true);
+  //       }
+  //     });
+  //   }
+  // };
 
-  console.log("video of playlist", video);
+
+  const buttonClickHandler = async () => {
+  if (!isDeleted) {
+    // UI FIRST
+    setIsDeleted(true);
+
+    // Backend SECOND
+    dispatch(removeVideoFromPlaylist({ videoId: video?._id, playlistId }))
+      .then(() => dispatch(getPlaylistByID(playlistId)))
+      .catch(() => setIsDeleted(false)); // rollback on error
+  } else {
+    // UI FIRST
+    setIsDeleted(false);
+
+    // Backend SECOND
+    dispatch(addVideoToPlaylist({ videoId: video?._id, playlistId }))
+      .then(() => dispatch(getPlaylistByID(playlistId)))
+      .catch(() => setIsDeleted(true)); // rollback on error
+  }
+};
+
+
+  console.log("Owner is playlist video layout", owner);
   
+
   return (
-    <li key={video?._id} className="border">
-      <div className="w-full sm:flex gap-x-4">
-        {/* Video Thumbnail */}
-        <div className="relative mb-2 w-full sm:w-5/12 sm:mb-0">
-          <Link to={`/watch/${video._id}`}>
-            <div className="w-full pt-[56%]">
-              <div className="absolute inset-0">
-                <img
-                  src={video?.thumbnail?.url}
-                  alt={video?.title}
-                  className="h-full w-full"
-                />
-              </div>
-              <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-md font-medium border border-white/20 min-w-[40px] text-center">
-                {formatVideoDuration(video?.duration)}
-              </span>
+    <div
+      className={`group relative sm:h-52 flex gap-3 p-3 rounded-xl bg-gray-900/50 hover:bg-gray-800/80 transition-all duration-300 border border-transparent hover:border-gray-700 ${className}`}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      {/* Video Thumbnail */}
+      <div className="relative shrink-0 w-40 sm:w-52 md:w-80 aspect-video rounded-lg overflow-hidden bg-gray-800">
+        <Link to={`/watch/${video._id}`} className="block w-full h-full">
+          <img
+            src={video?.thumbnail?.url}
+            alt={video?.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+
+          {/* Duration Badge */}
+          <span className="absolute bottom-2 right-2 bg-black/90 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium">
+            {formatVideoDuration(video?.duration)}
+          </span>
+
+          {/* Play Icon on Hover */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/30">
+            <div className="bg-white/90 p-2 rounded-full shadow-lg">
+              <Play className="w-5 h-5 fill-black text-black" />
             </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Video Details */}
+      <div className="flex-1 min-w-0 space-y-1.5">
+        {/* Title */}
+        <h3 className="text-base sm:text-lg font-semibold text-white line-clamp-2 group-hover:text-blue-400 transition-colors">
+          <Link to={`/watch/${video._id}`} className="hover:underline">
+            {video?.title}
+          </Link>
+        </h3>
+
+        {/* Views & Date */}
+        <p className="text-xs sm:text-sm text-gray-400">
+          {video?.views} view{video.views !== 1 ? "s" : ""} •{" "}
+          {formatTimestamp(video?.createdAt)}
+        </p>
+
+        {/* Owner Info */}
+        <div className="flex items-center gap-2">
+          <Link to={`/user/${video?.owner?.username}`} className="shrink-0">
+            <img
+              src={video?.owner?.avatar}
+              alt={video?.owner?.username}
+              className="w-8 h-8 rounded-full object-cover ring-1 ring-transparent hover:ring-blue-500 transition-all duration-200"
+            />
+          </Link>
+          <Link
+            to={`/user/${video?.owner?.username}`}
+            className="text-sm text-gray-300 hover:text-blue-400 transition-colors truncate"
+          >
+            @{video?.owner?.username}
           </Link>
         </div>
 
-        {/* Video Data */}
-        <div className="flex relative gap-x-2 px-2 sm:w-7/12 sm:px-0">
-          <div className="w-10 h-10 shrink-0 sm:hidden">
-            <img
-              src={video.owner?.avatar}
-              alt={video.owner?.fullName}
-              className="h-full w-full rounded-full"
-            />
-          </div>
-
-          {/* Video Deatisl */}
-          <div className="w-full mt-2">
-            {/* Title */}
-            <h5 className="mb-1.5 text-xl text-[#f6f5f6] font-semibold sm:max-w-[75%]">
-              {video?.title}
-            </h5>
-
-            {/* views and date */}
-            <p className="text-sm flex text-gray-200 font-medium sm:mt-3">
-              {video?.views} View{video.views > 1 ? "s" : ""} ·{" "}
-              {formatTimestamp(video?.createdAt)}
-            </p>
-
-            {/* OwnerDetails */}
-            <div className="flex items-center gap-x-3">
-              <div className="w-10 h-10 mt-2 shrink-0 hidden sm:block">
-                <Link to={`/user/${video?.owner?.username}`}>
-                  <img
-                    src={video?.owner?.avatar}
-                    alt={video?.owner?.username}
-                    className="w-full h-full rounded-full"
-                  />
-                </Link>
-              </div>
-              <p className="text-sm text-white/70 font-medium">
-                <Link
-                  to={`/user/${video?.owner?.username}`}
-                  className="hover:text-sky-500 transition-colors duration-200"
-                >
-                  {video?.owner?.username}
-                </Link>
-              </p>
-            </div>
-          </div>
-
-          {/* Delete Button */}
-          {owner && (
-            <span className="absolute top-2 right-2">
-              {!isDeleted ? (
-                // Remove button
-                <button
-                  onClick={buttonClickHandler}
-                  title="Remove video"
-                  className="inline-flex h-5 w-5 items-center justify-center text-red-500 hover:text-red-700 cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              ) : (
-                // Undo button
-                <button
-                  onClick={buttonClickHandler}
-                  title="Undo changes"
-                  className="inline-flex h-5 w-5 items-center justify-center text-blue-500 hover:text-blue-700 cursor-pointer"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                </button>
-              )}
-            </span>
-          )}
-        </div>
+        {/* Optional: Video Description (if available) */}
+        {video?.description && (
+          <p className="text-xs text-gray-400 line-clamp-1 mt-1">
+            {video.description}
+          </p>
+        )}
       </div>
-    </li>
+
+      {/* Action Buttons (Owner Only) */}
+      {owner && (
+        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button
+            onClick={buttonClickHandler}
+            className={`p-2 rounded-full transition-all duration-200 ${
+              isDeleted
+                ? "bg-blue-600/20 text-blue-400 hover:bg-blue-600/40"
+                : "bg-red-600/20 text-red-400 hover:bg-red-600/40"
+            }`}
+            title={isDeleted ? "Undo remove" : "Remove from playlist"}
+          >
+            {isDeleted ? (
+              <RotateCcw className="w-4 h-4" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* Optional: More Options */}
+          <button className="p-2 rounded-full bg-gray-700/50 text-gray-400 hover:bg-gray-600/70 hover:text-white transition-all">
+            <MoreVertical className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Undo State Visual Feedback */}
+      {isDeleted && (
+        <div className="absolute inset-0 bg-red-900/20 rounded-xl flex items-center justify-center pointer-events-none">
+          <p className="text-red-400 text-sm font-medium bg-red-900/80 px-3 py-1 rounded-full">
+            Removed (click to undo)
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -304,7 +304,6 @@ const playlistSlice = createSlice({
         action.type.startsWith("playlist/") && action.type.endsWith("/pending"),
       (state) => {
         state.loading = false;
-        state.data = null;
         state.status = false;
       }
     );

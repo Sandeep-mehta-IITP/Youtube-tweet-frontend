@@ -1,5 +1,5 @@
 import { toggleSubscription } from "@/app/Slices/subscriptionSlice";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react"; // Removed useState
 import { useDispatch, useSelector } from "react-redux";
 import LoginPopup from "../auth/LoginPopup";
 import { formatCount } from "@/utils/helpers/formatFigure";
@@ -13,18 +13,20 @@ const SubscriptionUser = ({ profile }) => {
   const loginPopupRef = useRef();
 
   const { isAuthenticated, userData } = useSelector((state) => state.auth);
-  const [isSubscribed, setIsSubscribed] = useState(profile.isSubscribed || profile.subscribedToSubscriber);
 
-  //console.log("userData in subsriptionuser", userData);
+  // Derive isSubscribed from the profile prop (no local state needed)
+  const isSubscribed =
+    profile?.isSubscribed || profile?.subscribedToSubscriber || false;
+
   const isOwner = userData?._id === profile._id;
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = () => {
     if (!isAuthenticated) {
       return loginPopupRef.current.open();
     }
-
-    await dispatch(toggleSubscription(profile?._id));
-    setIsSubscribed((prev) => !prev);
+    // Dispatch toggleSubscription—Redux will update the profile in state.subscription.data
+    dispatch(toggleSubscription(profile?._id));
+    // No need to manually toggle local state—Redux handles it
   };
 
   return (

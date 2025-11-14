@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle, Pencil, UserPlus } from "lucide-react";
@@ -6,23 +6,23 @@ import { toggleSubscription } from "@/app/Slices/subscriptionSlice";
 import LoginPopup from "../auth/LoginPopup";
 import { formatCount } from "@/utils/helpers/formatFigure";
 
+
 const ChannelProfileLayout = ({ profile, owner = false }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const loginPopupRef = useRef();
   const { isAuthenticated } = useSelector(({ auth }) => auth);
 
-  console.log("profile in channel", profile);
-  
+  console.log("profile in channel LAYOUT", profile);
 
-  const [isSubscribed, setIsSubscribed] = useState(
-    profile?.isSubscribed || false
-  );
+  // Derive isSubscribed from the profile prop (which now updates instantly via Redux)
+  const isSubscribed = profile?.isSubscribed || false;
 
   const handleSubscription = () => {
     if (!isAuthenticated) return loginPopupRef.current.open();
+    // Dispatch toggleSubscription—userSlice will handle the optimistic update
     dispatch(toggleSubscription(profile?._id));
-    setIsSubscribed((prev) => !prev);
+    // No need to dispatch channelProfile again—optimistic update handles it
   };
 
   return (

@@ -1,6 +1,7 @@
 import { axiosInstance } from "@/API/axiosInstance";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
+import { channelProfile } from "./userSlice";
 
 const initialState = {
   loading: false,
@@ -129,7 +130,19 @@ const subscriptionSlice = createSlice({
       state.loading = false;
       state.status = false;
     });
+
+    // NEW: Listen to channelProfile to update the list globally
+    builder.addCase(channelProfile.fulfilled, (state, action) => {
+      const updatedProfile = action.payload;
+      if (Array.isArray(state.data)) {
+        state.data = state.data.map((ch) =>
+          ch._id === updatedProfile._id ? { ...ch, ...updatedProfile } : ch
+        );
+      }
+    });
   },
+
+  
 });
 
 export default subscriptionSlice.reducer;

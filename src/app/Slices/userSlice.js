@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "@/API/axiosInstance";
 import { toast } from "react-toastify";
+import { toggleSubscription } from "./subscriptionSlice";
 
 const initialState = {
   userData: {},
@@ -98,6 +99,15 @@ const userSlice = createSlice({
       state.isAuthenticated = false;
     });
 
+    // Listen to toggleSubscription to update userData globally
+    builder.addCase(toggleSubscription.fulfilled, (state, action) => {
+      const updatedChannel = action.payload;
+      if (state.userData && state.userData._id === updatedChannel._id) {
+        state.userData = { ...state.userData, ...updatedChannel };
+      }
+    });
+
+    
     // get about channel
     builder.addCase(getAboutChannel.pending, (state) => {
       state.loading = true;
