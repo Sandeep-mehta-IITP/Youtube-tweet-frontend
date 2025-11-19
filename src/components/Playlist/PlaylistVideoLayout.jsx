@@ -7,8 +7,8 @@ import {
   formatTimestamp,
   formatVideoDuration,
 } from "@/utils/helpers/formatFigure";
-import { Play, RotateCcw, Trash2, MoreVertical } from "lucide-react";
-import React, { useState } from "react";
+import { Play, RotateCcw, Trash2, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 
@@ -19,61 +19,66 @@ const PlaylistVideoLayout = ({
   className = "",
 }) => {
   const dispatch = useDispatch();
-  const [isDeleted, setIsDeleted] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false); // Controls confirmation UI
+  const [isDeleted, setIsDeleted] = useState(false); // Tracks actual deletion
 
-  // const buttonClickHandler =async () => {
-  //   if (isDeleted) {
-  //     await dispatch(addVideoToPlaylist({ videoId: video?._id, playlistId })).then(
-  //       (res) => {
-  //         if (res.meta.requestStatus === "fulfilled") {
-  //           dispatch(getPlaylistByID(playlistId));
-  //           setIsDeleted(false);
-  //         }
-  //       }
-  //     );
-  //   } else {
-  //     await dispatch(
-  //       removeVideoFromPlaylist({ videoId: video?._id, playlistId })
-  //     ).then((res) => {
-  //       if (res.meta.requestStatus === "fulfilled") {
-  //          dispatch(getPlaylistByID(playlistId));
-  //         setIsDeleted(true);
-  //       }
-  //     });
-  //   }
-  // };
+  // Trigger removal confirmation
+  const handleRemoveClick = () => {
+    setIsRemoving(true);
+    setIsDeleted(true); // Optimistic UI
+  };
 
+  // Confirm permanent removal
+  const confirmRemove = async () => {
+    const result = await dispatch(
+      removeVideoFromPlaylist({ videoId: video?._id, playlistId })
+    );
 
-  const buttonClickHandler = async () => {
-  if (!isDeleted) {
-    // UI FIRST
-    setIsDeleted(true);
+    if (result.meta.requestStatus === "fulfilled") {
+      dispatch(getPlaylistByID(playlistId));
+      setIsRemoving(false);
+      // Keep isDeleted = true → video stays removed
+    } else {
+      // Rollback
+      setIsDeleted(false);
+      setIsRemoving(false);
+    }
+  };
 
-    // Backend SECOND
-    dispatch(removeVideoFromPlaylist({ videoId: video?._id, playlistId }))
-      .then(() => dispatch(getPlaylistByID(playlistId)))
-      .catch(() => setIsDeleted(false)); // rollback on error
-  } else {
-    // UI FIRST
+  useEffect(() => {
+    if (isRemoving && isDeleted) {
+      const timer = setTimeout(confirmRemove, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isRemoving, isDeleted]);
+
+  // Undo removal (re-add video)
+  const undoRemove = async () => {
     setIsDeleted(false);
 
-    // Backend SECOND
-    dispatch(addVideoToPlaylist({ videoId: video?._id, playlistId }))
-      .then(() => dispatch(getPlaylistByID(playlistId)))
-      .catch(() => setIsDeleted(true)); // rollback on error
-  }
-};
+    const result = await dispatch(
+      addVideoToPlaylist({ videoId: video?._id, playlistId })
+    );
 
+    if (result.meta.requestStatus === "fulfilled") {
+      dispatch(getPlaylistByID(playlistId));
+      setIsRemoving(false);
+    } else {
+      // Rollback
+      setIsDeleted(true);
+    }
+  };
 
-  console.log("Owner is playlist video layout", owner);
-  
+  // Cancel removal intent
+  const cancelRemove = () => {
+    setIsRemoving(false);
+    setIsDeleted(false);
+  };
 
   return (
     <div
       className={`group relative sm:h-52 flex gap-3 p-3 rounded-xl bg-gray-900/50 hover:bg-gray-800/80 transition-all duration-300 border border-transparent hover:border-gray-700 ${className}`}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={() => !isRemoving && setIsRemoving(false)}
     >
       {/* Video Thumbnail */}
       <div className="relative shrink-0 w-40 sm:w-52 md:w-80 aspect-video rounded-lg overflow-hidden bg-gray-800">
@@ -100,20 +105,17 @@ const PlaylistVideoLayout = ({
 
       {/* Video Details */}
       <div className="flex-1 min-w-0 space-y-1.5">
-        {/* Title */}
         <h3 className="text-base sm:text-lg font-semibold text-white line-clamp-2 group-hover:text-blue-400 transition-colors">
           <Link to={`/watch/${video._id}`} className="hover:underline">
             {video?.title}
           </Link>
         </h3>
 
-        {/* Views & Date */}
         <p className="text-xs sm:text-sm text-gray-400">
           {video?.views} view{video.views !== 1 ? "s" : ""} •{" "}
           {formatTimestamp(video?.createdAt)}
         </p>
 
-        {/* Owner Info */}
         <div className="flex items-center gap-2">
           <Link to={`/user/${video?.owner?.username}`} className="shrink-0">
             <img
@@ -130,7 +132,6 @@ const PlaylistVideoLayout = ({
           </Link>
         </div>
 
-        {/* Optional: Video Description (if available) */}
         {video?.description && (
           <p className="text-xs text-gray-400 line-clamp-1 mt-1">
             {video.description}
@@ -138,37 +139,64 @@ const PlaylistVideoLayout = ({
         )}
       </div>
 
-      {/* Action Buttons (Owner Only) */}
+      {/* Action Buttons */}
       {owner && (
-        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button
-            onClick={buttonClickHandler}
-            className={`p-2 rounded-full transition-all duration-200 ${
-              isDeleted
-                ? "bg-blue-600/20 text-blue-400 hover:bg-blue-600/40"
-                : "bg-red-600/20 text-red-400 hover:bg-red-600/40"
-            }`}
-            title={isDeleted ? "Undo remove" : "Remove from playlist"}
-          >
-            {isDeleted ? (
-              <RotateCcw className="w-4 h-4" />
-            ) : (
+        <div
+          className={`absolute top-2 right-2 flex items-center gap-1 transition-all duration-300 ${
+            isRemoving ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          }`}
+        >
+          {/* Initial Trash Button */}
+          {!isRemoving && !isDeleted && (
+            <button
+              onClick={handleRemoveClick}
+              className="p-2 rounded-full bg-red-600/20 text-red-400 hover:bg-red-600/40 transition-all"
+              title="Remove from playlist"
+            >
               <Trash2 className="w-4 h-4" />
-            )}
-          </button>
+            </button>
+          )}
 
-          {/* Optional: More Options */}
-          <button className="p-2 rounded-full bg-gray-700/50 text-gray-400 hover:bg-gray-600/70 hover:text-white transition-all">
-            <MoreVertical className="w-4 h-4" />
-          </button>
+          {/* Confirmation Bar */}
+          {isRemoving && (
+            <div className="flex items-center gap-1 bg-gray-800/90 backdrop-blur-sm rounded-full p-1 shadow-lg border border-gray-700">
+              <button
+                onClick={undoRemove}
+                className="p-1.5 rounded-full bg-blue-600/30 text-blue-400 hover:bg-blue-600/50 transition-all flex items-center gap-1 text-xs font-medium"
+                title="Undo"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Undo</span>
+              </button>
+
+              <div className="w-px h-5 bg-gray-600" />
+
+              <button
+                onClick={confirmRemove}
+                className="p-1.5 rounded-full bg-red-600/30 text-red-400 hover:bg-red-600/50 transition-all flex items-center gap-1 text-xs font-medium"
+                title="Remove permanently"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Remove</span>
+              </button>
+
+              <button
+                onClick={cancelRemove}
+                className="p-1.5 rounded-full bg-gray-700/50 text-gray-400 hover:bg-gray-600/70 transition-all"
+                title="Cancel"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Undo State Visual Feedback */}
-      {isDeleted && (
+      {/* Removed Overlay */}
+      {isDeleted && !isRemoving && (
         <div className="absolute inset-0 bg-red-900/20 rounded-xl flex items-center justify-center pointer-events-none">
           <p className="text-red-400 text-sm font-medium bg-red-900/80 px-3 py-1 rounded-full">
-            Removed (click to undo)
+            Removed
           </p>
         </div>
       )}

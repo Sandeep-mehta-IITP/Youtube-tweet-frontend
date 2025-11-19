@@ -15,7 +15,7 @@ const SearchResult = () => {
 
   // Fetch current page videos using RTK Query
   const { data, isFetching, isLoading } = useGetAllVideosQuery(
-    { search: searchQuery, page, limit: 10 },
+    { query: searchQuery, page, limit: 10 }, // Changed 'search' to 'query' to match backend expectation
     {
       skip: !searchQuery,
     }
@@ -58,7 +58,6 @@ const SearchResult = () => {
   }, [hasNextPage, isFetching]);
 
   console.log("videos in search result", allVideos);
-  
 
   return (
     <div id="scrollable_results_screen">

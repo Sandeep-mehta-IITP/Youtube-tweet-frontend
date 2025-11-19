@@ -30,7 +30,7 @@ const Navbar = () => {
 
   //console.log(userData)
   const navigate = useNavigate();
-  const dipatch = useDispatch();
+  const dispatch = useDispatch(); // Fixed typo: dipatch -> dispatch
   const searchInputRef = useRef();
   const smallsearchInputRef = useRef();
 
@@ -84,12 +84,12 @@ const Navbar = () => {
       return;
     }
 
-    navigate(`/results?search_query=${searchQuery}`);
+    navigate(`/results?search_query=${searchQuery}`); // This is fine, as SearchResult extracts 'search_query' and maps to 'query' param
   };
 
   // Logout Handler
   const logoutHandler = () => {
-    dipatch(logoutUser());
+    dispatch(logoutUser()); // Fixed: dipatch -> dispatch
     navigate("/");
   };
 
@@ -98,7 +98,7 @@ const Navbar = () => {
       <nav className="mx-auto flex items-center py-2 w-full">
         <Menu
           className="w-6 h-6 text-[#f6f5f6] ml-8 cursor-pointer hidden sm:block"
-          onClick={() => dipatch(toggleAside())}
+          onClick={() => dispatch(toggleAside())} // Fixed: dipatch -> dispatch
         />
         <Logo className="-ml-2 sm:ml-4" />
 

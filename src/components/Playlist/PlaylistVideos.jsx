@@ -27,7 +27,9 @@ const PlaylistVideos = () => {
 
   const playlistDeleteHandler = (isConfirm) => {
     if (isConfirm) {
-      dispatch(deletePlaylist(playlistId));
+      dispatch(deletePlaylist(playlistId)).then(() => {
+        dispatch(getUserPlaylists(userData?._id));
+      });
       navigate(`/channel/${username}/playlists`);
     }
   };
@@ -210,10 +212,7 @@ const PlaylistVideos = () => {
                   </div>
                 ) : (
                   <div className="flex flex-col">
-                    <EmptyPlaylist
-                      playlistVideos
-                      
-                    />
+                    <EmptyPlaylist playlistVideos />
                   </div>
                 )}
               </div>

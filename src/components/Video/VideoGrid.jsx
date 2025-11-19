@@ -15,8 +15,8 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 p-4">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="animate-pulse space-y-3">
-            {/* Thumbnail skeleton - Fixed aspect ratio */}
-            <div className="w-full h-48 bg-gray-800 rounded-lg relative overflow-hidden"></div>
+            {/* Thumbnail skeleton - 16:9 aspect ratio like YouTube */}
+            <div className="w-full aspect-video bg-gray-800 rounded-lg relative overflow-hidden"></div>
 
             {/* Video info skeleton */}
             <div className="space-y-2">
@@ -37,16 +37,14 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
           key={video?._id}
           className="group bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition-all duration-200"
         >
-          {/* Thumbnail Container - Fixed height for consistency */}
+          {/* Thumbnail Container - 16:9 aspect ratio like YouTube */}
           <div className="relative overflow-hidden">
             <Link to={`/watch/${video?._id}`}>
-              <div className="w-full h-48 relative">
-                {" "}
-                {/* Fixed height like YouTube */}
+              <div className="w-full aspect-video relative">
                 <img
                   src={video?.thumbnail?.url || video?.thumbnail}
                   alt={video?.title}
-                  className="absolute inset-0 w-full h-full object-contain object-center bg-black rounded-t-lg transition-transform duration-200 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover bg-black rounded-t-lg transition-transform duration-200 group-hover:scale-105"
                   loading="lazy"
                 />
               </div>

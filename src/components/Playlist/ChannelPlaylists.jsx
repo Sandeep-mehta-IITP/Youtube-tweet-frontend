@@ -24,15 +24,14 @@ const ChannelPlaylists = ({ owner = false }) => {
 
     dispatch(getUserPlaylists(idToFetch)).then((res) => {
       setLoading(false);
-      const data = res?.payload?.data || [];
+      const data = res?.payload || [];
       console.log("Playlists data in channel playlists", data);
-      
+
       setPlaylists(data);
     });
   }, [dispatch, owner, currentUser, userId, username]);
 
   const openPlaylistForm = () => dialog.current?.open();
-
 
   // Loading Skeleton
   if (loading) {
@@ -71,23 +70,12 @@ const ChannelPlaylists = ({ owner = false }) => {
       {/* Header + Create Button */}
       <div className="flex items-center justify-between mt-3 mb-6">
         <h2 className="text-xl font-bold text-white">Playlists</h2>
-
-        {owner && (
-          <button
-            onClick={openPlaylistForm}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Create playlist
-          </button>
-        )}
       </div>
 
       {/* Playlists Grid */}
       <div className="grid gap-6 sm:gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-3 ">
         {playlists.map((playlist) => {
           const hasVideos = playlist.totalVideos > 0;
-          
 
           // Generate stacked thumbnail or fallback
           const thumbnailUrl =
@@ -112,16 +100,6 @@ const ChannelPlaylists = ({ owner = false }) => {
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
                       />
-
-                      {/* Stacked Video Previews (YouTube Style) */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="relative w-16 h-12 bg-black/40 backdrop-blur-sm rounded overflow-hidden border border-white/20">
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-                        </div>
-                        <div className="absolute right-2 w-16 h-12 bg-black/40 backdrop-blur-sm rounded overflow-hidden border border-white/20 translate-x-2">
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-                        </div>
-                      </div>
 
                       {/* Video Count */}
                       <div className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
@@ -154,8 +132,6 @@ const ChannelPlaylists = ({ owner = false }) => {
                       <path d="M3 10h11v2H3zm0-4h15v2H3zm0 8h7v2H3zm17-2v6l-5-3z" />
                     </svg>
                   </div>
-
-                  
 
                   {/* Hover Play Overlay */}
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">

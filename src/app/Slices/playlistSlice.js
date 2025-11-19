@@ -31,7 +31,7 @@ export const getUserPlaylists = createAsyncThunk(
     try {
       const response = await axiosInstance.get(`/playlist/user/${userId}`);
       console.log("user playlists", response.data);
-      return response.data;
+      return response.data?.data;
     } catch (error) {
       console.log("FAILED TO FETCHED USER PLAYLISTS", error.userMessage);
       toast.error(error.userMessage || "Failed to fetch user playlists.");
