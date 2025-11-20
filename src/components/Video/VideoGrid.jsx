@@ -3,11 +3,19 @@ import {
   formatVideoDuration,
 } from "@/utils/helpers/formatFigure";
 import { Loader, MoreHorizontal } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NoVIdeoFound from "./NoVIdeoFound";
 
 const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!loading) {
+      setHasLoaded(true);
+    }
+  }, [loading]);
+
   //console.log("videos received in VideoGrid:", videos);
 
   if (loading) {
@@ -15,7 +23,7 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 p-4">
         {[...Array(8)].map((_, i) => (
           <div key={i} className="animate-pulse space-y-3">
-            {/* Thumbnail skeleton - 16:9 aspect ratio like YouTube */}
+            {/* Thumbnail skeleton */}
             <div className="w-full aspect-video bg-gray-800 rounded-lg relative overflow-hidden"></div>
 
             {/* Video info skeleton */}
@@ -37,7 +45,7 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
           key={video?._id}
           className="group bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition-all duration-200"
         >
-          {/* Thumbnail Container - 16:9 aspect ratio like YouTube */}
+          {/* Thumbnail */}
           <div className="relative overflow-hidden">
             <Link to={`/watch/${video?._id}`}>
               <div className="w-full aspect-video relative">
@@ -50,13 +58,13 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
               </div>
             </Link>
 
-            {/* Duration Badge - Better positioning */}
+            {/* Duration Badge  */}
             <span className="absolute bottom-2 right-2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-md font-medium border border-white/20 min-w-[40px] text-center">
               {formatVideoDuration(video?.duration)}
             </span>
 
             {/* Hover overlay for better UX */}
-            {/* pointer-events-none for working link tag properly without effecting z and opacity-0 */}
+
             <div className="absolute inset-0 bg-black bg-opacity-65 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg pointer-events-none"></div>
           </div>
 
@@ -128,7 +136,9 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
       )}
 
       {/* No Videos Message */}
-      {!loading && !fetching && videos.length === 0 && <NoVIdeoFound />}
+      {hasLoaded && !loading && !fetching && videos.length === 0 && (
+        <NoVIdeoFound />
+      )}
     </div>
   );
 };
