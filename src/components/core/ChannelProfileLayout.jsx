@@ -13,7 +13,7 @@ const ChannelProfileLayout = ({ profile, owner = false }) => {
   const loginPopupRef = useRef();
   const { isAuthenticated } = useSelector(({ auth }) => auth);
 
-  console.log("profile in channel LAYOUT", profile);
+  //console.log("profile in channel LAYOUT", profile);
 
   // Derive isSubscribed from the profile prop (which now updates instantly via Redux)
   const isSubscribed = profile?.isSubscribed || false;

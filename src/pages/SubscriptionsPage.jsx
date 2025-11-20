@@ -1,49 +1,63 @@
+import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  getChannelSubscribers,
   getSubscribedChannels,
+  toggleSubscription,
 } from "@/app/Slices/subscriptionSlice";
 import { Search } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import SubscriptionUser from "@/components/Subscription/SubscriptionUser";
+import MyChannelEmptySubscription from "@/components/Subscription/MyChannelEmptySubscription";
 import { useParams } from "react-router-dom";
-import SubscriptionUser from "./SubscriptionUser";
-import MyChannelEmptySubscription from "./MyChannelEmptySubscription";
-import EmptySubscribers from "./EmptySubscribers";
+import EmptySubscription from "@/components/Subscription/EmptySubscription";
 
-const Subscribed = ({ owner = false, isSubscribers = false }) => {
+const SubscriptionsPage = ({ owner = false }) => {
   const dispatch = useDispatch();
   const { username } = useParams();
-  //console.log("subscribers of ", username);
-
+  const { data, loading, status } = useSelector((state) => state.subscription);
+  const currentUser = useSelector((state) => state.auth?.userData);
+  const [subscribedFiltered, setSubscribedFiltered] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const userStateId = useSelector((state) => state.user.userData?._id);
-  const currentUser = useSelector((state) => state.auth.userData);
-  let { data, loading, status } = useSelector((state) => state.subscription);
-  //console.log("data in subscribed", data);
-  
-  //console.log("userStateId", userStateId);
-  
 
   const channelId = owner ? currentUser?._id : userStateId;
 
-   //console.log(`channel id in subscribed`, channelId);
-
-  const [subscribedFiltered, setSubscribedFiltered] = useState(null);
+  //   console.log(`channel id ${username}`, channelId);
 
   useEffect(() => {
-    if (!channelId ) return;
-    if (isSubscribers) {
-      //console.log("isSubscribes", isSubscribers);
-      const res = dispatch(getChannelSubscribers(channelId));
-      //console.log("subscribers res", res);
-    } else {
+    if (channelId) {
       dispatch(getSubscribedChannels(channelId));
     }
-  }, [dispatch, channelId, currentUser, username]);
+  }, [dispatch, channelId, username]);
 
-  if (!isSubscribers && (loading || !channelId)) {
+  const handleInputData = useCallback(
+    (input) => {
+      setSearchTerm(input);
+      if (!input) {
+        setSubscribedFiltered(null);
+      } else {
+        const filteredData =
+          data?.filter((item) =>
+            item.fullName.toLowerCase().includes(input.toLowerCase())
+          ) || [];
+        setSubscribedFiltered(filteredData);
+      }
+    },
+    [data]
+  );
+
+  // Refilter on data change if there's a search term
+  useEffect(() => {
+    handleInputData(searchTerm);
+  }, [data, searchTerm, handleInputData]);
+
+  // console.log("data in subscribed", data);
+
+  let subscribed = subscribedFiltered || data;
+
+  if (loading || !channelId) {
     return (
-      <div className="flex flex-col gap-y-4 pt-1">
-        <div className="flex flex-col gap-y-4 pt-4">
+      <div className="flex flex-col gap-y-4 pt-1 min-h-screen bg-gray-900">
+        <div className="flex flex-col gap-y-4 pt-4 px-8 sm:px-16">
           {/* Header Skeleton */}
           <div className="relative mb-2 rounded-sm bg-slate-100/10 animate-pulse py-2 pl-8 pr-3">
             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400"></span>
@@ -76,29 +90,16 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
     );
   }
 
-  let subscribed = subscribedFiltered || data;
-
-  if ((!status && !loading) || !subscribed)
+  if ((!status && !loading) || !subscribed) {
     return (
-      <div className="flex w-full h-screen flex-col gap-y-4 px-16 py-4 rounded bg-slate-100/10 animate-pulse"></div>
+      <div className="flex w-full h-screen flex-col gap-y-4 px-16 py-4 rounded bg-slate-100/10 animate-pulse min-h-screen bg-gray-900"></div>
     );
+  }
 
-  const handleInputData = (input) => {
-    if (!input) {
-      setSubscribedFiltered(data);
-    } else {
-      const filteredData = data.filter((item) =>
-        item.fullName.toLowerCase().includes(input.toLowerCase())
-      );
-      setSubscribedFiltered(filteredData);
-    }
-  };
-
-  //console.log("data in subscrition", data);
   //console.log("subscribed", subscribed);
 
   return data && data.length > 0 ? (
-    <ul className="flex w-full flex-col gap-y-4 px-8 py-8 sm:px-16 sm:py-12">
+    <ul className="flex w-full flex-col gap-y-4 px-8 py-8 sm:px-16 sm:py-12 min-h-screen bg-gray-900">
       {/* Search input */}
       <div className="relative max-w-2xl mb-4 rounded-lg bg-gray-200 py-2 pl-10 pr-3 text-black focus-within:ring-2 focus-within:ring-blue-500">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600">
@@ -107,6 +108,7 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
         <input
           type="text"
           onChange={(e) => handleInputData(e.target.value)}
+          value={searchTerm}
           className="w-full bg-transparent outline-none pl-1 text-black font-semibold placeholder-gray-500"
           placeholder="Search"
         />
@@ -120,8 +122,8 @@ const Subscribed = ({ owner = false, isSubscribers = false }) => {
   ) : owner ? (
     <MyChannelEmptySubscription />
   ) : (
-    <EmptySubscribers />
+    <EmptySubscription />
   );
 };
 
-export default Subscribed;
+export default SubscriptionsPage;

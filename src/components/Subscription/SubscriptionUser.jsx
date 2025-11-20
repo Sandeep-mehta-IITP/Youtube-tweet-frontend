@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { CheckCircle, UserPlus } from "lucide-react";
 
 const SubscriptionUser = ({ profile }) => {
-  console.log("profile", profile);
+  //console.log("profile", profile);
 
   const dispatch = useDispatch();
   const loginPopupRef = useRef();

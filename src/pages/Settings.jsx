@@ -43,11 +43,11 @@ const Settings = () => {
   return (
     <section className="w-full pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0 text-white">
       {/* --- Cover Image --- */}
-      <div className="relative mt-2 w-full aspect-[16/10] md:aspect-[16/3.5] overflow-hidden rounded-lg">
+      <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72 overflow-hidden rounded-lg">
         <img
           src={coverFile ? URL.createObjectURL(coverFile) : userData?.coverImage}
           alt={`${userData?.username || "user"} cover`}
-          className="absolute inset-0 h-full w-full object-cover object-center md:object-top"
+          className="absolute inset-0 h-full w-full object-cover object-center"
           loading="lazy"
         />
 

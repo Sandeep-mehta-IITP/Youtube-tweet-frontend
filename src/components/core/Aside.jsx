@@ -28,7 +28,7 @@ const Aside = () => {
     {
       name: "Subscriptions",
       icon: <MonitorPlay className="w-6 h-6" />,
-      route: `/channel/${username}/subscribed`,
+      route: `/channel/${username}/subscriptions`,
     },
     {
       name: "Liked Videos",

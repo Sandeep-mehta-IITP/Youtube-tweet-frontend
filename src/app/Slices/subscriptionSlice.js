@@ -34,7 +34,7 @@ export const getChannelSubscribers = createAsyncThunk(
   async (channelId, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/subscriptions/c/${channelId}`);
-      console.log("res of subs", response.data);
+      //console.log("subscirbers res", response.data);
 
       return response.data.data.docs;
     } catch (error) {
@@ -54,6 +54,8 @@ export const getSubscribedChannels = createAsyncThunk(
       const response = await axiosInstance.get(
         `/subscriptions/u/${subscriberId}`
       );
+      //console.log("subsriptions res", response.data);
+      
       return response.data.data.docs;
     } catch (error) {
       console.log("FAILED TO GET SUBSCRIBED CHANNELS", error.userMessage);

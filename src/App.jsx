@@ -40,6 +40,7 @@ import GuestSettings from "./components/GuestPages/GuestSettings";
 import AboutChannel from "./components/Channel/AboutChannel";
 import GuestSubscription from "./components/GuestPages/GuestSubscription";
 import PageNotFound from "./components/core/PageNotFound";
+import SubscriptionsPage from "./pages/SubscriptionsPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -129,10 +130,14 @@ function App() {
               path="playlists"
               element={<ChannelPlaylists owner={false} />}
             />
+            <Route path="subscriptions" element={<SubscriptionsPage owner={false} />} />
             <Route path="tweets" element={<ChannelTweets owner={false} />} />
             <Route path="subscribed" element={<Subscribed owner={false} isSubscribers={true} />} />
             <Route path="about" element={<AboutChannel owner={false} />} />
           </Route>
+
+          {/* Subscriptions */}
+          <Route path="subscription" element={<SubscriptionsPage />} />
 
           {/* Watch history */}
           <Route
@@ -181,6 +186,7 @@ function App() {
                 </AuthLayout>
               }
             />
+            <Route path="subscriptions" element={<SubscriptionsPage owner/>} />
             <Route path="playlists" element={<ChannelPlaylists owner />} />
             <Route path="tweets" element={<ChannelTweets owner />} />
             <Route path="about" element={<AboutChannel owner />} />
@@ -230,6 +236,8 @@ function App() {
           }
         />
 
+        
+
         {/* Login */}
         <Route
           path="/login"
@@ -239,6 +247,7 @@ function App() {
             </AuthLayout>
           }
         />
+        
 
         {/* Forgot password */}
         <Route path="/forgot-password" element={<ForgotPassword />} />

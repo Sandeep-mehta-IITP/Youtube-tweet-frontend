@@ -42,7 +42,7 @@ const VideoList = ({ videos = [], loading = true, fetching = false }) => {
       <ul className="flex flex-col gap-6 p-4">
         {videos.map((video) => (
           <li
-            key={video._id}
+            key={video?._id}
             className="w-full max-w-4xl hover:bg-white/5 transition-colors rounded-xl p-2"
           >
             <Link

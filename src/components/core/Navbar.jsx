@@ -208,10 +208,6 @@ const Navbar = () => {
                 </button>
 
                 <VideoUploadForm ref={uploadRef} />
-                <Link className="px-4 py-2 text-sm font-medium text-[#f6f5f6 active:text-blue-700 hover:bg-gray-700 flex items-center space-x-3 cursor-pointer">
-                  <NotebookPenIcon className="w-4 h-4" />
-                  <span>Create Post</span>
-                </Link>
               </div>
             </div>
           )}

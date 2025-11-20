@@ -1,6 +1,6 @@
 import { channelProfile } from "@/app/Slices/userSlice";
 import ChannelProfileLayout from "@/components/core/ChannelProfileLayout";
-import React, { useEffect } from "react";  // Removed useState
+import React, { useEffect } from "react"; // Removed useState
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, Outlet, useNavigate, useParams } from "react-router-dom";
 
@@ -12,8 +12,8 @@ const Channel = ({ owner = false }) => {
   const loggedInUsername = useSelector(
     (state) => state.auth.userData?.username
   );
-  // Get profile from Redux instead of local state
-  const profile = useSelector((state) => state.user.userData);  // Adjust 'state.user.channelProfile' based on your userSlice structure
+
+  const profile = useSelector((state) => state.user.userData);
 
   useEffect(() => {
     if (!owner && loggedInUsername === username)
@@ -28,6 +28,7 @@ const Channel = ({ owner = false }) => {
     { name: "Videos", route: "" },
     { name: "Playlists", route: "playlists" },
     { name: "Tweets", route: "tweets" },
+    { name: "Subscriptions", route: "subscriptions" },
     { name: "Subscribers", route: "subscribed" },
     { name: "About", route: "about" },
   ];
@@ -35,11 +36,12 @@ const Channel = ({ owner = false }) => {
   return profile ? (
     <section className="w-full pb-[70px] sm:ml-[70px] sm:pb-0 lg:ml-0">
       {/* --- Cover Image --- */}
-      <div className="relative mt-2 w-full aspect-[16/10] md:aspect-[16/3.5] overflow-hidden rounded-lg">
+      <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72 overflow-hidden rounded-lg">
         <img
           src={profile?.coverImage}
-          alt={profile?.username}
-          className="absolute inset-0 w-full h-full object-cover object-center md:object-top"
+          alt={`${profile?.username || "user"} cover`}
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          loading="lazy"
         />
       </div>
 
