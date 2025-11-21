@@ -39,7 +39,7 @@ const VideoGrid = ({ videos = [], loading = false, fetching = false }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-5 p-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-5 min-h-screen p-4">
       {videos.map((video) => (
         <article
           key={video?._id}

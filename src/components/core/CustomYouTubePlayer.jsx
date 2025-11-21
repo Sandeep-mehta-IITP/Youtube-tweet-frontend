@@ -266,8 +266,6 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
           e.preventDefault();
           if (isFullscreen) {
             toggleFullscreen();
-          } else if (isTheater) {
-            setIsTheater(false);
           }
           break;
       }
@@ -330,7 +328,6 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
     const onFsChange = () => {
       const fs = !!document.fullscreenElement;
       setIsFullscreen(fs);
-      if (fs) setIsTheater(false);
     };
     document.addEventListener("fullscreenchange", onFsChange);
 

@@ -31,7 +31,7 @@ export const videoApi = createApi({
       providesTags: (result) =>
         result?.data?.docs
           ? [
-              ...result.data.docs.map(({ id }) => ({ type: "Video", id })),
+              ...result.data.docs.map(({ _id }) => ({ type: "Video", id: _id })),
               { type: "Video", id: "LIST" },
             ]
           : [{ type: "Video", id: "LIST" }],

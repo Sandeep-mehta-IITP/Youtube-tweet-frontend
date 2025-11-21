@@ -98,8 +98,6 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Feed />}>
-          {/* <Route index element={<HomePage />} /> "/" route */}
-
           {/* More child routes can be added */}
           <Route path="" element={<FeedVideos />} />
           <Route path="support" element={<SupportPage />} />
