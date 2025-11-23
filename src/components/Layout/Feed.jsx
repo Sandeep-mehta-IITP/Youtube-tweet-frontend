@@ -13,7 +13,7 @@ const Feed = () => {
       <div className="flex min-h-[calc(100vh-66px)] sm:min-h-[calc(100vh-82px)]">
         <Aside />
         <main
-          className={`flex-1 overflow-y-auto
+          className={`flex-1 overflow-y-auto 
             ${asideOpen ? "ml-0 sm:ml-60" : "ml-0 sm:ml-16"} `}
           id="scrollable_results_screen"
         >

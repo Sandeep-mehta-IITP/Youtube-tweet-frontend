@@ -13,6 +13,7 @@ import commentSlice from "./Slices/commentSlice";
 import tweetSlice from "./Slices/tweetSlice";
 import subscriptionSlice from "./Slices/subscriptionSlice";
 import dashboardSlice from "./Slices/dashboardSlice";
+import paginationSlice from "./Slices/paginationSlice"
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     tweet: tweetSlice,
     subscription: subscriptionSlice,
     dashboard: dashboardSlice,
+    pagingVideos: paginationSlice,
 
     [paginationApi.reducerPath]: paginationApi.reducer,
     [videoApi.reducerPath]: videoApi.reducer,
