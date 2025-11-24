@@ -104,12 +104,12 @@ const VideoGrid = ({
                   </div>
                 </div>
 
-                <button className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-full">
+                {/* <button className="p-2 text-white/50 hover:text-white hover:bg-white/10 rounded-full">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 15a5 5 0 100-10 5 5 0 000 10z"></path>
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.5a1 1 0 102 0V5zM9.5 8.5a.5.5 0 000 1H9v3.5a.5.5 0 00.5.5h1a.5.5 0 000-1V9h.5a.5.5 0 000-1h-1V8.5z" clipRule="evenodd"></path>
                   </svg>
-                </button>
+                </button> */}
               </div>
             </div>
           </article>
