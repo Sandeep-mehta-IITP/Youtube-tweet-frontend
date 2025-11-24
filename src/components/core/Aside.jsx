@@ -96,7 +96,7 @@ const Aside = () => {
       </aside>
 
       {/* Mobile Footer Nav */}
-      <nav className="fixed bottom-1.5 left-0 right-0 sm:hidden bg-[#121212] border-t border-gray-800 overflow-x-auto py-3 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 sm:hidden bg-[#121212] border-t border-gray-800 overflow-x-auto py-3 z-50">
         <div className="flex justify-evenly gap-6 px-5">
           {navElements.map((item) => (
             <NavLink

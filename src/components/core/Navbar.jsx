@@ -89,7 +89,7 @@ const Navbar = () => {
 
   return (
     <header className="sticky inset-x-0 top-0 z-50 w-full border-b border-gray-800 bg-[#121212] px-4 ">
-      <nav className="mx-auto flex items-center py-2 w-full">
+      <nav className="mx-auto flex items-center w-full">
         <Menu
           className="w-6 h-6 text-[#f6f5f6] ml-8 cursor-pointer hidden sm:block"
           onClick={() => dispatch(toggleAside())} 
