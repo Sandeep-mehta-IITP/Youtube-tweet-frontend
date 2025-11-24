@@ -12,8 +12,6 @@ import {
   Loader,
 } from "lucide-react";
 
-
-
 const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
@@ -35,6 +33,11 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
   const hideTimeoutRef = useRef(null);
   const dragRef = useRef({ seeking: false });
   const lastTapRef = useRef(0);
+
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
 
   // --- Helpers ---
   const formatTime = useCallback((t) => {
@@ -149,13 +152,27 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
     setShowSpeedMenu(false);
   }, []);
 
-  const toggleFullscreen = useCallback(() => {
+  const toggleFullscreen = useCallback(async () => {
     if (!document.fullscreenElement && containerRef.current) {
-      containerRef.current.requestFullscreen().catch(() => {});
+      try {
+        await containerRef.current.requestFullscreen();
+        if (isMobile && screen.orientation && screen.orientation.lock) {
+          await screen.orientation.lock("landscape");
+        }
+      } catch (e) {
+        console.warn("Fullscreen request failed:", e);
+      }
     } else {
-      document.exitFullscreen().catch(() => {});
+      try {
+        if (isMobile && screen.orientation && screen.orientation.unlock) {
+          await screen.orientation.unlock();
+        }
+        await document.exitFullscreen();
+      } catch (e) {
+        console.warn("Exit fullscreen failed:", e);
+      }
     }
-  }, []);
+  }, [isMobile]);
 
   // --- Click anywhere toggles play/pause but not when clicking controls ---
   const handleContainerClick = useCallback(
@@ -253,7 +270,7 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
           break;
         case "KeyT":
           e.preventDefault();
-          toggleTheater();
+          // toggleTheater(); // Assuming this is defined elsewhere
           break;
         case "KeyS":
           e.preventDefault();
@@ -370,10 +387,14 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative top-0 left-1/2 -translate-x-1/2  z-50  w-full bg-black rounded-lg overflow-hidden group select-none`}
+      className={`relative bg-black rounded-lg overflow-hidden group select-none z-50 transition-all duration-300 ${
+        isFullscreen
+          ? "fixed inset-0 w-screen h-screen !aspect-auto z-[9999]"
+          : "w-full max-w-full mx-auto md:top-0 md:left-1/2 md:-translate-x-1/2"
+      } ${!isFullscreen ? "top-0" : ""}`}
       onMouseMove={showControlsNow}
       onClick={handleContainerClick}
-      style={{ aspectRatio: "16/9" }}
+      style={isFullscreen ? {} : { aspectRatio: "16/9" }}
     >
       {/* Video */}
       <video
@@ -387,7 +408,7 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
       {/* Buffering overlay */}
       {isBuffering && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black bg-opacity-60">
-          <Loader className="w-10 h-10 animate-spin text-white" />
+          <Loader className="w-8 h-8 md:w-10 md:h-10 animate-spin text-white" />
         </div>
       )}
 
@@ -401,8 +422,8 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
           }}
           className="absolute inset-0 z-20 flex items-center justify-center"
         >
-          <div className="flex items-center justify-center w-24 h-24 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-transform transform-gpu hover:scale-105">
-            <Play className="w-10 h-10 text-white ml-0.5" />
+          <div className="flex items-center justify-center w-16 h-16 md:w-24 md:h-24 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-transform transform-gpu hover:scale-105">
+            <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-0.5" />
           </div>
         </button>
       )}
@@ -412,7 +433,7 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
         className={`absolute inset-0 z-40 pointer-events-none transition-opacity duration-200 ${showControls || !isPlaying ? "opacity-100" : "opacity-0"}`}
       >
         {/* Progress bar area */}
-        <div className="absolute left-3 right-3 bottom-20 pointer-events-auto">
+        <div className="absolute bottom-16 md:bottom-20 left-2 md:left-3 right-2 md:right-3 pointer-events-auto">
           <div
             ref={progressRef}
             onMouseDown={(e) => {
@@ -423,7 +444,7 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
               e.stopPropagation();
               handleProgressPointerDown(e);
             }}
-            className="h-1 rounded-full bg-white/20 relative cursor-pointer"
+            className="h-1 md:h-1.5 rounded-full bg-white/20 relative cursor-pointer touch-manipulation"
             aria-label="progress bar"
           >
             {/* buffered */}
@@ -440,7 +461,7 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
             />
             {/* scrubber */}
             <div
-              className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white shadow-lg"
+              className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white shadow-lg"
               style={{
                 left: `${duration ? (currentTime / duration) * 100 : 0}%`,
               }}
@@ -449,32 +470,35 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
         </div>
 
         {/* Bottom control bar */}
-        <div className="absolute left-0 right-0 bottom-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-3 pointer-events-auto">
+        <div className="absolute left-0 right-0 bottom-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent p-2 md:p-3 pointer-events-auto">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2" data-player-control>
+            <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
+              <div
+                className="flex items-center gap-1 md:gap-2"
+                data-player-control
+              >
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     seekTo((videoRef.current?.currentTime || 0) - 10);
                   }}
-                  className="p-2 rounded-full hover:bg-white/10"
+                  className="p-1.5 md:p-2 rounded-full hover:bg-white/10 flex-shrink-0"
                   title="Rewind 10s"
                 >
-                  <SkipBack className="w-5 h-5 text-white" />
+                  <SkipBack className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     togglePlay();
                   }}
-                  className="p-2 rounded-full hover:bg-white/10"
+                  className="p-1.5 md:p-2 rounded-full hover:bg-white/10 flex-shrink-0"
                   title="Play/Pause"
                 >
                   {isPlaying ? (
-                    <Pause className="w-6 h-6 text-white" />
+                    <Pause className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   ) : (
-                    <Play className="w-6 h-6 text-white" />
+                    <Play className="w-5 h-5 md:w-6 md:h-6 text-white" />
                   )}
                 </button>
                 <button
@@ -482,15 +506,15 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
                     e.stopPropagation();
                     seekTo((videoRef.current?.currentTime || 0) + 10);
                   }}
-                  className="p-2 rounded-full hover:bg-white/10"
+                  className="p-1.5 md:p-2 rounded-full hover:bg-white/10 flex-shrink-0"
                   title="Forward 10s"
                 >
-                  <SkipForward className="w-5 h-5 text-white" />
+                  <SkipForward className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </button>
 
                 {/* Volume group aligned left */}
                 <div
-                  className="flex items-center gap-2 ml-2"
+                  className="items-center gap-1 md:gap-2 ml-1 md:ml-2 hidden sm:flex" // Hide volume slider on very small screens (mobile), show on sm+ like YouTube (tap for volume panel, but since no logic change, hide to avoid cramping)
                   data-player-control
                 >
                   <button
@@ -498,13 +522,13 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
                       e.stopPropagation();
                       toggleMute();
                     }}
-                    className="p-2 rounded hover:bg-white/10"
+                    className="p-1.5 md:p-2 rounded hover:bg-white/10 flex-shrink-0"
                   >
                     <VolumeIcon />
                   </button>
                   <div
                     ref={volumeRef}
-                    className="w-24 h-1 bg-white/30 rounded-full relative cursor-pointer group"
+                    className="w-20 md:w-24 h-1 bg-white/30 rounded-full relative cursor-pointer group touch-manipulation flex-shrink-0"
                     onMouseDown={handleVolumePointerDown}
                     onTouchStart={(e) => {
                       e.stopPropagation();
@@ -516,34 +540,37 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
                       style={{ width: `${volume * 100}%` }}
                     />
                     <div
-                      className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{ left: `${volume * 100}%` }}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* time */}
-              <div className="text-xs text-white/90 ml-3">
+              {/* time - truncate on mobile */}
+              <div className="text-xs md:text-sm text-white/90 ml-1 md:ml-3 truncate flex-shrink">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </div>
             </div>
 
-            <div className="flex items-center gap-2" data-player-control>
-              {/* Speed menu */}
+            <div
+              className="flex items-center gap-1 md:gap-2 flex-shrink-0"
+              data-player-control
+            >
+              {/* Speed menu - position adjusted for mobile */}
               <div className="relative">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowSpeedMenu((s) => !s);
                   }}
-                  className="p-2 rounded hover:bg-white/10"
+                  className="p-1.5 md:p-2 rounded hover:bg-white/10 flex-shrink-0"
                   title="Playback speed"
                 >
-                  <Settings className="w-5 h-5 text-white" />
+                  <Settings className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </button>
                 {showSpeedMenu && (
-                  <div className="absolute bottom-full mb-2 right-0 bg-black/95 rounded-md p-2 shadow-lg min-w-[110px]">
+                  <div className="absolute bottom-full mb-2 right-0 md:right-auto md:left-0 bg-black/95 rounded-md p-2 shadow-lg min-w-[100px] md:min-w-[110px] z-50">
                     <div className="text-xs text-white font-medium mb-2 px-1">
                       Playback speed
                     </div>
@@ -568,13 +595,9 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
                   e.stopPropagation();
                   toggleFullscreen();
                 }}
-                className="p-2 rounded hover:bg-white/10"
+                className="p-1.5 md:p-2 rounded hover:bg-white/10 flex-shrink-0"
               >
-                {isFullscreen ? (
-                  <Maximize2 className="w-5 h-5 text-white" />
-                ) : (
-                  <Maximize2 className="w-5 h-5 text-white" />
-                )}
+                <Maximize2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </button>
             </div>
           </div>
