@@ -45,7 +45,11 @@ const Aside = () => {
       icon: <VideoIcon className="w-6 h-6" />,
       route: `/channel/${username}`,
     },
-    { name: "Tweets", icon: <Twitter className="w-6 h-6" />, route: "/feed/tweets" },
+    {
+      name: "Tweets",
+      icon: <Twitter className="w-6 h-6" />,
+      route: "/feed/tweets",
+    },
     {
       name: "Dashboard",
       icon: <BarChart2 className="w-6 h-6" />,
@@ -96,7 +100,7 @@ const Aside = () => {
       </aside>
 
       {/* Mobile Footer Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 sm:hidden bg-[#121212] border-t border-gray-800 overflow-x-auto py-3 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 sm:hidden flex items-center bg-[#121212] border-t border-gray-800 overflow-x-auto py-3 z-50">
         <div className="flex justify-evenly gap-6 px-5">
           {navElements.map((item) => (
             <NavLink

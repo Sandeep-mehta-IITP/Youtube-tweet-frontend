@@ -52,7 +52,7 @@ function FeedVideos() {
         if (entry.isIntersecting && !isLoadingMore) { // Prevent duplicates
           const latest = dataRef.current?.data;
           if (latest?.hasNextPage && !fetchedPagesRef.current.has(latest.nextPage)) {
-            console.log("🎉 Triggering next page:", latest.nextPage);
+            //console.log("🎉 Triggering next page:", latest.nextPage);
             setIsLoadingMore(true); //  Start loader immediately
             setPage(latest.nextPage);
           }
@@ -60,15 +60,15 @@ function FeedVideos() {
       },
       {
         root: container,
-        rootMargin: "300px 0px 0px 0px", //  Bigger margin: Preload 300px early (YouTube-style)
-        threshold: 0, // Trigger as soon as it enters margin
+        rootMargin: "300px 0px 0px 0px", 
+        threshold: 0, 
       }
     );
 
     observer.observe(lastVideoRef.current);
 
     return () => observer.disconnect();
-  }, [allVideos, isLoadingMore, asideOpen]); // Re-observe on content/aside change
+  }, [allVideos, isLoadingMore, asideOpen]); 
 
   if (error) {
     return (
