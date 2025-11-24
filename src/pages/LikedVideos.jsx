@@ -13,7 +13,7 @@ const LikedVideos = () => {
 
   useEffect(() => {
     dispatch(getLikedVideos()).then((res) => {
-      console.log("liked videos response", res.payload);
+      //console.log("liked videos response", res.payload);
 
       setVideos(res.payload);
       setLoading(false);

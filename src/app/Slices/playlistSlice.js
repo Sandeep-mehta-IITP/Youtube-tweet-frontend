@@ -13,7 +13,7 @@ export const getPlaylistByID = createAsyncThunk(
   async (playlistId, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/playlist/${playlistId}`);
-      console.log("response", response.data?.data);
+      //console.log("response", response.data?.data);
 
       return response.data;
     } catch (error) {
@@ -30,7 +30,7 @@ export const getUserPlaylists = createAsyncThunk(
   async (userId, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get(`/playlist/user/${userId}`);
-      console.log("user playlists", response.data);
+     // console.log("user playlists", response.data);
       return response.data?.data;
     } catch (error) {
       console.log("FAILED TO FETCHED USER PLAYLISTS", error.userMessage);
@@ -47,7 +47,7 @@ export const getCurrentPlaylists = createAsyncThunk(
       const response = await axiosInstance.get(
         `/playlist/user/playlists/${videoId}`
       );
-      console.log("current playlist ", response.data);
+     // console.log("current playlist ", response.data);
 
       return response.data;
     } catch (error) {
@@ -63,7 +63,7 @@ export const createPlaylist = createAsyncThunk(
   async ({ data }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post("/playlist", data);
-      console.log("create playlist response", response.data);
+      //console.log("create playlist response", response.data);
 
       toast.success(response.data.message);
       return response.data;
@@ -82,7 +82,7 @@ export const addVideoToPlaylist = createAsyncThunk(
       const response = await axiosInstance.patch(
         `/playlist/add/${videoId}/${playlistId}`
       );
-      console.log("video add to playlist response", response.data);
+      //console.log("video add to playlist response", response.data);
       toast.success(response.data.message);
       return response.data;
     } catch (error) {
@@ -100,7 +100,7 @@ export const removeVideoFromPlaylist = createAsyncThunk(
       const response = await axiosInstance.patch(
         `/playlist/remove/${videoId}/${playlistId}`
       );
-      console.log("video remove from playlist", response.data);
+      //console.log("video remove from playlist", response.data);
 
       toast.success(response.data.message);
       return response.data;
@@ -120,7 +120,7 @@ export const updatePlaylist = createAsyncThunk(
         `/playlist/${playlistId}`,
         data
       );
-      console.log("update playlist response", response.data);
+      //console.log("update playlist response", response.data);
       toast.success(response.data.message);
       return response.data;
     } catch (error) {

@@ -43,7 +43,7 @@ export const updateComment = createAsyncThunk(
   "comment/updateComment",
   async ({ commentId, content }, { rejectWithValue }) => {
 
-    console.log("content in update comment slice", content);
+    //console.log("content in update comment slice", content);
     
     try {
       const response = await axiosInstance.patch(`/comments/c/${commentId}`, {

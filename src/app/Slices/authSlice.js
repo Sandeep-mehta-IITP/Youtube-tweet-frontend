@@ -224,7 +224,7 @@ export const watchHistory = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.get("/users/history");
-      console.log("WatchHistory data", response.data.data);
+      //console.log("WatchHistory data", response.data.data);
 
       return response.data.data;
     } catch (error) {

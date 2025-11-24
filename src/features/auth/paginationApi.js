@@ -23,7 +23,7 @@ export const paginationApi = createApi({
             .join("&");
         
         const fullUrl = `/videos${queryString}`;
-        console.log("API Query URL:", fullUrl);
+        //console.log("API Query URL:", fullUrl);
         return fullUrl;
       },
       async onQueryStarted(arg, { queryFulfilled }) {

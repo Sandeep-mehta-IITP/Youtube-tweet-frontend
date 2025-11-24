@@ -25,7 +25,7 @@ const ChannelPlaylists = ({ owner = false }) => {
     dispatch(getUserPlaylists(idToFetch)).then((res) => {
       setLoading(false);
       const data = res?.payload || [];
-      console.log("Playlists data in channel playlists", data);
+      //console.log("Playlists data in channel playlists", data);
 
       setPlaylists(data);
     });

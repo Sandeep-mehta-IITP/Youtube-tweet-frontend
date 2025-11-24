@@ -17,10 +17,10 @@ const WatchHistory = () => {
     dispatch(clearWatchHistory()).unwrap();
   };
 
-  console.log("userdata in history", userData);
+  //console.log("userdata in history", userData);
 
   const videos = userData?.watchHistory || [];
-  console.log("videos in watchHistory", videos);
+  //console.log("videos in watchHistory", videos);
 
   const isHistoryEmpty = !loading && videos.length < 1;
   return (

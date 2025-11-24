@@ -38,7 +38,7 @@ const VideoDetails = () => {
     (state) => state.playlist
   );
 
-  console.log("User playlist in video details page", playlists);
+  //console.log("User playlist in video details page", playlists);
 
   const {
     data: video,

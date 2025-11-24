@@ -9,7 +9,7 @@ import {
 const VideoList = ({ videos = [], loading = true, fetching = false }) => {
   const navigate = useNavigate();
 
-  console.log("videos in video list", videos);
+  //console.log("videos in video list", videos);
 
   if (loading)
     return (
