@@ -12,8 +12,7 @@ import {
   Loader,
 } from "lucide-react";
 
-// YouTube-style single-file player
-// Usage: <CustomYouTubePlayer src="/path/to/video.mp4" poster="/img.jpg" title="My Video" />
+
 
 const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
   const videoRef = useRef(null);

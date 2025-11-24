@@ -4,13 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Input from "../ui/Input";
 import {
   CircleUser,
-  Hamburger,
-  HamburgerIcon,
-  History,
   LogOutIcon,
   Menu,
-  Notebook,
-  NotebookPenIcon,
   Plus,
   Search,
   Settings,
@@ -18,7 +13,6 @@ import {
   User,
   Video,
 } from "lucide-react";
-import Button from "../ui/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleAside } from "@/app/Slices/uiSlice";
 import { logoutUser } from "@/app/Slices/authSlice";
@@ -84,12 +78,12 @@ const Navbar = () => {
       return;
     }
 
-    navigate(`/results?search_query=${searchQuery}`); // This is fine, as SearchResult extracts 'search_query' and maps to 'query' param
+    navigate(`/results?search_query=${searchQuery}`); 
   };
 
   // Logout Handler
   const logoutHandler = () => {
-    dispatch(logoutUser()); // Fixed: dipatch -> dispatch
+    dispatch(logoutUser()); 
     navigate("/");
   };
 
@@ -98,7 +92,7 @@ const Navbar = () => {
       <nav className="mx-auto flex items-center py-2 w-full">
         <Menu
           className="w-6 h-6 text-[#f6f5f6] ml-8 cursor-pointer hidden sm:block"
-          onClick={() => dispatch(toggleAside())} // Fixed: dipatch -> dispatch
+          onClick={() => dispatch(toggleAside())} 
         />
         <Logo className="-ml-2 sm:ml-4" />
 

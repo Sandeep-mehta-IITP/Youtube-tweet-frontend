@@ -1,4 +1,3 @@
-// src/components/core/ConfirmPopup.jsx
 import React, { forwardRef, useImperativeHandle, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, AlertTriangle } from "lucide-react";

@@ -21,7 +21,7 @@ const AboutChannel = ({ owner = false }) => {
   // 🦴 Skeleton Loader
   if (!aboutChannel) {
     return (
-      <div className="p-6 mt-4 w-full max-w-3xl mx-auto rounded-xl bg-[#1a1a1a]/70 border border-[#2d2d2d] shadow-md animate-pulse">
+      <div className="p-6 mt-4 w-full mx-auto rounded-xl bg-[#1a1a1a]/70 border border-[#2d2d2d] shadow-md animate-pulse">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 rounded-full bg-slate-500/30"></div>
           <div className="flex-1">
@@ -50,7 +50,7 @@ const AboutChannel = ({ owner = false }) => {
     );
   }
 
-  // 🧭 About Channel Section
+  //  About Channel Section
   return (
     <div className="text-white px-8 py-6 rounded-2xl backdrop-blur-md shadow-lg border border-[#2d2d2d] hover:border-blue-500/60 transition-all duration-300 mt-5  mx-auto">
       {/* Header */}
