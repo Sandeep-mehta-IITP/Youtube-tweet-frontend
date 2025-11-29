@@ -22,7 +22,7 @@ const Navbar = () => {
   let { userData, isAuthenticated } = useSelector((state) => state.auth);
   const username = userData?.username;
 
-  console.log(userData)
+  console.log(userData);
   const navigate = useNavigate();
   const dispatch = useDispatch(); // Fixed typo: dipatch -> dispatch
   const searchInputRef = useRef();
@@ -78,24 +78,24 @@ const Navbar = () => {
       return;
     }
 
-    navigate(`/results?search_query=${searchQuery}`); 
+    navigate(`/results?search_query=${searchQuery}`);
   };
 
   // Logout Handler
   const logoutHandler = async () => {
-  const result = await dispatch(logoutUser());
+    const result = await dispatch(logoutUser());
 
-  if (logoutUser.fulfilled.match(result)) {
-    navigate("/");
-  }
-};
+    if (logoutUser.fulfilled.match(result)) {
+      navigate("/");
+    }
+  };
 
   return (
     <header className="sticky inset-x-0 top-0 z-50 w-full border-b border-gray-800 bg-[#121212] px-4 ">
       <nav className="mx-auto flex items-center w-full">
         <Menu
           className="w-6 h-6 text-[#f6f5f6] ml-8 cursor-pointer hidden sm:block"
-          onClick={() => dispatch(toggleAside())} 
+          onClick={() => dispatch(toggleAside())}
         />
         <Logo className="-ml-2 sm:ml-4" />
 
@@ -139,6 +139,49 @@ const Navbar = () => {
           </div>
         </form>
 
+        {/*  Create Button  for mobile screen*/}
+        <div className="sm:hidden">
+          {isAuthenticated && (
+            <div className="relative" ref={createDropdownRef}>
+              <button
+                onClick={createDropdownHandler}
+                className="flex items-center space-x-2 px-4 py-2 text-white rounded-full border border-gray-800 hover:bg-gray-700   transition-all duration-200 shadow-lg hover:shadow-xl transform"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Create</span>
+              </button>
+              {/* Create Dropdown + Backdrop */}
+              {createDropdownOpen && (
+                <div
+                  className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-200"
+                  onClick={createDropdownHandler} // backdrop click = close
+                />
+              )}
+
+              <div
+                id="create-dropdown"
+                className={`fixed top-1/2 left-1/2 w-72 bg-[#121212] rounded-md shadow-lg py-3 z-50 border border-gray-500
+transform -translate-x-1/2 -translate-y-1/2 transition-all duration-200
+${
+  createDropdownOpen
+    ? "opacity-100 visible scale-100"
+    : "opacity-0 invisible scale-95"
+}`}
+              >
+                <button
+                  onClick={() => uploadRef.current.open()}
+                  className="w-full px-4 py-2 text-lg font-medium text-[#f6f5f6] flex items-center justify-center space-x-5 cursor-pointer"
+                >
+                  <Video className="w-4 h-4" />
+                  <span>Upload Video</span>
+                </button>
+
+                <VideoUploadForm ref={uploadRef} />
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Mobile Search */}
         <div className="flex items-center sm:hidden ml-auto">
           {!mobileSearchOpen ? (
@@ -148,7 +191,7 @@ const Navbar = () => {
           ) : (
             <div className="absolute inset-x-0 top-0 z-20 bg-[#121212] px-3 py-2">
               <form
-                className="flex items-center w-full bg-[#1f1f1f] rounded-full px-3 py-2"
+                className="flex items-center w-full bg-[#1f1f1f] rounded-full px-3 py-1"
                 onSubmit={(event) => {
                   event.preventDefault();
                   handleSearchQuery(smallsearchInputRef.current.value);
@@ -161,7 +204,7 @@ const Navbar = () => {
                   className="flex-1 bg-transparent border-none text-gray-100 placeholder-gray-400 focus:ring-0 focus:outline-none"
                 />
                 <button type="submit">
-                  <Search className="w-5 h-5 text-gray-300  fixed top-7 right-20" />
+                  <Search className="w-5 h-5 text-gray-300  fixed top-[1.47rem] right-[4.5rem]" />
                 </button>
                 <button
                   type="button"
@@ -198,7 +241,7 @@ const Navbar = () => {
               >
                 <button
                   onClick={() => uploadRef.current.open()}
-                  className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] active:text-blue-700 hover:bg-gray-700 flex items-center space-x-3 cursor-pointer"
+                  className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3 cursor-pointer"
                 >
                   <Video className="w-4 h-4" />
                   <span>Upload Video</span>
@@ -247,7 +290,6 @@ const Navbar = () => {
                   <span>Your Profile</span>
                 </Link>
 
-                
                 <Link
                   to="/settings"
                   className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3"

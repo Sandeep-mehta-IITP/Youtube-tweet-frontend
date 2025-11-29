@@ -82,7 +82,7 @@ function FeedVideos() {
   }
 
   return (
-    <div>
+    <div className="pb-4">
       <VideoGrid
         videos={allVideos}
         loading={isLoading}

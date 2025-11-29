@@ -119,7 +119,7 @@ const FeedTweets = ({ owner = false }) => {
     <>
       <LoginPopup ref={loginPopUpRef} message="Sign in to Tweet..." />
 
-      <section className="w-full py-3 px-3 sm:ml-[70px] lg:ml-0">
+      <section className="w-full py-3 px-3 sm:ml-[70px] lg:ml-0 pb-20">
         {/* Tweet Composer */}
         <form
           onSubmit={handleSubmit(addTweet)}

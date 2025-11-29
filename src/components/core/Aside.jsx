@@ -29,6 +29,7 @@ const Aside = () => {
       name: "Subscriptions",
       icon: <MonitorPlay className="w-6 h-6" />,
       route: `/channel/${username}/subscriptions`,
+      hideOnMobile: true,
     },
     {
       name: "Liked Videos",
@@ -39,6 +40,7 @@ const Aside = () => {
       name: "Playlists",
       icon: <ListVideo className="w-6 h-6" />,
       route: `/channel/${username}/playlists`,
+      hideOnMobile: true,
     },
     {
       name: "Your Videos",
@@ -64,6 +66,7 @@ const Aside = () => {
       name: "Settings",
       icon: <Settings className="w-6 h-6" />,
       route: "/settings",
+      hideOnMobile: true,
     },
   ];
 
@@ -100,9 +103,10 @@ const Aside = () => {
       </aside>
 
       {/* Mobile Footer Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 sm:hidden flex items-center bg-[#121212] border-t border-gray-800 overflow-x-auto py-3 z-50">
-        <div className="flex justify-evenly gap-6 px-5">
-          {navElements.map((item) => (
+      <nav className="fixed bottom-0 left-0 right-0 sm:hidden flex items-center justify-evenly bg-[#121212] border-t border-gray-800 overflow-x-auto py-3 z-50">
+        {navElements
+          .filter((item) => !item.hideOnMobile)
+          .map((item) => (
             <NavLink
               key={item.route}
               to={item.route}
@@ -114,7 +118,6 @@ const Aside = () => {
               {item.icon}
             </NavLink>
           ))}
-        </div>
       </nav>
     </>
   );

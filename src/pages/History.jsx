@@ -25,7 +25,7 @@ const WatchHistory = () => {
   const isHistoryEmpty = !loading && videos.length < 1;
   return (
     <>
-      <section className="w-full">
+      <section className="w-full pb-16">
         {!isHistoryEmpty && !loading && (
           <div className="flex items-center justify-center p-3">
             <button

@@ -12,7 +12,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 export default function SignupPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, isAuthenticated } = useSelector((state) => state.user);
+  const { loading, isAuthenticated } = useSelector((state) => state.auth);
 
   const [showPass, setShowPass] = useState(false);
 

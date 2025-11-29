@@ -148,7 +148,7 @@ const Dashboard = () => {
 
   return (
     channelStats && (
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-y-6 px-4 py-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-y-6 px-4 py-8 pb-20">
         <ChannelState channelStates={channelStats} />
         <AdminPanelVideos channelVideos={channelVideos} />
       </div>

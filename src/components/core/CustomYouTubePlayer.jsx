@@ -387,7 +387,7 @@ const CustomYouTubePlayer = ({ src, poster, title = "Video" }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative bg-black rounded-lg overflow-hidden group select-none z-50 transition-all duration-300 ${
+      className={`relative bg-black rounded-lg overflow-hidden group select-none z-20 transition-all duration-300 ${
         isFullscreen
           ? "fixed inset-0 w-screen h-screen !aspect-auto z-[9999]"
           : "w-full max-w-full mx-auto md:top-0 md:left-1/2 md:-translate-x-1/2"
