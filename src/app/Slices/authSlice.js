@@ -329,31 +329,29 @@ const authSlice = createSlice({
   initialState,
   extraReducers: (builder) => {
     // register user
-        builder.addCase(registerUser.pending, (state) => {
-          state.loading = true;
-        });
-    
-        builder.addCase(registerUser.fulfilled, (state, action) => {
-          state.loading = false;
-          state.userData = action.payload;
-          console.log(" register user in user slice", state.userData);
-    
-          state.isAuthenticated = true;
-        });
-    
-        builder.addCase(registerUser.rejected, (state, action) => {
-          state.loading = false;
-          state.isAuthenticated = false;
-          state.userData = null;
-        
-        });
+    builder.addCase(registerUser.pending, (state) => {
+      state.loading = true;
+    });
+
+    builder.addCase(registerUser.fulfilled, (state, action) => {
+      state.loading = false;
+      state.userData = action.payload;
+      console.log(" register user in user slice", state.userData);
+
+      state.isAuthenticated = true;
+    });
+
+    builder.addCase(registerUser.rejected, (state, action) => {
+      state.loading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+    });
 
     // ONLY THESE 3 LOGOUT THE USER
     builder
       .addCase(loginUser.rejected, (state) => {
         state.loading = false;
         state.isAuthenticated = false;
-        state.userData = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.loading = false;
@@ -363,7 +361,6 @@ const authSlice = createSlice({
       .addCase(getCurrentUser.rejected, (state) => {
         state.loading = false;
         state.isAuthenticated = false;
-        state.userData = null;
       });
 
     //FULL USER UPDATE (login, getCurrentUser)
@@ -420,7 +417,6 @@ const authSlice = createSlice({
         state.loading = false;
       });
 
-   
     const safeActions = [
       verifyPassword,
       changePassword,

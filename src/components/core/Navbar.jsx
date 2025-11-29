@@ -82,10 +82,13 @@ const Navbar = () => {
   };
 
   // Logout Handler
-  const logoutHandler = () => {
-    dispatch(logoutUser()); 
+  const logoutHandler = async () => {
+  const result = await dispatch(logoutUser());
+
+  if (logoutUser.fulfilled.match(result)) {
     navigate("/");
-  };
+  }
+};
 
   return (
     <header className="sticky inset-x-0 top-0 z-50 w-full border-b border-gray-800 bg-[#121212] px-4 ">
