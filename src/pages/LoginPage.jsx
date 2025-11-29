@@ -118,9 +118,9 @@ const LoginPage = () => {
       {/* Signup link */}
       <p className="mt-4 text-[#f6f5f6] font-medium text-base sm:text-lg text-center">
         Don't have an account?{" "}
-        <Link to="/signup" className="text-blue-500 hover:underline">
+        <button type="button" onClick={() => navigate("/signup")} className="text-blue-500 hover:underline">
           Signup
-        </Link>
+        </button>
       </p>
     </div>
   );

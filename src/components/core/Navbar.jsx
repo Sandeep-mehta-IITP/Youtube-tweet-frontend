@@ -22,7 +22,7 @@ const Navbar = () => {
   let { userData, isAuthenticated } = useSelector((state) => state.auth);
   const username = userData?.username;
 
-  //console.log(userData)
+  console.log(userData)
   const navigate = useNavigate();
   const dispatch = useDispatch(); // Fixed typo: dipatch -> dispatch
   const searchInputRef = useRef();
@@ -244,13 +244,7 @@ const Navbar = () => {
                   <span>Your Profile</span>
                 </Link>
 
-                <Link
-                  to={`/channel/${username}`}
-                  className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3"
-                >
-                  <TvMinimal className="w-5 h-5" />
-                  <span>Your channel</span>
-                </Link>
+                
                 <Link
                   to="/settings"
                   className=" px-4 py-2 text-sm font-medium text-[#f6f5f6] hover:bg-gray-700 flex items-center space-x-3"

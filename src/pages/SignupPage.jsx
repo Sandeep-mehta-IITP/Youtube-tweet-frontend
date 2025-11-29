@@ -6,7 +6,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "@/app/Slices/userSlice";
+import { registerUser } from "@/app/Slices/authSlice";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function SignupPage() {
@@ -48,7 +48,7 @@ export default function SignupPage() {
 
       if (registerUser.fulfilled.match(result)) {
         reset();
-        navigate("/login");
+        navigate("/");
       }
     } catch (error) {
       console.error("Signup Error:", error);

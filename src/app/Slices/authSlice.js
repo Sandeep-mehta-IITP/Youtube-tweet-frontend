@@ -8,6 +8,26 @@ const initialState = {
   isAuthenticated: false,
 };
 
+export const registerUser = createAsyncThunk(
+  "user/registerUser",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post("users/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Override default JSON header
+        },
+      });
+      toast.success("Signup successful! 🎉");
+      return response.data?.data?.user;
+    } catch (error) {
+      const message = error.userMessage || "Signup failed! ❌";
+      console.error("Signup failed:", message);
+      toast.error(message || "Signup failed! ❌");
+      return rejectWithValue(message);
+    }
+  }
+);
+
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (data, { rejectWithValue }) => {
@@ -308,6 +328,26 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   extraReducers: (builder) => {
+    // register user
+        builder.addCase(registerUser.pending, (state) => {
+          state.loading = true;
+        });
+    
+        builder.addCase(registerUser.fulfilled, (state, action) => {
+          state.loading = false;
+          state.userData = action.payload;
+          console.log(" register user in user slice", state.userData);
+    
+          state.isAuthenticated = true;
+        });
+    
+        builder.addCase(registerUser.rejected, (state, action) => {
+          state.loading = false;
+          state.isAuthenticated = false;
+          state.userData = null;
+        
+        });
+
     // ONLY THESE 3 LOGOUT THE USER
     builder
       .addCase(loginUser.rejected, (state) => {
